@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" /> 
+        <meta http-equiv="Pragma" content="no-cache" /> 
+        <meta http-equiv="Expires" content="0" />
+        <meta name="description" content="" />
+        <meta name="keywords" content="" />
+        <title>Social Network | Create Page</title>
+        <link rel="icon" href="../../public/sn/images/fav.png" type="image/png" sizes="16x16"> 
+        
+        <link rel="stylesheet" href="../../public/sn/css/main.min.css">
+        <link rel="stylesheet" href="../../public/sn/css/style.css">
+        <link rel="stylesheet" href="../../public/sn/css/sn.css">
+        <link rel="stylesheet" href="../../public/sn/css/color.css">
+        <link rel="stylesheet" href="../../public/sn/css/responsive.css">
+
+        <link rel="stylesheet" href="../../public/css/bootstrap.css" />
+        <link rel="stylesheet" href="../../public/css/fontawesome.css" />
+        <script src="../../public/js/jquery.js"></script>
+        <script src="../../public/js/bootstrap.js"></script>
+
+        <script src="../../public/js/react.development.js"></script>
+        <script src="../../public/js/react-dom.development.js"></script>
+        <script src="../../public/js/babel.min.js"></script>
+        <script src="../../public/js/axios.min.js"></script>
+        <script src="../../public/js/sweetalert2@11.js"></script>
+        <script src="../../public/js/fontawesome.js"></script>
+
+        <script src="../../public/js/script.js"></script>
+        <script src="../../public/sn/js/sn.js"></script>
+
+    </head>
+
+    <body>
+        <!--<div class="se-pre-con"></div>-->
+        <div class="theme-layout">
+
+            <div id="header-app">
+                
+            </div>
+
+            <script type="text/babel" src="../../public/sn/components/Header.js"></script>
+                
+            <section>
+                <div class="gap gray-bg">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="row" id="page-contents">
+
+                                    <div class="col-lg-3" id="sidebar-app">
+                                        <!--  -->
+                                    </div>
+
+                                    <script type="text/babel" src="../../public/sn/components/Sidebar.js"></script>
+
+                                    <div class="col-lg-6">
+                                        <div class="central-meta">
+                                            <div class="editing-info">
+                                                <h5 class="f-title"><i class="ti-info-alt"></i> Create Page</h5>
+                                                <form method="post" onsubmit="createPage();">
+                                                    <div class="form-group">   
+                                                      <input type="text" id="input" name="name" required="required"/>
+                                                      <label class="control-label" for="input">Page Name</label>
+                                                      <i class="mtrl-select"></i>
+                                                    </div>
+
+                                                    <div class="form-group">    
+                                                      <textarea rows="4" id="textarea" name="description" required="required"></textarea>
+                                                      <label class="control-label" for="textarea">Description</label><i class="mtrl-select"></i>
+                                                    </div>
+
+                                                    <p>Cover Photo</p>
+                                                    <div class="form-group">
+                                                      <input type="file" name="image" accept="image/*" required="required"/>
+                                                    </div>
+
+                                                    <!-- <div class="form-group">    
+                                                      <select name="status">
+                                                        <option value="country">Status</option>
+                                                          <option value="active">Active</option>
+                                                          <option value="inActive">In-active</option>
+                                                      </select>
+                                                    </div> -->
+
+                                                    <div class="submit-btns">
+                                                        <button type="submit" name="submit" class="mtr-btn"><span>Save</span></button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <script>
+            async function createPage() {
+                event.preventDefault();
+
+                const form = event.target;
+                const formData = new FormData(form);
+
+                form.submit.setAttribute("disabled", "disabled");
+
+                try {
+                    const response = await axios.post(
+                        apiUrl + "/sn/pages/create",
+                        formData,
+                        {
+                            headers: {
+                                Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                            }
+                        }
+                    )
+
+                    if (response.data.status == "success") {
+                        const page = response.data.page
+                        swal.fire("Create Page", response.data.message, "success");
+                    } else {
+                        swal.fire("Error", response.data.message, "error")
+                    }
+                } catch (exp) {
+                    // swal.fire("Error", exp.message, "error")
+                } finally {
+                    form.submit.removeAttribute("disabled");
+                }
+            }
+        </script>
+    </body>
+</html>

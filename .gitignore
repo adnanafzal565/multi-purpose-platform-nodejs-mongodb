@@ -1,0 +1,8 @@
+premium-api/
+api/uploads/private/messages
+api/uploads/public/media
+api/uploads/public/pages
+api/uploads/public/posts
+api/uploads/public/profiles
+docs
+api/node_modules

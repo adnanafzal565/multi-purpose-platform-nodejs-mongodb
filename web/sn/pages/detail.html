@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" /> 
+        <meta http-equiv="Pragma" content="no-cache" /> 
+        <meta http-equiv="Expires" content="0" />
+        <meta name="description" content="" />
+        <meta name="keywords" content="" />
+        <title>Social Network | Page</title>
+        <link rel="icon" href="../../public/sn/images/fav.png" type="image/png" sizes="16x16"> 
+        
+        <link rel="stylesheet" href="../../public/sn/css/main.min.css">
+        <link rel="stylesheet" href="../../public/sn/css/style.css">
+        <link rel="stylesheet" href="../../public/sn/css/sn.css">
+        <link rel="stylesheet" href="../../public/sn/css/color.css">
+        <link rel="stylesheet" href="../../public/sn/css/responsive.css">
+
+        <link rel="stylesheet" href="../../public/css/bootstrap.css" />
+        <link rel="stylesheet" href="../../public/css/fontawesome.css" />
+        <script src="../../public/js/jquery.js"></script>
+        <script src="../../public/js/bootstrap.js"></script>
+
+        <script src="../../public/js/react.development.js"></script>
+        <script src="../../public/js/react-dom.development.js"></script>
+        <script src="../../public/js/babel.min.js"></script>
+        <script src="../../public/js/axios.min.js"></script>
+        <script src="../../public/js/sweetalert2@11.js"></script>
+        <script src="../../public/js/fontawesome.js"></script>
+
+        <script src="../../public/js/script.js"></script>
+        <script src="../../public/sn/js/sn.js"></script>
+
+    </head>
+
+    <body>
+        <!--<div class="se-pre-con"></div>-->
+        <div class="theme-layout">
+
+            <div id="header-app">
+                
+            </div>
+
+            <script type="text/babel" src="../../public/sn/components/Header.js"></script>
+
+            <section id="page-detail-container"></section>
+
+            <section>
+                <div class="gap gray-bg">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="row" id="page-contents">
+
+                                    <div class="col-lg-3" id="sidebar-app">
+                                        <!--  -->
+                                    </div>
+
+                                    <script type="text/babel" src="../../public/sn/components/Sidebar.js"></script>
+
+                                    <div class="col-lg-6">
+                                        <div class="central-meta">
+                                            <div class="new-postbox">
+                                                <figure>
+                                                    <img class="user-img"
+                                                        onerror="this.src = baseUrl + '/public/img/user-placeholder.png'"
+                                                        alt="" />
+                                                </figure>
+                                                <div class="newpst-input">
+                                                    <form method="post" onsubmit="doPost();" enctype="multipart/form-data">
+                                                        <textarea rows="2" name="caption" placeholder="write something"></textarea>
+                                                        <div class="attachments">
+                                                            <ul>
+                                                                <li>
+                                                                    <i class="fa fa-image"></i>
+                                                                    <label class="fileContainer">
+                                                                        <input type="file" class="files" multiple accept="image/*, video/*, audio/*" />
+                                                                    </label>
+                                                                </li>
+                                                                <li>
+                                                                    <button type="submit" name="submit">Post</button>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="loadMore" id="newsfeed">
+                                            <!--  -->
+                                        </div>
+
+                                        <p id="loading">Loading...</p>
+
+                                        <button type="button" class="btn-view btn-load-more"
+                                            onclick="loadMore();"
+                                            id="btn-load-more">Load More</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <script>
+            const urlSearchParams = new URLSearchParams(window.location.search);
+
+            const id = urlSearchParams.get("id") || "";
+            let page = urlSearchParams.get("page") || 1;
+
+            globalState.listen(function (newState, updatedState) {
+                if (typeof updatedState.user !== "undefined" && updatedState.user) {
+                    getData();
+                }
+            });
+
+            function loadMore() {
+                page++;
+                fetchPosts();
+            }
+
+            async function fetchPosts() {
+                document.getElementById("loading").style.display = "";
+
+                const formData = new FormData();
+                formData.append("_id", id);
+                formData.append("page", page);
+
+                try {
+                    const response = await axios.post(
+                        apiUrl + "/sn/posts/fetch",
+                        formData,
+                        {
+                            headers: {
+                                Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                            }
+                        }
+                    )
+
+                    if (response.data.status == "success") {
+                        const posts = response.data.posts;
+                        
+                        globalState.setState({
+                            posts: posts
+                        });
+
+                        let html = "";
+                        for (let a = 0; a < posts.length; a++) {
+                            html += renderSinglePost(posts[a]);
+                        }
+                        // document.getElementById("newsfeed").innerHTML += html;
+
+                        document.getElementById("newsfeed").insertAdjacentHTML("beforeend", html);
+
+                        if (posts.length == 0) {
+                            document.getElementById("btn-load-more").remove();
+                        }
+                    } else {
+                        swal.fire("Error", response.data.message, "error")
+                    }
+                } catch (exp) {
+                    // swal.fire("Error", exp.message, "error")
+                } finally {
+                    document.getElementById("loading").style.display = "none";
+                }
+            }
+
+            async function getData() {
+                document.getElementById("loading").style.display = "";
+
+                const formData = new FormData();
+                formData.append("_id", id);
+                formData.append("page", page);
+
+                try {
+                    const response = await axios.post(
+                        apiUrl + "/sn/pages/fetch-single",
+                        formData,
+                        {
+                            headers: {
+                                Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                            }
+                        }
+                    )
+
+                    if (response.data.status == "success") {
+                        const pageObj = response.data.page;
+                        
+                        let html = "";
+                        html += `<div class="feature-photo">
+                            <figure><img src="` + pageObj.image + `" /></figure>
+
+                            <div class="add-btn">
+                                <span>` + pageObj.followers + ` followers</span>
+                                <button type="button" class="mtr-btn"><span>Follow</span></button>
+                            </div>
+
+                            <form class="edit-phto">
+                                <i class="fa fa-camera-retro"></i>
+                                <label class="fileContainer">
+                                    Edit Cover Photo
+                                    <input type="file"/>
+                                </label>
+                            </form>
+
+                            <div class="container-fluid">
+                                <div class="row merged">
+                                    <div class="col-lg-10 col-sm-9">
+                                        <div class="timeline-info">
+                                            <ul>
+                                                <li class="admin-name">
+                                                  <h5>` + pageObj.name + `</h5>
+                                                  <span>` + pageObj.user.name + `</span>
+                                                </li>
+                                                <li>
+                                                    <a class="active" href="fav-page.html" title="" data-ripple="">Page</a>
+                                                    <a class="" href="page-likers.html" title="" data-ripple="">likers</a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`;
+                        document.getElementById("page-detail-container").innerHTML = html;
+                    } else {
+                        swal.fire("Error", response.data.message, "error")
+                    }
+                } catch (exp) {
+                    // swal.fire("Error", exp.message, "error")
+                } finally {
+                    document.getElementById("loading").style.display = "none";
+                }
+            }
+
+            async function doPost() {
+                event.preventDefault();
+
+                if (globalState.state.user == null) {
+                    return;
+                }
+
+                const form = event.target;
+                const formData = new FormData(form);
+
+                const files = form.querySelector(".files").files;
+                for (let a = 0; a < files.length; a++) {
+                    formData.append("files[]", files[a]);
+                }
+
+                form.submit.setAttribute("disabled", "disabled");
+                form.submit.innerHTML = "Loading...";
+
+                try {
+                    const response = await axios.post(
+                        apiUrl + "/sn/posts/create",
+                        formData,
+                        {
+                            headers: {
+                                Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                            }
+                        }
+                    )
+
+                    if (response.data.status == "success") {
+                        swal.fire("Success", response.data.message, "success");
+
+                        const post = response.data.post;
+                        document.getElementById("newsfeed").innerHTML = renderSinglePost(post) + document.getElementById("newsfeed").innerHTML;
+                    } else {
+                        swal.fire("Error", response.data.message, "error")
+                    }
+                } catch (exp) {
+                    // swal.fire("Error", exp.message, "error")
+                } finally {
+                    form.submit.removeAttribute("disabled");
+                    form.submit.innerHTML = "Post";
+                }
+            }
+        </script>
+    </body>
+</html>

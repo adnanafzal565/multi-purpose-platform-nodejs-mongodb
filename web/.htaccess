@@ -1,0 +1,23 @@
+<Files "public/js/script.js"> 
+    Header set Cache-Control "no-cache, no-store, must-revalidate" 
+    Header set Pragma "no-cache" 
+    Header set Expires "0" 
+</Files>
+
+<Files "public/components/Header.js"> 
+    Header set Cache-Control "no-cache, no-store, must-revalidate" 
+    Header set Pragma "no-cache" 
+    Header set Expires "0" 
+</Files>
+
+<Files "public/components/Chat.js"> 
+    Header set Cache-Control "no-cache, no-store, must-revalidate" 
+    Header set Pragma "no-cache" 
+    Header set Expires "0" 
+</Files>
+ 
+<Files "public/css/styles.css"> 
+    Header set Cache-Control "no-cache, no-store, must-revalidate" 
+    Header set Pragma "no-cache" 
+    Header set Expires "0" 
+</Files>

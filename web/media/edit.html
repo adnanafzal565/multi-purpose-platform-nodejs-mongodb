@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Node JS and Mongo DB</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+        <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" /> 
+        <meta http-equiv="Pragma" content="no-cache" /> 
+        <meta http-equiv="Expires" content="0" />
+
+        <link rel="stylesheet" href="../public/css/bootstrap.css" />
+        <link rel="stylesheet" href="../public/css/fontawesome.css" />
+        <link rel="stylesheet" href="../public/css/styles.css" />
+        <script src="../public/js/jquery.js"></script>
+        <script src="../public/js/bootstrap.js"></script>
+
+        <script src="../public/js/react.development.js"></script>
+        <script src="../public/js/react-dom.development.js"></script>
+        <script src="../public/js/babel.min.js"></script>
+        <script src="../public/js/axios.min.js"></script>
+        <script src="../public/js/sweetalert2@11.js"></script>
+        <script src="../public/js/fontawesome.js"></script>
+
+        <script src="../public/js/script.js"></script>
+    </head>
+
+    <body>
+        
+        <nav class="navbar navbar-expand-lg navbar-light bg-light" id="header-app">
+            
+        </nav>
+
+        <script type="text/babel" src="../public/components/Header.js"></script>
+
+        <main class="flex-shrink-0">
+            <div class="container mt-5 mb-5">
+                <div class="row">
+                    <div class="offset-md-3 col-md-4">
+                        <form onsubmit="doUpload();" id="form-edit-media" enctype="multipart/form-data">
+                            <div class="form-group">
+                                <label class="form-label">Title</label>
+                                <input type="text" name="title" class="form-control" />
+                            </div>
+
+                            <div class="form-group mt-3 mb-3">
+                                <label class="form-label">Alt</label>
+                                <input type="text" name="alt" class="form-control" />
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Caption</label>
+                                <input type="text" name="caption" class="form-control" />
+                            </div>
+
+                            <div class="form-group mt-3 mb-3">
+                                <label class="form-label">Type</label>
+                                <select name="type" class="form-control">
+                                    <option value="private">Private</option>
+                                    <option value="public">Public</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">File</label>
+                                <input type="file" name="file" class="form-control" />
+                            </div>
+
+                            <button type="submit" name="submit" class="btn btn-warning mt-3">Update</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <script>
+            const urlSearchParams = new URLSearchParams(window.location.search);
+            let id = urlSearchParams.get("id") || 1;
+
+            async function doUpload() {
+                event.preventDefault();
+
+                const form = event.target;
+                form.submit.setAttribute("disabled", "disabled");
+
+                try {
+                    const formData = new FormData(form);
+                    formData.append("_id", id);
+
+                    const response = await axios.post(
+                        apiUrl + "/media/update",
+                        formData,
+                        {
+                            headers: {
+                                Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                            }
+                        }
+                    )
+
+                    if (response.data.status == "success") {
+                        swal.fire("Update Media", response.data.message, "success");
+                    } else {
+                        swal.fire("Error", response.data.message, "error")
+                    }
+                } catch (exp) {
+                    // swal.fire("Error", exp.message, "error")
+                } finally {
+                    form.submit.removeAttribute("disabled");
+                }
+            }
+
+            globalState.listen(async function (newState, updatedState) {
+                if (typeof updatedState.user !== "undefined") {
+                    try {
+                        const formData = new FormData();
+                        formData.append("_id", id);
+
+                        const response = await axios.post(
+                            apiUrl + "/media/fetch-single",
+                            formData,
+                            {
+                                headers: {
+                                    Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                                }
+                            }
+                        )
+
+                        if (response.data.status == "success") {
+                            const media = response.data.media;
+                            const form = document.getElementById("form-edit-media");
+                            form.title.value = media.title;
+                            form.alt.value = media.alt;
+                            form.caption.value = media.caption;
+
+                            const options = form.type.options;
+                            for (let a = 0; a < options.length; a++) {
+                                options[a].selected = (options[a].value == media.type);
+                            }
+                        } else {
+                            swal.fire("Error", response.data.message, "error")
+                        }
+                    } catch (exp) {
+                        // swal.fire("Error", exp.message, "error")
+                    }
+                }
+            });
+        </script>
+
+        <footer class="footer mt-auto py-3 bg-light">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12 text-center">
+                        <span class="text-muted">Copyright <span id="current-year"></span>. All right reserved.</span>                        
+                    </div>
+                </div>
+            </div>
+        </footer>
+
+        <!--<div id="chat-app"></div>
+        <script type="text/babel" src="../public/components/Chat.js"></script>
+        <link rel="stylesheet" href="../public/css/chat.css" />-->
+    </body>
+</html>

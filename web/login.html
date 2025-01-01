@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Node JS and Mongo DB | Login</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+        <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" /> 
+        <meta http-equiv="Pragma" content="no-cache" /> 
+        <meta http-equiv="Expires" content="0" />
+
+        <link rel="stylesheet" href="public/css/bootstrap.css" />
+        <link rel="stylesheet" href="public/css/fontawesome.css" />
+        <link rel="stylesheet" href="public/css/styles.css" />
+        <script src="public/js/jquery.js"></script>
+        <script src="public/js/bootstrap.js"></script>
+
+        <script src="public/js/react.development.js"></script>
+        <script src="public/js/react-dom.development.js"></script>
+        <script src="public/js/babel.min.js"></script>
+        <script src="public/js/axios.min.js"></script>
+        <script src="public/js/sweetalert2@11.js"></script>
+        <script src="public/js/fontawesome.js"></script>
+
+        <script src="public/js/script.js"></script>
+    </head>
+
+    <body>
+        
+        <nav class="navbar navbar-expand-lg navbar-light bg-light" id="header-app">
+            
+        </nav>
+
+        <script type="text/babel" src="public/components/Header.js"></script>
+
+        <main class="flex-shrink-0">
+            <div class="container mt-5 mb-5">
+                <div class="row">
+                    <div class="offset-4 col-4">
+                        <h2>Login</h2>
+
+                        <form onsubmit="doLogin()">
+                            <div class="form-group" style="margin-bottom: 20px;">
+                                <label class="form-label">Enter email</label>
+                                <input type="email" name="email" class="form-control" required />
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Enter password</label>
+                                <input type="password" name="password" class="form-control" required />
+                            </div>
+
+                            <input type="submit" name="submit" class="btn btn-outline-primary btn-sm" value="Login" style="margin-top: 20px;" />
+                        </form>
+
+                        <p style="margin-top: 10px;">
+                            <a href="{{ url('/forgot-password') }}">Forgot password ?</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <script>
+                async function doLogin() {
+                    event.preventDefault()
+                    const form = event.target
+
+                    try {
+                        const formData = new FormData(form)
+                        form.submit.setAttribute("disabled", "disabled")
+
+                        const response = await axios.post(
+                            apiUrl + "/login",
+                            formData
+                        )
+
+                        if (response.data.status == "success") {
+                            const accessToken = response.data.accessToken
+                            localStorage.setItem(accessTokenKey, accessToken)
+
+                            const urlSearchParams = new URLSearchParams(window.location.search)
+                            const redirect = urlSearchParams.get("redirect") || ""
+                            if (redirect == "") {
+                                window.location.href = baseUrl
+                            } else {
+                                window.location.href = redirect
+                            }
+                        } else {
+                            swal.fire("Error", response.data.message, "error")
+                        }
+                    } catch (exp) {
+                        swal.fire("Error", exp.message, "error")
+                    } finally {
+                        form.submit.removeAttribute("disabled")
+                    }
+                }
+            </script>
+        </main>
+
+        <footer class="footer mt-auto py-3 bg-light">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12 text-center">
+                        <span class="text-muted">Copyright <span id="current-year"></span>. All right reserved.</span>                        
+                    </div>
+                </div>
+            </div>
+        </footer>
+
+        <!--<div id="chat-app"></div>
+        <script type="text/babel" src="public/components/Chat.js"></script>
+        <link rel="stylesheet" href="public/css/chat.css" />-->
+    </body>
+</html>

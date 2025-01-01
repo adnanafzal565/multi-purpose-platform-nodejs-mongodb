@@ -1,0 +1,21 @@
+.user-img {
+    width: 75px !important;
+    height: 75px !important;
+    object-fit: cover !important;
+    border-radius: 0% !important;
+}
+.width-100 {
+    width: 100% !important;
+}
+.display-contents {
+    display: contents !important;
+}
+.justify-content-left {
+    justify-content: left !important;
+}
+.user-profile-header {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 50% !important;
+}
