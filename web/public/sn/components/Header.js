@@ -122,11 +122,11 @@ function Header() {
                     <ul className="main-menu">
                         <li><a href={ `${ baseUrl }` } title="">Home</a></li>
 
-                        {/*{ state.user != null && (
+                        { state.user != null && (
                             <>
                                 <li><a href={ `${ baseUrl }/sn/pages/index.html` }>Pages</a></li>
                             </>
-                        ) }*/}
+                        ) }
                     </ul>
                     <ul className="setting-area">
                         

@@ -49,6 +49,7 @@ const auth = require("./modules/auth");
 const media = require("./modules/media");
 const notifications = require("./modules/notifications");
 const posts = require("./modules/sn/posts");
+const pages = require("./modules/sn/pages");
 
 const port = process.env.PORT || 3000;
 const databaseName = "nodejs_mongodb"
@@ -56,6 +57,9 @@ const databaseName = "nodejs_mongodb"
 global.db = null;
 global.jwtSecret = "NodeJS_MongoDB_1234567890";
 global.baseUrl = "http://localhost:" + port;
+
+global.premiumVersionTitle = "Premium Feature";
+global.premiumVersionText = "This feature is available in premium version only.";
 
 http.listen(port, async function () {
     console.log("Server started: " + baseUrl);
@@ -67,6 +71,7 @@ http.listen(port, async function () {
         console.log("Database connected.");
 
         posts.init(app);
+        pages.init(app);
         media.init(app);
         notifications.init(app);
 
@@ -413,7 +418,7 @@ http.listen(port, async function () {
                 return;
             }
 
-            const postsArr = await posts.fetchPosts({
+            const postsArr = await posts.fetch({
                 userId: user._id
             }, page, user);
 

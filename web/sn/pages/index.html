@@ -75,6 +75,12 @@
                                             </div>
                                         </div>
                                     </div>
+
+                                    <div class="col-lg-3" id="right-sidebar-app">
+                                        <!--  -->
+                                    </div>
+
+                                    <script type="text/babel" src="../../public/sn/components/RightSidebar.js"></script>
                                 </div>
                             </div>
                         </div>
@@ -122,7 +128,7 @@
                             $("#btn-load-more").show();
                         }
                     } else {
-                        swal.fire("Error", response.data.message, "error")
+                        swal.fire(response.data.title, response.data.message, response.data.status);
                     }
                 } catch (exp) {
                     // swal.fire("Error", exp.message, "error")

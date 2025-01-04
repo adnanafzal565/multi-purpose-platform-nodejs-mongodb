@@ -56,7 +56,7 @@
                                         
                                     </div>
 
-                                    <!-- <script type="text/babel" src="../public/sn/components/Sidebar.js"></script> -->
+                                    <script type="text/babel" src="../public/sn/components/Sidebar.js"></script>
 
                                     <div class="col-lg-6">
                                         <div class="central-meta">
@@ -74,7 +74,7 @@
                                                                 <li>
                                                                     <i class="fa fa-image"></i>
                                                                     <label class="fileContainer">
-                                                                        <input type="file" class="files" multiple accept="image/*, video/*, audio/*" />
+                                                                        <input type="file" class="files" multiple accept="image/*, video/*" />
                                                                     </label>
                                                                 </li>
                                                                 <li>
@@ -204,7 +204,10 @@
                             swal.fire("Success", response.data.message, "success");
 
                             const post = response.data.post;
-                            document.getElementById("newsfeed").innerHTML = renderSinglePost(post) + document.getElementById("newsfeed").innerHTML;
+                            let html = renderSinglePost(post);
+                            document.getElementById("newsfeed").insertAdjacentHTML("afterbegin", html);
+                            
+                            // document.getElementById("newsfeed").innerHTML = renderSinglePost(post) + document.getElementById("newsfeed").innerHTML;
                         } else {
                             swal.fire("Error", response.data.message, "error")
                         }

@@ -1,3 +1,28 @@
+function renderSingleFollower(follower) {
+    let html = "";
+    html += `<li>
+        <div class="nearly-pepls">
+            <figure>
+                <a href="` + baseUrl + `/sn/profile.html?id=` + follower.userId + `">
+                    <img src="` + follower.profileImage + `"
+                        onerror="this.src = baseUrl + '/public/img/user-placeholder.png'" />
+                </a>
+            </figure>
+
+            <div class="pepl-info">
+                <h4>
+                    <a href="` + baseUrl + `/sn/profile.html?id=` + follower.userId + `">
+                        ` + follower.name + `
+                    </a>
+                </h4>
+                
+                <a href="` + baseUrl + `/sn/profile.html?id=` + follower.userId + `" class="add-butn">view profile</a>
+            </div>
+        </div>
+    </li>`;
+    return html;
+}
+
 function renderSinglePage(page) {
     let html = "";
     html += `<li>
@@ -537,19 +562,32 @@ function renderSinglePost(post) {
     let html = "";
     const isMyPost = (globalState.state.user != null && post.user._id == globalState.state.user._id);
 
+    let image = post.user.profileImage;
+    let name = post.user.name;
+    let href = baseUrl + "/sn/profile.html?id=" + post.user._id;
+
+    if (typeof post.page !== "undefined") {
+        image = post.page.image;
+        name = post.page.name;
+        href = baseUrl + "/sn/pages/detail.html?id=" + post.page._id;
+    }
+
     html += `<div data-post-id="` + post._id + `" class="central-meta item">
         <div class="user-post">
             <div class="friend-info">
                 <div class="row">
-                    <div class="col-md-8">
+                    <div class="col-md-2">
                         <figure>
-                            <img src="` + post.user.profileImage + `"
+                            <img src="` + image + `"
                                 onerror="this.src = baseUrl + '/public/img/user-placeholder.png'"
                                 class="user-img"
-                                alt="` + post.user.name + `" />
+                                alt="` + name + `" />
                         </figure>
+                    </div>
+
+                    <div class="col-md-6">
                         <div class="friend-name">
-                            <ins><a href="time-line.html" title="">` + post.user.name + `</a></ins>
+                            <ins><a href="` + href + `" title="">` + name + `</a></ins>
                             <span>published: ` + post.createdAt + `</span>
                         </div>
                     </div>`

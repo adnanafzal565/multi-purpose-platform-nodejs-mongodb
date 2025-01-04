@@ -9,7 +9,7 @@ const ObjectId = mongodb.ObjectId;
 module.exports = {
     limit: 15,
 
-    async fetchPosts(searchObj, page, user) {
+    async fetch(searchObj, page, user) {
         const skip = (page - 1) * this.limit;
 
         const posts = await db.collection("posts")
@@ -54,14 +54,18 @@ module.exports = {
                     sharedPostUser: 0
                 }
             }, {
-                $sort: {
+                /*$sort: {
                     _id: -1
+                }*/
+
+                $sample: {
+                    size: this.limit
                 }
             }, {
                 $skip: skip
-            }, {
+            }/*, {
                 $limit: this.limit
-            }])
+            }*/])
             .toArray();
 
         const postsArr = [];
@@ -1675,7 +1679,7 @@ module.exports = {
                 .sort("_id", "desc")
                 .toArray();*/
 
-            const postsArr = await self.fetchPosts(searchObj, page, user);
+            const postsArr = await self.fetch(searchObj, page, user);
 
             result.json({
                 status: "success",

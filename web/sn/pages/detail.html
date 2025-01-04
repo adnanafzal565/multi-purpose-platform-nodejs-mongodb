@@ -61,7 +61,7 @@
                                     <script type="text/babel" src="../../public/sn/components/Sidebar.js"></script>
 
                                     <div class="col-lg-6">
-                                        <div class="central-meta">
+                                        <div class="central-meta" id="create-post-widget" style="display: none;">
                                             <div class="new-postbox">
                                                 <figure>
                                                     <img class="user-img"
@@ -76,7 +76,7 @@
                                                                 <li>
                                                                     <i class="fa fa-image"></i>
                                                                     <label class="fileContainer">
-                                                                        <input type="file" class="files" multiple accept="image/*, video/*, audio/*" />
+                                                                        <input type="file" class="files" multiple accept="image/*, video/*" />
                                                                     </label>
                                                                 </li>
                                                                 <li>
@@ -108,6 +108,7 @@
         </div>
 
         <script>
+            let pageObj = null;
             const urlSearchParams = new URLSearchParams(window.location.search);
 
             const id = urlSearchParams.get("id") || "";
@@ -153,20 +154,55 @@
                         for (let a = 0; a < posts.length; a++) {
                             html += renderSinglePost(posts[a]);
                         }
-                        // document.getElementById("newsfeed").innerHTML += html;
-
                         document.getElementById("newsfeed").insertAdjacentHTML("beforeend", html);
 
                         if (posts.length == 0) {
                             document.getElementById("btn-load-more").remove();
                         }
                     } else {
-                        swal.fire("Error", response.data.message, "error")
+                        swal.fire(response.data.title, response.data.message, response.data.status);
                     }
                 } catch (exp) {
                     // swal.fire("Error", exp.message, "error")
                 } finally {
                     document.getElementById("loading").style.display = "none";
+                }
+            }
+
+            async function toggleFollow() {
+                const node = event.currentTarget;
+                node.setAttribute("disabled", "disabled");
+
+                const formData = new FormData();
+                formData.append("_id", id);
+
+                try {
+                    const response = await axios.post(
+                        apiUrl + "/sn/pages/toggle-follow",
+                        formData,
+                        {
+                            headers: {
+                                Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                            }
+                        }
+                    )
+
+                    if (response.data.status == "success") {
+                        if (pageObj != null) {
+                            if (pageObj.isFollowing) {
+                                document.querySelector("#btn-toggle-follow span").innerHTML = "Follow";
+                            } else {
+                                document.querySelector("#btn-toggle-follow span").innerHTML = "Unfollow";
+                            }
+                            pageObj.isFollowing = !pageObj.isFollowing;
+                        }
+                    } else {
+                        swal.fire(response.data.title, response.data.message, response.data.status);
+                    }
+                } catch (exp) {
+                    // swal.fire("Error", exp.message, "error")
+                } finally {
+                    node.removeAttribute("disabled");
                 }
             }
 
@@ -189,24 +225,19 @@
                     )
 
                     if (response.data.status == "success") {
-                        const pageObj = response.data.page;
+                        pageObj = response.data.page;
                         
                         let html = "";
                         html += `<div class="feature-photo">
                             <figure><img src="` + pageObj.image + `" /></figure>
 
                             <div class="add-btn">
-                                <span>` + pageObj.followers + ` followers</span>
-                                <button type="button" class="mtr-btn"><span>Follow</span></button>
+                                <span style="background-color: #424242; padding: 5px;">` + pageObj.followersCount + ` followers</span>
+                                <button type="button" class="mtr-btn" onclick="toggleFollow();"
+                                    id="btn-toggle-follow">
+                                    <span>` + (pageObj.isFollowing ? 'Unfollow' : 'Follow') + `</span>
+                                </button>
                             </div>
-
-                            <form class="edit-phto">
-                                <i class="fa fa-camera-retro"></i>
-                                <label class="fileContainer">
-                                    Edit Cover Photo
-                                    <input type="file"/>
-                                </label>
-                            </form>
 
                             <div class="container-fluid">
                                 <div class="row merged">
@@ -218,9 +249,16 @@
                                                   <span>` + pageObj.user.name + `</span>
                                                 </li>
                                                 <li>
-                                                    <a class="active" href="fav-page.html" title="" data-ripple="">Page</a>
-                                                    <a class="" href="page-likers.html" title="" data-ripple="">likers</a>
-                                                </li>
+                                                    <a class="active" href="` + baseUrl + `/sn/pages/detail.html?id=` + pageObj._id + `">Page</a>
+                                                    <a class="" href="` + baseUrl + `/sn/pages/followers.html?id=` + pageObj._id + `">Followers</a>`
+
+                                                    if (globalState.state.user != null && globalState.state.user._id == pageObj.user._id) {
+                                                        html += `<a class="btn btn-link" href="` + baseUrl + `/sn/pages/edit.html?id=` + pageObj._id + `">Edit</a>
+                                                            <button type="button" class="btn btn-danger"
+                                                                onclick="deletePage();">Delete</button>`
+                                                    }
+
+                                                html += `</li>
                                             </ul>
                                         </div>
                                     </div>
@@ -228,14 +266,75 @@
                             </div>
                         </div>`;
                         document.getElementById("page-detail-container").innerHTML = html;
+
+                        globalState.setState({
+                            posts: pageObj.posts
+                        });
+
+                        html = "";
+                        for (let a = 0; a < pageObj.posts.length; a++) {
+                            html += renderSinglePost(pageObj.posts[a]);
+                        }
+                        document.getElementById("newsfeed").insertAdjacentHTML("beforeend", html);
+
+                        if (pageObj.isMyPage) {
+                            $("#create-post-widget").show();
+                        } else {
+                            $("#create-post-widget").hide();
+                        }
                     } else {
-                        swal.fire("Error", response.data.message, "error")
+                        swal.fire(response.data.title, response.data.message, response.data.status);
                     }
                 } catch (exp) {
                     // swal.fire("Error", exp.message, "error")
                 } finally {
                     document.getElementById("loading").style.display = "none";
                 }
+            }
+
+            function deletePage() {
+                const node = event.target;
+
+                swal.fire({
+                    title: "Delete Page",
+                    text: "All the posts of this page will be deleted as well.",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Yes, delete it",
+                }).then(async function (result) {
+                    /* Read more about isConfirmed, isDenied below */
+                    if (result.isConfirmed) {
+                        node.setAttribute("disabled", "disabled");
+
+                        const formData = new FormData();
+                        formData.append("_id", id);
+
+                        try {
+                            const response = await axios.post(
+                                apiUrl + "/sn/pages/delete",
+                                formData,
+                                {
+                                    headers: {
+                                        Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                                    }
+                                }
+                            )
+
+                            if (response.data.status == "success") {
+                                swal.fire("Delete Page", response.data.message, "success")
+                                    .then(function () {
+                                        window.location.href = baseUrl + "/sn";
+                                    });
+                            } else {
+                                swal.fire(response.data.title, response.data.message, response.data.status);
+                            }
+                        } catch (exp) {
+                            // swal.fire("Error", exp.message, "error")
+                        } finally {
+                            node.removeAttribute("disabled");
+                        }
+                    }
+                });
             }
 
             async function doPost() {
@@ -247,6 +346,8 @@
 
                 const form = event.target;
                 const formData = new FormData(form);
+                formData.append("type", "page");
+                formData.append("pageId", id);
 
                 const files = form.querySelector(".files").files;
                 for (let a = 0; a < files.length; a++) {
@@ -271,9 +372,12 @@
                         swal.fire("Success", response.data.message, "success");
 
                         const post = response.data.post;
-                        document.getElementById("newsfeed").innerHTML = renderSinglePost(post) + document.getElementById("newsfeed").innerHTML;
+                        let html = renderSinglePost(post);
+                        document.getElementById("newsfeed").insertAdjacentHTML("afterbegin", html);
+
+                        // document.getElementById("newsfeed").innerHTML = renderSinglePost(post) + document.getElementById("newsfeed").innerHTML;
                     } else {
-                        swal.fire("Error", response.data.message, "error")
+                        swal.fire(response.data.title, response.data.message, response.data.status);
                     }
                 } catch (exp) {
                     // swal.fire("Error", exp.message, "error")
