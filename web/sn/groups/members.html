@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" /> 
+        <meta http-equiv="Pragma" content="no-cache" /> 
+        <meta http-equiv="Expires" content="0" />
+        <meta name="description" content="" />
+        <meta name="keywords" content="" />
+        <title>Social Network | Group Members</title>
+        <link rel="icon" href="../../public/sn/images/fav.png" type="image/png" sizes="16x16"> 
+        
+        <link rel="stylesheet" href="../../public/sn/css/main.min.css">
+        <link rel="stylesheet" href="../../public/sn/css/style.css">
+        <link rel="stylesheet" href="../../public/sn/css/sn.css">
+        <link rel="stylesheet" href="../../public/sn/css/color.css">
+        <link rel="stylesheet" href="../../public/sn/css/responsive.css">
+
+        <link rel="stylesheet" href="../../public/css/bootstrap.css" />
+        <link rel="stylesheet" href="../../public/css/fontawesome.css" />
+        <script src="../../public/js/jquery.js"></script>
+        <script src="../../public/js/bootstrap.js"></script>
+
+        <script src="../../public/js/react.development.js"></script>
+        <script src="../../public/js/react-dom.development.js"></script>
+        <script src="../../public/js/babel.min.js"></script>
+        <script src="../../public/js/axios.min.js"></script>
+        <script src="../../public/js/sweetalert2@11.js"></script>
+        <script src="../../public/js/fontawesome.js"></script>
+
+        <script src="../../public/js/script.js"></script>
+        <script src="../../public/sn/js/sn.js"></script>
+
+    </head>
+
+    <body>
+        <!--<div class="se-pre-con"></div>-->
+        <div class="theme-layout">
+
+            <div id="header-app">
+                
+            </div>
+
+            <script type="text/babel" src="../../public/sn/components/Header.js"></script>
+
+            <div id="group-detail-app">
+                
+            </div>
+
+            <script>
+                const urlSearchParams = new URLSearchParams(window.location.search);
+
+                const id = urlSearchParams.get("id") || "";
+                let page = urlSearchParams.get("page") || 1;
+            </script>
+
+            <script type="text/babel">
+                function GroupDetail() {
+
+                    const [group, setGroup] = React.useState(null);
+                    const [state, setState] = React.useState(globalState.state);
+                    const [loading, setLoading] = React.useState(false);
+                    const [members, setMembers] = React.useState([]);
+                    const [currentMembers, setCurrentMembers] = React.useState([]);
+
+                    React.useEffect(function () {
+                        globalState.listen(function (newState, updatedState) {
+                            setState(newState);
+                        });
+
+                        getData();
+
+                        setTimeout(function () {
+                            fetch(baseUrl + "/public/sn/components/Sidebar.js")
+                                .then(function (response) {
+                                    response.text().then(function (text) {
+                                        const transpiledCode = Babel.transform(text, {
+                                            presets: ["env", "react"]
+                                        }).code;
+
+                                        eval(transpiledCode);
+                                    })
+                                });
+                        }, 1000);
+                    }, []);
+
+                    function removeMember(id) {
+                        const node = event.target;
+
+                        swal.fire({
+                            title: "Delete Member",
+                            text: "All the posts of this member will NOT be deleted.",
+                            icon: "warning",
+                            showCancelButton: true,
+                            confirmButtonText: "Yes, delete it",
+                        }).then(async function (result) {
+                            /* Read more about isConfirmed, isDenied below */
+                            if (result.isConfirmed) {
+                                node.setAttribute("disabled", "disabled");
+
+                                const formData = new FormData();
+                                formData.append("_id", id);
+
+                                try {
+                                    const response = await axios.post(
+                                        apiUrl + "/sn/groups/remove-member",
+                                        formData,
+                                        {
+                                            headers: {
+                                                Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                                            }
+                                        }
+                                    )
+
+                                    if (response.data.status == "success") {
+                                        const tempMembers = [...members];
+                                        for (let a = 0; a < tempMembers.length; a++) {
+                                            if (tempMembers[a]._id == id) {
+                                                tempMembers.splice(a, 1);
+                                                break;
+                                            }
+                                        }
+                                        setMembers(tempMembers);
+                                    } else {
+                                        swal.fire(response.data.title, response.data.message, response.data.status);
+                                    }
+                                } catch (exp) {
+                                    // swal.fire("Error", exp.message, "error")
+                                } finally {
+                                    node.removeAttribute("disabled");
+                                }
+                            }
+                        });
+                    }
+
+                    async function getData() {
+                        setLoading(true)
+
+                        const formData = new FormData();
+                        formData.append("_id", id);
+                        formData.append("page", page);
+
+                        try {
+                            const response = await axios.post(
+                                apiUrl + "/sn/groups/fetch-single",
+                                formData,
+                                {
+                                    headers: {
+                                        Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                                    }
+                                }
+                            )
+
+                            if (response.data.status == "success") {
+                                const groupObj = response.data.group;
+                                setMembers(groupObj.members);
+                                setCurrentMembers(groupObj.members);
+                                setGroup(groupObj);
+                            } else {
+                                swal.fire(response.data.title, response.data.message, response.data.status);
+                            }
+                        } catch (exp) {
+                            // swal.fire("Error", exp.message, "error")
+                        } finally {
+                            setLoading(false);
+                        }
+                    }
+
+                    function loadMore() {
+                        page++;
+                        fetchMembers();
+                    }
+
+                    async function fetchMembers() {
+                        setLoading(true);
+
+                        const formData = new FormData();
+                        formData.append("_id", id);
+                        formData.append("page", page);
+
+                        try {
+                            const response = await axios.post(
+                                apiUrl + "/sn/groups/members",
+                                formData,
+                                {
+                                    headers: {
+                                        Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                                    }
+                                }
+                            )
+
+                            if (response.data.status == "success") {
+                                const tempMembers = response.data.members;
+                                setCurrentMembers(tempMembers);
+
+                                const tempArr = [...members];
+                                for (let a = 0; a < tempMembers.length; a++) {
+                                    tempArr.push(tempMembers[a]);
+                                }
+                                setMembers(tempArr);
+                            } else {
+                                swal.fire(response.data.title, response.data.message, response.data.status);
+                            }
+                        } catch (exp) {
+                            // swal.fire("Error", exp.message, "error")
+                        } finally {
+                            setLoading(false);
+                        }
+                    }
+
+                    const styles = {
+                        btnRemoveMember: {
+                            position: "relative",
+                            right: 5,
+                            top: 5
+                        }
+                    };
+
+                    return (
+                        <>
+                            { group != null && (
+                                <>
+                                    <section>
+                                        <div className="feature-photo">
+                                            <figure><img src={ group.image } /></figure>
+
+                                            <div className="add-btn">
+                                                <span className="counter">{ group.membersCount } members</span>
+                                                <button type="button" className="mtr-btn" onClick={ function () {
+                                                    toggleJoin();
+                                                } }
+                                                    id="btn-toggle-follow">
+                                                    <span>{ (group.isMember ? 'Leave' : 'Join') }</span>
+                                                </button>
+                                            </div>
+
+                                            <div className="container-fluid">
+                                                <div className="row merged">
+                                                    <div className="col-lg-10 col-sm-9">
+                                                        <div className="timeline-info">
+                                                            <ul>
+                                                                <li className="admin-name">
+                                                                  <h5>{ group.name }</h5>
+                                                                </li>
+                                                                <li>
+                                                                    <a className="" href={ `${ baseUrl }/sn/groups/detail.html?id=${ group._id }` }>Group</a>
+                                                                    <a className="active" href={ `${ baseUrl }/sn/groups/members.html?id=${ group._id }` }>Members ({ group.membersCount })</a>
+                                                                    { group.isAdmin && (
+                                                                        <a className="" href={ `${ baseUrl }/sn/groups/pending-posts.html?id=${ group._id }` }>Pending Posts ({ group.pendingPostsCount })</a>
+                                                                    ) }
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <div className="gap gray-bg">
+                                            <div className="container-fluid">
+                                                <div className="row">
+                                                    <div className="col-lg-12">
+                                                        <div className="row" id="page-contents">
+
+                                                            <div className="col-lg-3" id="sidebar-app">
+
+                                                            </div>
+
+                                                            <div className="col-lg-6">
+                                                                { loading && (
+                                                                    <p>Loading...</p>
+                                                                ) }
+
+                                                                <ul className="nearby-contct">
+                                                                    { members.map(function (member) {
+                                                                        return (
+                                                                            <li key={ `member-${ member._id }` }>
+                                                                                <div className="nearly-pepls">
+                                                                                    <figure>
+                                                                                        <a href={ `${ baseUrl }/sn/profile.html?id=${ member.userId}` }>
+                                                                                            <img src={ member.profileImage }
+                                                                                                onError={ function () {
+                                                                                                    event.target.src = baseUrl + '/public/img/user-placeholder.png';
+                                                                                                } }
+                                                                                                className="user-img" />
+                                                                                        </a>
+                                                                                    </figure>
+
+                                                                                    <div className="pepl-info">
+                                                                                        <h4>
+                                                                                            <a href={ `${ baseUrl }/sn/profile.html?id=${ member.userId }` }>
+                                                                                                {  member.name }
+                                                                                            </a>
+                                                                                        </h4>
+                                                                                        
+                                                                                        <a href={ `${ baseUrl }/sn/profile.html?id=${ member.userId }` } className="add-butn position-relative">view profile</a>
+
+                                                                                        { group.isAdmin && (
+                                                                                            <button type="button" className="btn btn-danger btn-sm pull-right" onClick={ function () {
+                                                                                                removeMember(member._id);
+                                                                                            } } style={ styles.btnRemoveMember }>Remove</button>
+                                                                                        ) }
+                                                                                    </div>
+                                                                                </div>
+                                                                            </li>
+                                                                        );
+                                                                    }) }
+                                                                </ul>
+
+                                                                <div className="loadMore">
+                                                                    { currentMembers.length > 0 && (
+                                                                        <button type="button" className="btn-view btn-load-more"
+                                                                            onClick={ function () {
+                                                                                loadMore();
+                                                                            } }>Load More</button>
+                                                                    ) }
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+                                </>
+                            ) }
+                        </>
+                    );
+                }
+
+                ReactDOM.createRoot(
+                    document.getElementById("group-detail-app")
+                ).render(<GroupDetail />);
+            </script>
+        </div>
+    </body>
+</html>

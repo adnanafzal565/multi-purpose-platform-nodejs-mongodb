@@ -9,6 +9,11 @@ const ObjectId = mongodb.ObjectId;
 module.exports = {
     limit: 15,
 
+    async count(searchObj) {
+        return await db.collection("posts")
+            .countDocuments(searchObj);
+    },
+
     async fetch(searchObj, page, user) {
         const skip = (page - 1) * this.limit;
 
@@ -1696,6 +1701,8 @@ module.exports = {
 			const pageId = request.fields.pageId || "";
 			const postId = request.fields.postId || ""; // in case of shared post
             const files = request.files["files[]"];
+            let status = "published";
+            let message = "Post has been created";
 
             if (!["post", "shared", "group", "page", "sponsored"].includes(postType)) {
                 result.json({
@@ -1767,25 +1774,23 @@ module.exports = {
                     });
                     return;
 				}
-				
-				const groupMember = await db.collection("group_members")
-					.findOne({
-						$and: [{
-							groupId: group._id
-						}, {
-							userId: user._id
-						}]
-					});
+
+                const isAdmin = (group.userId.toString() == user._id.toString());
 					
-				if (groupMember == null) {
+				if (!isAdmin) {
 					result.json({
                         status: "error",
-                        message: "Sorry, you are not a member of this group."
+                        message: "In free version, only admin can post in a group."
                     });
                     return;
 				}
 				
 				postObj.groupId = group._id;
+
+                if (!isAdmin) {
+                    status = "pending";
+                    message = "Your post is pending for approval from admin of this group.";
+                }
 			} else if (postType == "page") {
 				if (!ObjectId.isValid(pageId)) {
 					result.json({
@@ -1816,6 +1821,8 @@ module.exports = {
 				
 				postObj.pageId = page._id;
 			}
+
+            postObj.status = status;
 
             const insertedDoc = await db.collection("posts")
                 .insertOne(postObj);
@@ -1874,7 +1881,7 @@ module.exports = {
             
             result.json({
                 status: "success",
-                message: "Post has been created.",
+                message: message,
                 post: postObj
             });
         });

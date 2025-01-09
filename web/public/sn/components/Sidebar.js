@@ -9,6 +9,11 @@ function Sidebar() {
                             <i className="fa fa-file"></i>&nbsp;
                             <a href={ `${ baseUrl }/sn/pages/create.html` }>Create Page</a>
                         </li>
+
+                        <li>
+                            <i className="fa fa-file"></i>&nbsp;
+                            <a href={ `${ baseUrl }/sn/groups/create.html` }>Create Group</a>
+                        </li>
                     </ul>
                 </div>
             </aside>

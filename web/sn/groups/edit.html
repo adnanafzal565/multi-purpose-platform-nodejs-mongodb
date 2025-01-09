@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" /> 
+        <meta http-equiv="Pragma" content="no-cache" /> 
+        <meta http-equiv="Expires" content="0" />
+        <meta name="description" content="" />
+        <meta name="keywords" content="" />
+        <title>Social Network | Edit Group</title>
+        <link rel="icon" href="../../public/sn/images/fav.png" type="image/png" sizes="16x16"> 
+        
+        <link rel="stylesheet" href="../../public/sn/css/main.min.css">
+        <link rel="stylesheet" href="../../public/sn/css/style.css">
+        <link rel="stylesheet" href="../../public/sn/css/sn.css">
+        <link rel="stylesheet" href="../../public/sn/css/color.css">
+        <link rel="stylesheet" href="../../public/sn/css/responsive.css">
+
+        <link rel="stylesheet" href="../../public/css/bootstrap.css" />
+        <link rel="stylesheet" href="../../public/css/fontawesome.css" />
+        <script src="../../public/js/jquery.js"></script>
+        <script src="../../public/js/bootstrap.js"></script>
+
+        <script src="../../public/js/react.development.js"></script>
+        <script src="../../public/js/react-dom.development.js"></script>
+        <script src="../../public/js/babel.min.js"></script>
+        <script src="../../public/js/axios.min.js"></script>
+        <script src="../../public/js/sweetalert2@11.js"></script>
+        <script src="../../public/js/fontawesome.js"></script>
+
+        <script src="../../public/js/script.js"></script>
+        <script src="../../public/sn/js/sn.js"></script>
+
+    </head>
+
+    <body>
+        <!--<div class="se-pre-con"></div>-->
+        <div class="theme-layout">
+
+            <div id="header-app">
+                
+            </div>
+
+            <script type="text/babel" src="../../public/sn/components/Header.js"></script>
+                
+            <section>
+                <div class="gap gray-bg">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="row" id="page-contents">
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <script>
+            const urlSearchParams = new URLSearchParams(window.location.search);
+            const id = urlSearchParams.get("id") || "";
+        </script>
+
+        <script type="text/babel">
+            function EditGroup() {
+
+                const [loading, setLoading] = React.useState(false);
+                const [group, setGroup] = React.useState(null);
+                const [coverPhoto, setCoverPhoto] = React.useState("");
+
+                React.useEffect(function () {
+
+                    getData();
+
+                    setTimeout(function () {
+                        fetch(baseUrl + "/public/sn/components/Sidebar.js")
+                            .then(function (response) {
+                                response.text().then(function (text) {
+                                    const transpiledCode = Babel.transform(text, {
+                                        presets: ["env", "react"]
+                                    }).code;
+
+                                    eval(transpiledCode);
+                                })
+                            });
+                    }, 1000);
+                }, []);
+
+                async function updateGroup() {
+                    const form = event.target;
+                    const formData = new FormData(form);
+                    formData.append("_id", id);
+
+                    form.submit.setAttribute("disabled", "disabled");
+
+                    try {
+                        const response = await axios.post(
+                            apiUrl + "/sn/groups/update",
+                            formData,
+                            {
+                                headers: {
+                                    Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                                }
+                            }
+                        )
+
+                        if (response.data.status == "success") {
+                            const tempGroup = response.data.group;
+                            if (tempGroup.image) {
+                                setCoverPhoto(tempGroup.image);
+                            }
+
+                            swal.fire("Update Group", response.data.message, "success");
+                        } else {
+                            swal.fire(response.data.title, response.data.message, response.data.status);
+                        }
+                    } catch (exp) {
+                        // swal.fire("Error", exp.message, "error")
+                    } finally {
+                        form.submit.removeAttribute("disabled");
+                    }
+                }
+
+                async function getData() {
+                    setLoading(true)
+
+                    const formData = new FormData();
+                    formData.append("_id", id);
+
+                    try {
+                        const response = await axios.post(
+                            apiUrl + "/sn/groups/fetch-single",
+                            formData,
+                            {
+                                headers: {
+                                    Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                                }
+                            }
+                        )
+
+                        if (response.data.status == "success") {
+                            const tempGroup = response.data.group;
+                            setGroup(tempGroup);
+                            setCoverPhoto(tempGroup.image);
+                        } else {
+                            swal.fire(response.data.title, response.data.message, response.data.status);
+                        }
+                    } catch (exp) {
+                        // swal.fire("Error", exp.message, "error")
+                    } finally {
+                        setLoading(false);
+                    }
+                }
+
+                return (
+                    <>
+                        <div className="col-lg-3" id="sidebar-app">
+                            
+                        </div>
+
+                        <div className="col-lg-6">
+                            <div className="central-meta">
+                                <div className="editing-info">
+                                    <h5 className="f-title"><i className="ti-info-alt"></i> Edit Group</h5>
+                                    <form method="post" onSubmit={ function () {
+                                        event.preventDefault();
+                                        updateGroup();
+                                    } }>
+                                        <div className="form-group">
+                                            <input type="text" defaultValue={ group?.name } name="name" required />
+                                            <label className="control-label">Group Name</label>
+                                            <i className="mtrl-select"></i>
+                                        </div>
+
+                                        <div className="form-group">    
+                                            <textarea rows="4" name="description" defaultValue={ group?.description } required></textarea>
+                                            <label className="control-label">Description</label><i className="mtrl-select"></i>
+                                        </div>
+
+                                        <p>Cover Photo</p>
+                                        <div className="form-group">
+                                            <input type="file" name="image" accept="image/*" />
+                                        </div>
+
+                                        { coverPhoto != "" && (
+                                            <img src={ coverPhoto } className="post-image" />
+                                        ) }
+
+                                        {/*<div className="form-group">
+                                            <select name="status">
+                                            <option value="country">Status</option>
+                                                <option value="active">Active</option>
+                                                <option value="inActive">In-active</option>
+                                            </select>
+                                        </div>*/}
+
+                                        <div className="submit-btns">
+                                            <button type="submit" name="submit" className="mtr-btn"><span>Save</span></button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </>
+                );
+            }
+
+            ReactDOM.createRoot(
+                document.getElementById("page-contents")
+            ).render(<EditGroup />);
+        </script>
+    </body>
+</html>

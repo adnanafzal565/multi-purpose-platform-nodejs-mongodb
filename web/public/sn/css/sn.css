@@ -1,3 +1,21 @@
+.position-relative {
+    position: relative !important;
+}
+.cursor-pointer {
+    cursor: pointer;
+}
+.post-image {
+    width: 100%;
+    height: 400px;
+    object-fit: contain;
+}
+aside.sidebar ul.naves li a {
+    text-decoration: none !important;
+}
+.counter {
+    background-color: #424242;
+    padding: 5px;
+}
 .user-img {
     width: 75px !important;
     height: 75px !important;

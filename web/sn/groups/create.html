@@ -9,7 +9,7 @@
         <meta http-equiv="Expires" content="0" />
         <meta name="description" content="" />
         <meta name="keywords" content="" />
-        <title>Social Network | My Pages</title>
+        <title>Social Network | Create Group</title>
         <link rel="icon" href="../../public/sn/images/fav.png" type="image/png" sizes="16x16"> 
         
         <link rel="stylesheet" href="../../public/sn/css/main.min.css">
@@ -60,27 +60,40 @@
 
                                     <div class="col-lg-6">
                                         <div class="central-meta">
-                                            <div class="groups">
-                                                <span><i class="fa fa-file"></i> My Pages</span>
-                                            </div>
+                                            <div class="editing-info">
+                                                <h5 class="f-title"><i class="ti-info-alt"></i> Create Group</h5>
+                                                <form method="post" onsubmit="createGroup();">
+                                                    <div class="form-group">
+                                                      <input type="text" id="input" name="name" required="required"/>
+                                                      <label class="control-label" for="input">Group Name</label>
+                                                      <i class="mtrl-select"></i>
+                                                    </div>
 
-                                            <p class="loading">Loading...</p>
+                                                    <div class="form-group">    
+                                                      <textarea rows="4" id="textarea" name="description" required="required"></textarea>
+                                                      <label class="control-label" for="textarea">Description</label><i class="mtrl-select"></i>
+                                                    </div>
 
-                                            <ul class="liked-pages" id="pages-container">
-                                                
-                                            </ul>
+                                                    <p>Cover Photo</p>
+                                                    <div class="form-group">
+                                                      <input type="file" name="image" accept="image/*" required="required"/>
+                                                    </div>
 
-                                            <div class="lodmore">
-                                                <button class="btn-view btn-load-more" id="btn-load-more" onclick="loadMore();"></button>
+                                                    <!-- <div class="form-group">
+                                                      <select name="status">
+                                                        <option value="country">Status</option>
+                                                          <option value="active">Active</option>
+                                                          <option value="inActive">In-active</option>
+                                                      </select>
+                                                    </div> -->
+
+                                                    <div class="submit-btns">
+                                                        <button type="submit" name="submit" class="mtr-btn"><span>Save</span></button>
+                                                    </div>
+                                                </form>
                                             </div>
                                         </div>
                                     </div>
-
-                                    <div class="col-lg-3" id="right-sidebar-app">
-                                        <!--  -->
-                                    </div>
-
-                                    <script type="text/babel" src="../../public/sn/components/RightSidebar.js"></script>
                                 </div>
                             </div>
                         </div>
@@ -90,22 +103,17 @@
         </div>
 
         <script>
-            let page = 1;
+            async function createGroup() {
+                event.preventDefault();
 
-            function loadMore() {
-                page++;
-                getData();
-            }
+                const form = event.target;
+                const formData = new FormData(form);
 
-            async function getData() {
-                $(".loading").show();
-
-                const formData = new FormData();
-                formData.append("page", page);
+                form.submit.setAttribute("disabled", "disabled");
 
                 try {
                     const response = await axios.post(
-                        apiUrl + "/sn/pages/fetch-my",
+                        apiUrl + "/sn/groups/create",
                         formData,
                         {
                             headers: {
@@ -115,33 +123,20 @@
                     )
 
                     if (response.data.status == "success") {
-                        const pages = response.data.pages;
-                        let html = "";
-                        for (let a = 0; a < pages.length; a++) {
-                            html += renderSinglePage(pages[a]);
-                        }
-                        document.querySelector("#pages-container").insertAdjacentHTML("beforeend", html);
-
-                        if (pages.length == 0) {
-                            $("#btn-load-more").hide();
-                        } else {
-                            $("#btn-load-more").show();
-                        }
+                        const group = response.data.group;
+                        swal.fire("Create Group", response.data.message, "success")
+                            .then(function () {
+                                window.location.href = baseUrl + "/sn/groups/detail.html?id=" + group._id
+                            });
                     } else {
                         swal.fire(response.data.title, response.data.message, response.data.status);
                     }
                 } catch (exp) {
                     // swal.fire("Error", exp.message, "error")
                 } finally {
-                    $(".loading").hide();
+                    form.submit.removeAttribute("disabled");
                 }
             }
-
-            globalState.listen(function (newState, updatedState) {
-                if (typeof updatedState.user !== "undefined" && updatedState.user) {
-                    getData();
-                }
-            });
         </script>
     </body>
 </html>

@@ -87,7 +87,6 @@ module.exports = {
                 _id: page._id,
                 name: page.name || "",
                 description: page.description || "",
-                status: page.status || "",
                 user: {
                     _id: page.user._id || "",
                     name: page.user.name || "",
@@ -248,7 +247,7 @@ module.exports = {
             const obj = {
                 name: name,
                 description: description,
-                status: status,
+                // status: status,
                 updatedAt: new Date().toUTCString()
             };
 
@@ -294,7 +293,7 @@ module.exports = {
                     path: fileLocation,
                     name: image.name,
                     size: image.size,
-                    type: image.mimetype
+                    type: image.type
                 };
             }
 
@@ -524,7 +523,7 @@ module.exports = {
                 path: fileLocation,
                 name: image.name,
                 size: image.size,
-                type: image.mimetype
+                type: image.type
             };
 
             await db.collection("pages")
@@ -533,6 +532,8 @@ module.exports = {
             if (fs.existsSync(obj.image.path)) {
                 obj.image.path = baseUrl + "/" + obj.image.path;
             }
+
+            delete obj.status;
 
             result.json({
                 status: "success",

@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" /> 
+        <meta http-equiv="Pragma" content="no-cache" /> 
+        <meta http-equiv="Expires" content="0" />
+        <meta name="description" content="" />
+        <meta name="keywords" content="" />
+        <title>Social Network | Group</title>
+        <link rel="icon" href="../../public/sn/images/fav.png" type="image/png" sizes="16x16"> 
+        
+        <link rel="stylesheet" href="../../public/sn/css/main.min.css">
+        <link rel="stylesheet" href="../../public/sn/css/style.css">
+        <link rel="stylesheet" href="../../public/sn/css/sn.css">
+        <link rel="stylesheet" href="../../public/sn/css/color.css">
+        <link rel="stylesheet" href="../../public/sn/css/responsive.css">
+
+        <link rel="stylesheet" href="../../public/css/bootstrap.css" />
+        <link rel="stylesheet" href="../../public/css/fontawesome.css" />
+        <script src="../../public/js/jquery.js"></script>
+        <script src="../../public/js/bootstrap.js"></script>
+
+        <script src="../../public/js/react.development.js"></script>
+        <script src="../../public/js/react-dom.development.js"></script>
+        <script src="../../public/js/babel.min.js"></script>
+        <script src="../../public/js/axios.min.js"></script>
+        <script src="../../public/js/sweetalert2@11.js"></script>
+        <script src="../../public/js/fontawesome.js"></script>
+
+        <script src="../../public/js/script.js"></script>
+        <script src="../../public/sn/js/sn.js"></script>
+        <script type="text/babel" src="../../public/sn/components/SinglePost.js"></script>
+
+    </head>
+
+    <body>
+        <!--<div class="se-pre-con"></div>-->
+        <div class="theme-layout">
+
+            <div id="header-app">
+                
+            </div>
+
+            <script type="text/babel" src="../../public/sn/components/Header.js"></script>
+
+            <div id="group-detail-app">
+                
+            </div>
+
+            <script>
+                const urlSearchParams = new URLSearchParams(window.location.search);
+
+                const id = urlSearchParams.get("id") || "";
+                let page = urlSearchParams.get("page") || 1;
+            </script>
+
+            <script type="text/babel">
+                function GroupDetail() {
+
+                    const [group, setGroup] = React.useState(null);
+                    const [state, setState] = React.useState(globalState.state);
+                    const [loading, setLoading] = React.useState(false);
+                    const [currentPosts, setCurrentPosts] = React.useState([]);
+
+                    React.useEffect(function () {
+                        globalState.listen(function (newState, updatedState) {
+                            setState(newState);
+                        });
+
+                        getData();
+
+                        setTimeout(function () {
+                            fetch(baseUrl + "/public/sn/components/Sidebar.js")
+                                .then(function (response) {
+                                    response.text().then(function (text) {
+                                        const transpiledCode = Babel.transform(text, {
+                                            presets: ["env", "react"]
+                                        }).code;
+
+                                        eval(transpiledCode);
+                                    })
+                                });
+                        }, 1000);
+                    }, []);
+
+                    async function toggleJoin() {
+                        const node = event.currentTarget;
+                        node.setAttribute("disabled", "disabled");
+
+                        const formData = new FormData();
+                        formData.append("_id", id);
+
+                        try {
+                            const response = await axios.post(
+                                apiUrl + "/sn/groups/toggle-join",
+                                formData,
+                                {
+                                    headers: {
+                                        Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                                    }
+                                }
+                            )
+
+                            if (response.data.status == "success") {
+                                if (group != null) {
+                                    group.isMember = !group.isMember;
+
+                                    if (group.isMember) {
+                                        setGroup({
+                                            ...group,
+                                            membersCount: group.membersCount + 1
+                                        });
+                                    } else {
+                                        setGroup({
+                                            ...group,
+                                            membersCount: group.membersCount - 1
+                                        });
+                                    }
+                                }
+                            } else {
+                                swal.fire(response.data.title, response.data.message, response.data.status);
+                            }
+                        } catch (exp) {
+                            // swal.fire("Error", exp.message, "error")
+                        } finally {
+                            node.removeAttribute("disabled");
+                        }
+                    }
+
+                    function deleteGroup() {
+                        const node = event.target;
+
+                        swal.fire({
+                            title: "Delete Group",
+                            text: "All the posts of this group will be deleted as well.",
+                            icon: "warning",
+                            showCancelButton: true,
+                            confirmButtonText: "Yes, delete it",
+                        }).then(async function (result) {
+                            /* Read more about isConfirmed, isDenied below */
+                            if (result.isConfirmed) {
+                                node.setAttribute("disabled", "disabled");
+
+                                const formData = new FormData();
+                                formData.append("_id", id);
+
+                                try {
+                                    const response = await axios.post(
+                                        apiUrl + "/sn/groups/delete",
+                                        formData,
+                                        {
+                                            headers: {
+                                                Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                                            }
+                                        }
+                                    )
+
+                                    if (response.data.status == "success") {
+                                        swal.fire("Delete Group", response.data.message, "success")
+                                            .then(function () {
+                                                window.location.href = baseUrl + "/sn/groups/index.html";
+                                            });
+                                    } else {
+                                        swal.fire(response.data.title, response.data.message, response.data.status);
+                                    }
+                                } catch (exp) {
+                                    // swal.fire("Error", exp.message, "error")
+                                } finally {
+                                    node.removeAttribute("disabled");
+                                }
+                            }
+                        });
+                    }
+
+                    async function getData() {
+                        setLoading(true)
+
+                        const formData = new FormData();
+                        formData.append("_id", id);
+                        formData.append("page", page);
+
+                        try {
+                            const response = await axios.post(
+                                apiUrl + "/sn/groups/fetch-single",
+                                formData,
+                                {
+                                    headers: {
+                                        Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                                    }
+                                }
+                            )
+
+                            if (response.data.status == "success") {
+                                const groupObj = response.data.group;
+                                
+                                globalState.setState({
+                                    posts: groupObj.posts
+                                });
+
+                                setCurrentPosts(groupObj.posts);
+                                setGroup(groupObj);
+                            } else {
+                                swal.fire(response.data.title, response.data.message, response.data.status);
+                            }
+                        } catch (exp) {
+                            // swal.fire("Error", exp.message, "error")
+                        } finally {
+                            setLoading(false);
+                        }
+                    }
+
+                    function loadMore() {
+                        page++;
+                        fetchPosts();
+                    }
+
+                    async function fetchPosts() {
+                        setLoading(true);
+
+                        const formData = new FormData();
+                        formData.append("_id", id);
+                        formData.append("page", page);
+
+                        try {
+                            const response = await axios.post(
+                                apiUrl + "/sn/groups/fetch-posts",
+                                formData,
+                                {
+                                    headers: {
+                                        Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                                    }
+                                }
+                            )
+
+                            if (response.data.status == "success") {
+                                const tempPosts = response.data.posts;
+                                const postsArr = globalState.state.posts;
+                                for (let a = 0; a < tempPosts.length; a++) {
+                                    postsArr.push(tempPosts[a]);
+                                }
+                                globalState.setState({
+                                    posts: postsArr
+                                });
+                                setCurrentPosts(tempPosts);
+                            } else {
+                                swal.fire(response.data.title, response.data.message, response.data.status);
+                            }
+                        } catch (exp) {
+                            // swal.fire("Error", exp.message, "error")
+                        } finally {
+                            setLoading(false);
+                        }
+                    }
+
+                    async function doPost() {
+                        event.preventDefault();
+
+                        if (state.user == null) {
+                            return;
+                        }
+
+                        const form = event.target;
+                        const formData = new FormData(form);
+                        formData.append("type", "group");
+                        formData.append("groupId", id);
+
+                        const files = form.querySelector(".files").files;
+                        for (let a = 0; a < files.length; a++) {
+                            formData.append("files[]", files[a]);
+                        }
+
+                        form.submit.setAttribute("disabled", "disabled");
+                        form.submit.innerHTML = "Loading...";
+
+                        try {
+                            const response = await axios.post(
+                                apiUrl + "/sn/posts/create",
+                                formData,
+                                {
+                                    headers: {
+                                        Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                                    }
+                                }
+                            )
+
+                            if (response.data.status == "success") {
+                                swal.fire("Success", response.data.message, "success");
+
+                                if (group.isAdmin) {
+                                    const post = response.data.post;
+                                    const tempPosts = globalState.state.posts;
+                                    tempPosts.unshift(post);
+                                    globalState.setState({
+                                        posts: tempPosts
+                                    });
+                                }
+
+                                // let html = renderSinglePost(post);
+                                // document.getElementById("newsfeed").insertAdjacentHTML("afterbegin", html);
+                            } else {
+                                swal.fire(response.data.title, response.data.message, response.data.status);
+                            }
+                        } catch (exp) {
+                            // swal.fire("Error", exp.message, "error")
+                        } finally {
+                            form.submit.removeAttribute("disabled");
+                            form.submit.innerHTML = "Post";
+                        }
+                    }
+
+                    return (
+                        <>
+                            { group != null && (
+                                <>
+                                    <section>
+                                        <div className="feature-photo">
+                                            <figure><img src={ group.image } /></figure>
+
+                                            <div className="add-btn">
+                                                <span className="counter">{ group.membersCount } members</span>
+                                                <button type="button" className="mtr-btn" onClick={ function () {
+                                                    toggleJoin();
+                                                } }
+                                                    id="btn-toggle-follow">
+                                                    <span>{ (group.isMember ? 'Leave' : 'Join') }</span>
+                                                </button>
+                                            </div>
+
+                                            <div className="container-fluid">
+                                                <div className="row merged">
+                                                    <div className="col-lg-10 col-sm-9">
+                                                        <div className="timeline-info">
+                                                            <ul>
+                                                                <li className="admin-name">
+                                                                  <h5>{ group.name }</h5>
+                                                                </li>
+                                                                <li>
+                                                                    <a className="active" href={ `${ baseUrl }/sn/groups/detail.html?id=${ group._id }` }>Group</a>
+                                                                    <a className="" href={ `${ baseUrl }/sn/groups/members.html?id=${ group._id }` }>Members ({ group.membersCount })</a>
+
+                                                                    { group.isAdmin && (
+                                                                        <>
+                                                                            <a className="" href={ `${ baseUrl }/sn/groups/pending-posts.html?id=${ group._id }` }>Pending Posts ({ group.pendingPostsCount })</a>
+
+                                                                            <a className="btn btn-link" href={ `${ baseUrl }/sn/groups/edit.html?id=${ group._id }` }>Edit</a>
+                                                                            <button type="button" className="btn btn-danger"
+                                                                                onClick={ function () {
+                                                                                    deleteGroup();
+                                                                                } }>Delete</button>
+                                                                        </>
+                                                                    ) }
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+
+                                    <section>
+                                        <div className="gap gray-bg">
+                                            <div className="container-fluid">
+                                                <div className="row">
+                                                    <div className="col-lg-12">
+                                                        <div className="row" id="page-contents">
+
+                                                            <div className="col-lg-3" id="sidebar-app">
+
+                                                            </div>
+
+                                                            <div className="col-lg-6">
+                                                                { (group.isMember || group.isAdmin) && (
+                                                                    <div className="central-meta" id="create-post-widget">
+                                                                        <div className="new-postbox">
+                                                                            <figure>
+                                                                                <img className="user-img"
+                                                                                    onError={ function () {
+                                                                                        event.target.src = baseUrl + "/public/img/user-placeholder.png";
+                                                                                    } }
+                                                                                    src={ state.user?.profileImage || '' } />
+                                                                            </figure>
+
+                                                                            <div className="newpst-input">
+                                                                                <form method="post" onSubmit={ function () {
+                                                                                    event.preventDefault();
+                                                                                    doPost();
+                                                                                } } encType="multipart/form-data">
+                                                                                    <textarea rows="2" name="caption" placeholder="write something"></textarea>
+                                                                                    <div className="attachments">
+                                                                                        <ul>
+                                                                                            <li>
+                                                                                                <i className="fa fa-image"></i>
+                                                                                                <label className="fileContainer">
+                                                                                                    <input type="file" className="files" multiple accept="image/*, video/*" />
+                                                                                                </label>
+                                                                                            </li>
+                                                                                            <li>
+                                                                                                <button type="submit" name="submit">Post</button>
+                                                                                            </li>
+                                                                                        </ul>
+                                                                                    </div>
+                                                                                </form>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                ) }
+
+                                                                <div className="loadMore" id="newsfeed">
+                                                                    { state.posts.map(function (post) {
+                                                                        return (
+                                                                            <SinglePost key={ `post-${ post._id }` }
+                                                                                post={ post } />
+                                                                        );
+                                                                    }) }
+                                                                </div>
+
+                                                                { loading && (
+                                                                    <p>Loading...</p>
+                                                                ) }
+
+                                                                { currentPosts.length > 0 && (
+                                                                    <button type="button" className="btn-view btn-load-more"
+                                                                        onClick={ function () {
+                                                                            loadMore();
+                                                                        } }>Load More</button>
+                                                                ) }
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+                                </>
+                            ) }
+                        </>
+                    );
+                }
+
+                ReactDOM.createRoot(
+                    document.getElementById("group-detail-app")
+                ).render(<GroupDetail />);
+            </script>
+        </div>
+    </body>
+</html>

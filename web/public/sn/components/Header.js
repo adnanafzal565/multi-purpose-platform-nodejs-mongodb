@@ -125,6 +125,7 @@ function Header() {
                         { state.user != null && (
                             <>
                                 <li><a href={ `${ baseUrl }/sn/pages/index.html` }>Pages</a></li>
+                                <li><a href={ `${ baseUrl }/sn/groups/index.html` }>Groups</a></li>
                             </>
                         ) }
                     </ul>

@@ -10,24 +10,39 @@ function RightSidebar() {
 
     return (
         <>
-            { state.user != null && (
-                <aside className="sidebar static">
-                    <div className="widget">
-                        <h4 className="widget-title">My Account</h4>
-                        <ul className="naves">
-                            <li>
-                                <i className="fa fa-file"></i>&nbsp;
-                                <a href={ `${ baseUrl }/sn/pages/my.html` }>My Pages</a>
-                            </li>
+            <aside className="sidebar static">
+                <div className="widget">
+                    <h4 className="widget-title">Pages</h4>
+                    <ul className="naves">
+                        <li>
+                            <i className="fa fa-file"></i>&nbsp;
+                            <a href={ `${ baseUrl }/sn/pages/my.html` }>My Created</a>
+                        </li>
 
-                            <li>
-                                <i className="fa fa-file"></i>&nbsp;
-                                <a href={ `${ baseUrl }/sn/pages/my-followed.html` }>Following Pages</a>
-                            </li>
-                        </ul>
-                    </div>
-                </aside>
-            ) }
+                        <li>
+                            <i className="fa fa-file"></i>&nbsp;
+                            <a href={ `${ baseUrl }/sn/pages/my-followed.html` }>My Followed</a>
+                        </li>
+                    </ul>
+                </div>
+            </aside>
+
+            <aside className="sidebar static">
+                <div className="widget">
+                    <h4 className="widget-title">Groups</h4>
+                    <ul className="naves">
+                        <li>
+                            <i className="fa fa-file"></i>&nbsp;
+                            <a href={ `${ baseUrl }/sn/groups/my.html` }>My Created</a>
+                        </li>
+
+                        <li>
+                            <i className="fa fa-file"></i>&nbsp;
+                            <a href={ `${ baseUrl }/sn/groups/my-joined.html` }>My Joined</a>
+                        </li>
+                    </ul>
+                </div>
+            </aside>
         </>
     );
 }

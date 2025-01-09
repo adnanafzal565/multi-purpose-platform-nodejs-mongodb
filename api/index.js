@@ -50,6 +50,7 @@ const media = require("./modules/media");
 const notifications = require("./modules/notifications");
 const posts = require("./modules/sn/posts");
 const pages = require("./modules/sn/pages");
+const groups = require("./modules/sn/groups");
 
 const port = process.env.PORT || 3000;
 const databaseName = "nodejs_mongodb"
@@ -72,6 +73,7 @@ http.listen(port, async function () {
 
         posts.init(app);
         pages.init(app);
+        groups.init(app);
         media.init(app);
         notifications.init(app);
 
@@ -175,7 +177,7 @@ http.listen(port, async function () {
                     return
                 }
 
-                if (fs.existsSync(profileImageObj.path))
+                if (profileImageObj.path && fs.existsSync(profileImageObj.path))
                     fs.unlinkSync(profileImageObj.path)
 				
 				if (!fs.existsSync("uploads/public/profiles"))

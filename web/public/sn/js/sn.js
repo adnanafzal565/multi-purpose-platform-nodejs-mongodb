@@ -1,3 +1,99 @@
+async function declinePost(id) {
+    const node = event.target;
+    node.setAttribute("disabled", "disabled");
+
+    const formData = new FormData();
+    formData.append("_id", id);
+
+    try {
+        const response = await axios.post(
+            apiUrl + "/sn/posts/decline",
+            formData,
+            {
+                headers: {
+                    Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                }
+            }
+        )
+
+        if (response.data.status == "success") {
+            swal.fire("Post Declined", response.data.message, "success");
+            // node.remove();
+            node.parentElement.parentElement.parentElement.parentElement.parentElement.remove();
+        } else {
+            swal.fire(response.data.title, response.data.message, response.data.status);
+            node.removeAttribute("disabled");
+        }
+    } catch (exp) {
+        // swal.fire("Error", exp.message, "error");
+        node.removeAttribute("disabled");
+    }
+}
+
+async function acceptPost(id) {
+    const node = event.target;
+    node.setAttribute("disabled", "disabled");
+
+    const formData = new FormData();
+    formData.append("_id", id);
+
+    try {
+        const response = await axios.post(
+            apiUrl + "/sn/posts/accept",
+            formData,
+            {
+                headers: {
+                    Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                }
+            }
+        )
+
+        if (response.data.status == "success") {
+            swal.fire("Post Accepted", response.data.message, "success");
+            // node.remove();
+            node.parentElement.parentElement.parentElement.parentElement.parentElement.remove();
+        } else {
+            swal.fire(response.data.title, response.data.message, response.data.status);
+            node.removeAttribute("disabled");
+        }
+    } catch (exp) {
+        // swal.fire("Error", exp.message, "error");
+        node.removeAttribute("disabled");
+    }
+}
+
+async function toggleJoin(id, callBack = null) {
+    const node = event.target;
+    node.setAttribute("disabled", "disabled");
+
+    const formData = new FormData();
+    formData.append("_id", id);
+
+    try {
+        const response = await axios.post(
+            apiUrl + "/sn/groups/toggle-join",
+            formData,
+            {
+                headers: {
+                    Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                }
+            }
+        )
+
+        if (response.data.status == "success") {
+            if (callBack != null) {
+                callBack();
+            }
+        } else {
+            swal.fire(response.data.title, response.data.message, response.data.status);
+        }
+    } catch (exp) {
+        // swal.fire("Error", exp.message, "error")
+    } finally {
+        node.removeAttribute("disabled");
+    }
+}
+
 function renderSingleFollower(follower) {
     let html = "";
     html += `<li>
@@ -5,7 +101,8 @@ function renderSingleFollower(follower) {
             <figure>
                 <a href="` + baseUrl + `/sn/profile.html?id=` + follower.userId + `">
                     <img src="` + follower.profileImage + `"
-                        onerror="this.src = baseUrl + '/public/img/user-placeholder.png'" />
+                        onerror="this.src = baseUrl + '/public/img/user-placeholder.png'"
+                        class="user-img" />
                 </a>
             </figure>
 
@@ -174,12 +271,10 @@ async function showPostLikers(id, page = 1) {
                 html += `<div class="row">
                     <div class="col-md-8">
                         <img src="` + likers[a].user.profileImage + `"
-                            style="width: 70px; height: 70px; object-fit: cover;
-                                border-radius: 50%;
-                                margin-right: 5px;"
+                            class="user-img"
                             onerror="this.src = baseUrl + '/public/img/user-placeholder.png'" />
 
-                        ` + likers[a].user.name + `
+                        &nbsp;` + likers[a].user.name + `
                     </div>
 
                     <div class="col-md-4">
@@ -590,16 +685,23 @@ function renderSinglePost(post) {
                             <ins><a href="` + href + `" title="">` + name + `</a></ins>
                             <span>published: ` + post.createdAt + `</span>
                         </div>
-                    </div>`
+                    </div>
+                    
+                    <div class="col-md-4">`
 
                 if (isMyPost) {
-                    html += `<div class="col-md-4">
-                        <a href="` + baseUrl + `/sn/edit-post.html?id=` + post._id + `">Edit</a>
-                        &nbsp;<button type="button" class="btn btn-danger btn-sm" onclick="deletePost('` + post._id + `');">Delete</button>
-                    </div>`;
+                    html += `<a href="` + baseUrl + `/sn/edit-post.html?id=` + post._id + `">Edit</a>
+                        &nbsp;<button type="button" class="btn btn-danger btn-sm" onclick="deletePost('` + post._id + `');">Delete</button>`;
+                }
+
+                if (post.status == "pending") {
+                    html += `<button type="button" class="btn btn-success btn-sm" onclick="acceptPost('` + post._id +`');">Accept</button>
+                    <button type="button" class="btn btn-danger btn-sm" onclick="declinePost('` + post._id + `');">Decline</button>`;
                 }
 
             html += `</div>
+                </div>
+                
                 <div class="post-meta">
                     <div class="description">
                         <p>` + (post.caption || "") + `</p>

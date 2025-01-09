@@ -232,7 +232,7 @@
                             <figure><img src="` + pageObj.image + `" /></figure>
 
                             <div class="add-btn">
-                                <span style="background-color: #424242; padding: 5px;">` + pageObj.followersCount + ` followers</span>
+                                <span class="counter">` + pageObj.followersCount + ` followers</span>
                                 <button type="button" class="mtr-btn" onclick="toggleFollow();"
                                     id="btn-toggle-follow">
                                     <span>` + (pageObj.isFollowing ? 'Unfollow' : 'Follow') + `</span>
@@ -323,7 +323,7 @@
                             if (response.data.status == "success") {
                                 swal.fire("Delete Page", response.data.message, "success")
                                     .then(function () {
-                                        window.location.href = baseUrl + "/sn";
+                                        window.location.href = baseUrl + "/sn/pages/index.html";
                                     });
                             } else {
                                 swal.fire(response.data.title, response.data.message, response.data.status);
