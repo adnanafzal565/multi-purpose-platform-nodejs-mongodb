@@ -1630,7 +1630,6 @@ module.exports = {
             const q = request.fields.q || "";
             const userId = request.fields.userId || "";
             const page = parseInt(request.fields.page || 1);
-            const skip = (page - 1) * self.limit;
             let searchArr = [];
 
             if (_id != "") {

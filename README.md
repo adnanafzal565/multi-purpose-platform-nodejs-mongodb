@@ -63,7 +63,7 @@ Project can be accessed from: `http://localhost/nodejs-mongodb/web/index.html`
 
 <br />
 
-Complete documentation: https://adnan-tech.com/api-docs/nodejs-mongodb.html
+Complete documentation: https://adnan-tech.com/api-docs/nodejs-mongodb.php
 
 <br />
 

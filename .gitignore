@@ -4,6 +4,8 @@ api/uploads/public/media
 api/uploads/public/pages
 api/uploads/public/posts
 api/uploads/public/profiles
-docs
+docs/nodejs-mongodb.html
+docs/sample.html
+docs/api_docs.sql
 api/node_modules
 README.pdf
