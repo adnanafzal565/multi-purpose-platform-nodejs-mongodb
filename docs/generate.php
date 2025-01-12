@@ -21,6 +21,7 @@
         example_request TEXT NULL,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        deleted_at DATETIME DEFAULT NULL,
         FOREIGN KEY (section_id) REFERENCES sections (id) ON UPDATE CASCADE ON DELETE CASCADE
     )");
 
@@ -78,7 +79,7 @@
 
         foreach ($sections as $section)
         {
-            $stmt = $pdo->prepare("SELECT * FROM apis WHERE section_id = ? ORDER BY id ASC");
+            $stmt = $pdo->prepare("SELECT * FROM apis WHERE section_id = ? AND deleted_at IS NULL ORDER BY id ASC");
             $stmt->execute([$section->id]);
             $apis = $stmt->fetchAll(PDO::FETCH_OBJ);
 
@@ -283,6 +284,22 @@
         ]);
         exit();
     }
+
+    if (isset($_GET["delete_api"]))
+    {
+        $id = $_POST["id"] ?? 0;
+
+        $pdo->prepare("UPDATE apis SET deleted_at = UTC_TIMESTAMP() WHERE id = ?")
+            ->execute([
+                $id
+            ]);
+
+        echo json_encode([
+            "status" => "success",
+            "message" => "API has been deleted."
+        ]);
+        exit();
+    }
 ?>
 
 <html>
@@ -342,7 +359,6 @@
             function App() {
 
                 const [addingAPI, setAddingAPI] = React.useState(false);
-                const [updatingAPI, setUpdatingAPI] = React.useState(false);
                 const [addingSection, setAddingSection] = React.useState(false);
                 const [sections, setSections] = React.useState([]);
                 const [apis, setApis] = React.useState([]);
@@ -457,8 +473,6 @@
                         return;
                     }
 
-                    setUpdatingAPI(true);
-
                     const form = event.target;
                     const formData = new FormData(form);
                     formData.append("id", apiToEdit.id);
@@ -466,6 +480,8 @@
                     formData.append("parameters", JSON.stringify(apiToEdit.parameters));
                     formData.append("arguments", JSON.stringify(apiToEdit.arguments));
                     formData.append("status_codes", JSON.stringify(apiToEdit.responses));
+
+                    form.submit.setAttribute("disabled", "disabled");
 
                     try {
                         const response = await axios.post(
@@ -481,8 +497,61 @@
                     } catch (exp) {
                         swal.fire("Error", exp.message, "error");
                     } finally {
-                        setUpdatingAPI(false);
+                        form.submit.removeAttribute("disabled");
                     }
+                }
+
+                function deleteAPI(api) {
+                    swal.fire({
+                        title: "Delete API",
+                        text: "Are you sure you want to delete the API \"" + api.name + "\"",
+                        showCancelButton: true,
+                        confirmButtonText: "Yes, Delete it !",
+                    }).then(function (result) {
+                        /* Read more about isConfirmed, isDenied below */
+                        if (result.isConfirmed) {
+
+                            setTimeout(async function () {
+                                Swal.showLoading();
+
+                                const formData = new FormData();
+                                formData.append("id", api.id);
+
+                                try {
+                                    const response = await axios.post(
+                                        "generate.php?delete_api=1",
+                                        formData
+                                    );
+
+                                    if (response.data.status == "success") {
+                                        swal.fire("Delete API", response.data.message, "success");
+
+                                        const tempSections = [ ...sections ];
+                                        let flag = false;
+                                        for (let a = 0; a < tempSections.length; a++) {
+                                            for (let b = 0; b < tempSections[a].apis.length; b++) {
+                                                if (tempSections[a].apis[b].id == api.id) {
+                                                    tempSections[a].apis.splice(b, 1);
+                                                    flag = true;
+                                                    break;
+                                                }
+                                            }
+                                            if (flag) {
+                                                break;
+                                            }
+                                        }
+                                        setSections(tempSections);
+                                    } else {
+                                        swal.fire("Error", response.data.message, "error");
+                                    }
+                                } catch (exp) {
+                                    swal.fire("Error", exp.message, "error");
+                                } finally {
+                                    Swal.hideLoading();
+                                }
+                            }, 500);
+                        }
+                    });
                 }
 
                 return (
@@ -537,9 +606,13 @@
 
                                                 <div className="form-group mt-3 mb-3">
                                                     <label className="form-label">Method</label>
-                                                    <select name="method" className="form-control" required>
-                                                        <option value="post">POST</option>
+                                                    <select name="method" className="form-control" required
+                                                        defaultValue="post">
                                                         <option value="get">GET</option>
+                                                        <option value="post">POST</option>
+                                                        <option value="put">PUT</option>
+                                                        <option value="patch">PATCH</option>
+                                                        <option value="delete">DELETE</option>
                                                     </select>
                                                 </div>
 
@@ -831,13 +904,22 @@
                                                             return (
                                                                 <details key={ `data-api-${ apiIndex }` } id={ `${ section.name } - ${ api.name }` }>
                                                                     <summary>{ `${ api.method.toUpperCase() } ${ api.name }` }</summary>
-                                                                    <button type="button" className="btn btn-warning mt-3 mb-3"
-                                                                        onClick={ function () {
-                                                                            const tempAPI = { ...api };
-                                                                            tempAPI.sectionId = section.id;
-                                                                            setApiToEdit(tempAPI);
-                                                                            $("#modal-edit-api").modal("show");
-                                                                        } }>Edit</button>
+                                                                    
+                                                                    <div className="mt-3 mb-3">
+                                                                        <button type="button" className="btn btn-warning"
+                                                                            onClick={ function () {
+                                                                                const tempAPI = { ...api };
+                                                                                tempAPI.sectionId = section.id;
+                                                                                setApiToEdit(tempAPI);
+                                                                                $("#modal-edit-api").modal("show");
+                                                                            } }>Edit</button>
+
+                                                                        &nbsp;<button type="button" className="btn btn-danger"
+                                                                            onClick={ function () {
+                                                                                deleteAPI(api);
+                                                                            } }>Delete</button>
+                                                                    </div>
+
                                                                     <p><strong>Description:</strong> { api.description }</p>
 
                                                                     { (api.headers.length > 0) && (
@@ -971,9 +1053,12 @@
                                                     <div className="form-group mt-3 mb-3">
                                                         <label className="form-label">Method</label>
                                                         <select name="method" className="form-control" required
-                                                            defaultValue={ apiToEdit.method }>
-                                                            <option value="post">POST</option>
+                                                            defaultValue={ apiToEdit.method ?? "post" }>
                                                             <option value="get">GET</option>
+                                                            <option value="post">POST</option>
+                                                            <option value="put">PUT</option>
+                                                            <option value="patch">PATCH</option>
+                                                            <option value="delete">DELETE</option>
                                                         </select>
                                                     </div>
 
@@ -1287,8 +1372,7 @@
 
                                     <div className="modal-footer">
                                         <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                        <button type="submit" className="btn btn-success" form="form-update-api"
-                                            disabled={ updatingAPI }>Save changes</button>
+                                        <button type="submit" className="btn btn-success" form="form-update-api" name="submit">Save changes</button>
                                     </div>
                                 </div>
                             </div>

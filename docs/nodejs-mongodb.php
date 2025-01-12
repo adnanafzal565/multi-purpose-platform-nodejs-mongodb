@@ -9,7 +9,7 @@
 
     foreach ($sections as $section)
     {
-        $stmt = $pdo->prepare("SELECT * FROM apis WHERE section_id = ? ORDER BY id ASC");
+        $stmt = $pdo->prepare("SELECT * FROM apis WHERE section_id = ? AND deleted_at IS NULL ORDER BY id ASC");
         $stmt->execute([$section->id]);
         $apis = $stmt->fetchAll(PDO::FETCH_OBJ);
 
