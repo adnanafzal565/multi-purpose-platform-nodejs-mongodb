@@ -63,11 +63,18 @@
 
             <script>
                 async function doRegister() {
-                    event.preventDefault()
-                    const form = event.target
+                    event.preventDefault();
+                    const form = event.target;
 
                     try {
-                        const formData = new FormData(form)
+                        const formData = new FormData(form);
+
+                        if (typeof premium !== "undefined") {
+                            const keys = await premium.generateKeyPair();
+                            formData.append("publicKey", keys.publicKey);
+                            formData.append("privateKey", keys.privateKey);
+                        }
+
                         form.submit.setAttribute("disabled", "disabled")
 
                         const response = await axios.post(
@@ -76,7 +83,8 @@
                         )
 
                         if (response.data.status == "success") {
-                            const verification = response.data.verification
+                            const verification = response.data.verification;
+
                             swal.fire("Register", response.data.message, "success")
                                 .then(function () {
                                     if (verification) {

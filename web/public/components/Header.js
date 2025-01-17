@@ -69,9 +69,9 @@ function Header() {
             )
 
             if (response.data.status == "success") {
-                globalState.setState({
-                    user: null
-                })
+                // globalState.setState({
+                //     user: null
+                // })
                 localStorage.removeItem(accessTokenKey)
                 window.location.reload()
             } else {

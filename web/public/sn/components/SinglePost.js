@@ -4,7 +4,6 @@ function SinglePost({ post }) {
     const [name, setName] = React.useState(post.user.name);
     const [href, setHref] = React.useState(baseUrl + "/sn/profile.html?id=" + post.user._id);
     const [state, setState] = React.useState(globalState.state);
-    // const [isMyPost, setIsMyPost] = React.useState(false);
 
     React.useEffect(function () {
         if (typeof post.page !== "undefined") {
@@ -15,7 +14,6 @@ function SinglePost({ post }) {
 
         globalState.listen(function (newState, updatedState) {
             setState(newState);
-            // setIsMyPost(newState.user != null && post.user._id == newState.user._id);
         });
     }, []);
 
@@ -59,6 +57,22 @@ function SinglePost({ post }) {
         }
     }
 
+    function isMyPost() {
+        let flag = false;
+        if (state.user != null && state.user._id == post.user._id) {
+            flag = true;
+        }
+        return flag;
+    }
+
+    function isMeGroupAdmin() {
+        let flag = false;
+        if (state.user != null && typeof post.group !== "undefined" && state.user._id == post.group.userId) {
+            flag = true;
+        }
+        return flag;
+    }
+
     return (
         <div data-post-id={ post._id } className="central-meta item">
             <div className="user-post">
@@ -84,16 +98,19 @@ function SinglePost({ post }) {
 
                         <div className="col-md-4">
 
-                            { (state.user != null && post.user._id == state.user._id) && (
+                            { (isMyPost() || isMeGroupAdmin()) && (
                                 <>
-                                    <a href={ `${ baseUrl }/sn/edit-post.html?id=${ post._id }` }>Edit</a>
+                                    { isMyPost() && (
+                                        <a href={ `${ baseUrl }/sn/edit-post.html?id=${ post._id }` }>Edit</a>
+                                    ) }
+
                                     &nbsp;<button type="button" className="btn btn-danger btn-sm" onClick={ function () {
                                         deletePost(post._id);
                                     } }>Delete</button>
                                 </>
                             ) }
 
-                            { post.status == "pending" && (
+                            { (isMeGroupAdmin() && post.status == "pending") && (
                                 <>
                                     <button type="button" className="btn btn-success btn-sm" onClick={ function () {
                                         acceptPost(post._id);
@@ -118,7 +135,7 @@ function SinglePost({ post }) {
 
                         { (post.files || []).map(function (file, index) {
                             return (
-                                <React.fragment key={ `${ post._id }-file-${ index }` }>
+                                <React.Fragment key={ `${ post._id }-file-${ index }` }>
                                     { file.type.includes("image") ? (
                                         <img src={ file.path }
                                             alt={ file.name }
@@ -130,13 +147,13 @@ function SinglePost({ post }) {
                                             controls></video>
                                     ) }
 
-                                    { isMyPost && (
+                                    { isMyPost() && (
                                         <i className="fa fa-trash cursor-pointer"
                                             onClick={ function () {
                                                 deletePostFile(post._id, file.path);
                                             } }></i>
                                     ) }
-                                </React.fragment>
+                                </React.Fragment>
                             );
                         }) }
 

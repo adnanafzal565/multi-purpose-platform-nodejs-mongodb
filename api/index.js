@@ -47,10 +47,13 @@ const bcryptjs = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const auth = require("./modules/auth");
 const media = require("./modules/media");
+const users = require("./modules/users");
+const chats = require("./modules/chats");
 const notifications = require("./modules/notifications");
 const posts = require("./modules/sn/posts");
 const pages = require("./modules/sn/pages");
 const groups = require("./modules/sn/groups");
+const friends = require("./modules/sn/friends");
 
 const port = process.env.PORT || 3000;
 const databaseName = "nodejs_mongodb"
@@ -58,6 +61,14 @@ const databaseName = "nodejs_mongodb"
 global.db = null;
 global.jwtSecret = "NodeJS_MongoDB_1234567890";
 global.baseUrl = "http://localhost:" + port;
+
+global.socketIO = require("socket.io")(http, {
+    cors: {
+        origin: "*"
+    }
+});
+ 
+global.usersArr = [];
 
 global.premiumVersionTitle = "Premium Feature";
 global.premiumVersionText = "This feature is available in premium version only.";
@@ -76,6 +87,19 @@ http.listen(port, async function () {
         groups.init(app);
         media.init(app);
         notifications.init(app);
+        friends.init(app);
+        users.init(app);
+        chats.init(app);
+
+        socketIO.on("connection", function (socket) {
+ 
+            socket.on("connected", function (userId) {
+                usersArr[userId] = socket.id;
+                // console.log(usersArr);
+            });
+         
+            // socket.on("sendEvent") goes here
+        });
 
         app.post("/change-password", auth, async function (request, result) {
             const user = request.user;
@@ -451,7 +475,8 @@ http.listen(port, async function () {
             else
                 user.profileImage = "";
 
-            const unreadNotifications = await notifications.fetchUnreadCount(user);
+            const unreadNotificationsCount = await notifications.fetchUnreadCount(user);
+            const unreadNotifications = await notifications.fetchUnread(user);
          
             result.json({
                 status: "success",
@@ -460,9 +485,10 @@ http.listen(port, async function () {
                     _id: user._id,
                     name: user.name,
                     email: user.email,
-                    profileImage: user.profileImage
-                },
-                unreadNotifications: unreadNotifications
+                    profileImage: user.profileImage,
+                    unreadNotifications: unreadNotifications,
+                    unreadNotificationsCount: unreadNotificationsCount
+                }
             })
         })
 

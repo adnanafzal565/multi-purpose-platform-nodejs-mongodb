@@ -655,7 +655,18 @@ function sharePost(id) {
 
 function renderSinglePost(post) {
     let html = "";
-    const isMyPost = (globalState.state.user != null && post.user._id == globalState.state.user._id);
+    let isMyPost = false;
+    let isMeGroupAdmin = false;
+
+    if (globalState.state.user != null) {
+        if (post.user._id == globalState.state.user._id) {
+            isMyPost = true;
+        }
+
+        if (typeof post.group !== "undefined" && post.group.userId == globalState.state.user._id) {
+            isMeGroupAdmin = true;
+        }
+    }
 
     let image = post.user.profileImage;
     let name = post.user.name;
@@ -689,12 +700,14 @@ function renderSinglePost(post) {
                     
                     <div class="col-md-4">`
 
-                if (isMyPost) {
-                    html += `<a href="` + baseUrl + `/sn/edit-post.html?id=` + post._id + `">Edit</a>
-                        &nbsp;<button type="button" class="btn btn-danger btn-sm" onclick="deletePost('` + post._id + `');">Delete</button>`;
+                if (isMyPost || isMeGroupAdmin) {
+                    if (isMyPost) {
+                        html += `<a href="` + baseUrl + `/sn/edit-post.html?id=` + post._id + `">Edit</a>`;
+                    }
+                    html += `&nbsp;<button type="button" class="btn btn-danger btn-sm" onclick="deletePost('` + post._id + `');">Delete</button>`;
                 }
 
-                if (post.status == "pending") {
+                if (isMeGroupAdmin && post.status == "pending") {
                     html += `<button type="button" class="btn btn-success btn-sm" onclick="acceptPost('` + post._id +`');">Accept</button>
                     <button type="button" class="btn btn-danger btn-sm" onclick="declinePost('` + post._id + `');">Decline</button>`;
                 }

@@ -77,6 +77,8 @@
                         if (response.data.status == "success") {
                             const accessToken = response.data.accessToken
                             localStorage.setItem(accessTokenKey, accessToken)
+                            localStorage.setItem(privateKeyKey, response.data.privateKey || "");
+                            localStorage.setItem(publicKeyKey, response.data.publicKey || "");
 
                             const urlSearchParams = new URLSearchParams(window.location.search)
                             const redirect = urlSearchParams.get("redirect") || ""

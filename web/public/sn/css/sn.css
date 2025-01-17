@@ -1,3 +1,18 @@
+.alertify-notifier {
+    color: white !important;
+}
+.unread-messages-counter {
+    background: rgb(233 244 250) !important;
+    color: black !important;
+}
+.dropdown .dropdown-toggle {
+    background: none !important;
+    border: none !important;
+    color: black !important;
+}
+.color-black {
+    color: black;
+}
 .position-relative {
     position: relative !important;
 }

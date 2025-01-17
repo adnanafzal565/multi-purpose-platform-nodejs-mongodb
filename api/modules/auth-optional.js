@@ -9,9 +9,12 @@ module.exports = async function (request, result, next) {
         const userId = decoded.userId
  
         const user = await db.collection("users").findOne({
-            accessToken: accessToken
-            // _id: ObjectId.createFromHexString(userId)
-        })
+            $and: [{
+                accessToken: accessToken
+            }, {
+                _id: ObjectId.createFromHexString(userId)
+            }]
+        });
  
         if (user == null) {
             // result.json({
@@ -22,8 +25,7 @@ module.exports = async function (request, result, next) {
             // return
         }
  
-        request.user = user
-        next()
+        request.user = user;
     } catch (exp) {
         // result.json({
         //     status: "error",
@@ -31,4 +33,5 @@ module.exports = async function (request, result, next) {
         // })
         // return;
     }
+    next();
 }

@@ -31,6 +31,8 @@
         <script src="../../public/js/fontawesome.js"></script>
 
         <script src="../../public/js/script.js"></script>
+        <script src="../../public/sn/js/script.js"></script>
+        <script src="../../public/sn/js/main.min.js"></script>
         <script src="../../public/sn/js/sn.js"></script>
         <script type="text/babel" src="../../public/sn/components/SinglePost.js"></script>
 
@@ -164,78 +166,76 @@
                     return (
                         <>
                             { group != null && (
-                                <>
-                                    <section>
-                                        <div className="feature-photo">
-                                            <figure><img src={ group.image } /></figure>
+                                <section>
+                                    <div className="feature-photo">
+                                        <figure><img src={ group.image } /></figure>
 
-                                            <div className="add-btn">
-                                                <span className="counter">{ group.membersCount } members</span>
-                                            </div>
+                                        <div className="add-btn">
+                                            <span className="counter">{ group.membersCount } members</span>
+                                        </div>
 
-                                            <div className="container-fluid">
-                                                <div className="row merged">
-                                                    <div className="col-lg-10 col-sm-9">
-                                                        <div className="timeline-info">
-                                                            <ul>
-                                                                <li className="admin-name">
-                                                                  <h5>{ group.name }</h5>
-                                                                </li>
-                                                                <li>
-                                                                    <a className="" href={ `${ baseUrl }/sn/groups/detail.html?id=${ group._id }` }>Group</a>
-                                                                    <a className="" href={ `${ baseUrl }/sn/groups/members.html?id=${ group._id }` }>Members ({ group.membersCount })</a>
+                                        <div className="container-fluid">
+                                            <div className="row merged">
+                                                <div className="col-lg-10 col-sm-9">
+                                                    <div className="timeline-info">
+                                                        <ul>
+                                                            <li className="admin-name">
+                                                                <h5>{ group.name }</h5>
+                                                            </li>
+                                                            <li>
+                                                                <a className="" href={ `${ baseUrl }/sn/groups/detail.html?id=${ group._id }` }>Group</a>
+                                                                <a className="" href={ `${ baseUrl }/sn/groups/members.html?id=${ group._id }` }>Members ({ group.membersCount })</a>
 
-                                                                    { group.isAdmin && (
-                                                                        <a className="active" href={ `${ baseUrl }/sn/groups/pending-posts.html?id=${ group._id }` }>Pending Posts ({ group.pendingPostsCount })</a>
-                                                                    ) }
-                                                                </li>
-                                                            </ul>
-                                                        </div>
+                                                                { group.isAdmin && (
+                                                                    <a className="active" href={ `${ baseUrl }/sn/groups/pending-posts.html?id=${ group._id }` }>Pending Posts ({ group.pendingPostsCount })</a>
+                                                                ) }
+                                                            </li>
+                                                        </ul>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </section>
-
-                                    <section>
-                                        <div className="gap gray-bg">
-                                            <div className="container-fluid">
-                                                <div className="row">
-                                                    <div className="col-lg-12">
-                                                        <div className="row" id="page-contents">
-
-                                                            <div className="col-lg-3" id="sidebar-app">
-
-                                                            </div>
-
-                                                            <div className="col-lg-6">
-                                                                <div className="loadMore" id="newsfeed">
-                                                                    { posts.map(function (post) {
-                                                                        return (
-                                                                            <SinglePost key={ `post-${ post._id }` } post={ post } />
-                                                                        );
-                                                                    }) }
-                                                                </div>
-
-                                                                { loading && (
-                                                                    <p>Loading...</p>
-                                                                ) }
-
-                                                                { currentPosts.length > 0 && (
-                                                                    <button type="button" className="btn-view btn-load-more"
-                                                                        onClick={ function () {
-                                                                            loadMore();
-                                                                        } }>Load More</button>
-                                                                ) }
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </section>
-                                </>
+                                    </div>
+                                </section>
                             ) }
+
+                            <section>
+                                <div className="gap gray-bg">
+                                    <div className="container-fluid">
+                                        <div className="row">
+                                            <div className="col-lg-12">
+                                                <div className="row" id="page-contents">
+
+                                                    <div className="col-lg-3" id="sidebar-app">
+
+                                                    </div>
+
+                                                    <div className="col-lg-6">
+                                                        <div className="loadMore" id="newsfeed">
+                                                            { posts.map(function (post) {
+                                                                return (
+                                                                    <SinglePost key={ `post-${ post._id }` } post={ post } />
+                                                                );
+                                                            }) }
+                                                        </div>
+
+                                                        { loading && (
+                                                            <p>Loading...</p>
+                                                        ) }
+
+                                                        { currentPosts.length > 0 && (
+                                                            <button type="button" className="btn-view btn-load-more"
+                                                                onClick={ function () {
+                                                                    loadMore();
+                                                                } }>Load More</button>
+                                                        ) }
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
                         </>
                     );
                 }

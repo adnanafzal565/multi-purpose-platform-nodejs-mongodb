@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" /> 
+        <meta http-equiv="Pragma" content="no-cache" /> 
+        <meta http-equiv="Expires" content="0" />
+        <meta name="description" content="" />
+        <meta name="keywords" content="" />
+        <title>Social Network | Chat</title>
+        <link rel="icon" href="../public/sn/images/fav.png" type="image/png" sizes="16x16"> 
+        
+        <link rel="stylesheet" href="../public/sn/css/main.min.css">
+        <link rel="stylesheet" href="../public/sn/css/style.css">
+        <link rel="stylesheet" href="../public/sn/css/sn.css">
+        <link rel="stylesheet" href="../public/sn/css/color.css">
+        <link rel="stylesheet" href="../public/sn/css/responsive.css">
+
+        <link rel="stylesheet" href="../public/css/bootstrap.css" />
+        <link rel="stylesheet" href="../public/css/fontawesome.css" />
+        <script src="../public/js/jquery.js"></script>
+        <script src="../public/js/bootstrap.js"></script>
+
+        <script src="../public/js/react.development.js"></script>
+        <script src="../public/js/react-dom.development.js"></script>
+        <script src="../public/js/babel.min.js"></script>
+        <script src="../public/js/axios.min.js"></script>
+        <script src="../public/js/sweetalert2@11.js"></script>
+        <script src="../public/js/fontawesome.js"></script>
+
+        <script src="../public/js/script.js"></script>
+        <script src="../public/sn/js/script.js"></script>
+        <script src="../public/sn/js/main.min.js"></script>
+        <script src="../public/sn/js/sn.js"></script>
+
+    </head>
+
+    <body>
+        <!--<div class="se-pre-con"></div>-->
+        <div class="theme-layout">
+
+            <div id="header-app">
+                
+            </div>
+
+            <script type="text/babel" src="../public/sn/components/Header.js"></script>
+                
+            <section id="chat-app">
+
+            </section>
+
+            <script>
+                const urlSearchParams = new URLSearchParams(window.location.search);
+                const id = urlSearchParams.get("id") || "";
+                let page = urlSearchParams.get("page") || 1;
+                let pageChat = 1;
+            </script>
+
+            <script type="text/babel">
+                function Chat() {
+
+                    const [state, setState] = React.useState(globalState.state);
+                    const [loading, setLoading] = React.useState(false);
+                    const [friends, setFriends] = React.useState([]);
+                    const [currentFriendsCount, setCurrentFriendsCount] = React.useState(0);
+                    const [selectedUser, setSelectedUser] = React.useState(null);
+                    const [messages, setMessages] = React.useState([]);
+                    const [currentMessagesCount, setCurrentMessagesCount] = React.useState(0);
+                    const [publicKey, setPublicKey] = React.useState("");
+
+                    function loadMore() {
+                        page++;
+                        getData();
+                    }
+
+                    async function getData() {
+                        setLoading(true);
+
+                        const formData = new FormData();
+                        formData.append("page", page);
+                        formData.append("_id", id);
+
+                        try {
+                            const response = await axios.post(
+                                apiUrl + "/sn/friends/fetch",
+                                formData,
+                                {
+                                    headers: {
+                                        Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                                    }
+                                }
+                            )
+
+                            if (response.data.status == "success") {
+                                const friendsArr = response.data.friends;
+                                const selectedFriend = response.data.selectedFriend;
+
+                                if (selectedFriend != null) {
+                                    setSelectedUser(selectedFriend);
+                                }
+
+                                setCurrentFriendsCount(friendsArr.length);
+
+                                const tempArr = [...friends];
+                                for (let a = 0; a < friendsArr.length; a++) {
+                                    tempArr.push(friendsArr[a]);
+                                }
+                                setFriends(tempArr);
+                            } else {
+                                // swal.fire(response.data.title, response.data.message, response.data.status);
+                            }
+                        } catch (exp) {
+                            // swal.fire("Error", exp.message, "error")
+                        } finally {
+                            setLoading(false);
+                        }
+                    }
+
+                    function getOther(friend) {
+                        if (state.user != null) {
+                            if (state.user._id == friend.user1._id) {
+                                return friend.user2;
+                            } else if (state.user._id == friend.user2._id) {
+                                return friend.user1;
+                            }
+                        }
+                        return null;
+                    }
+
+                    function openChat(user) {
+                        setMessages([]);
+                        setSelectedUser(user);
+
+                        addOrUpdateURLParam("id", user._id);
+                    }
+
+                    function loadMoreChat() {
+                        pageChat++;
+                        fetchChat();
+                    }
+
+                    async function fetchChat() {
+                        if (selectedUser == null) {
+                            return;
+                        }
+
+                        setLoading(true);
+
+                        const formData = new FormData();
+                        formData.append("page", pageChat);
+                        formData.append("_id", selectedUser._id);
+
+                        try {
+                            const response = await axios.post(
+                                apiUrl + "/chats/fetch",
+                                formData,
+                                {
+                                    headers: {
+                                        Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                                    }
+                                }
+                            )
+
+                            if (response.data.status == "success") {
+                                const messagesArr = response.data.messages;
+                                setPublicKey(response.data.publicKey || "");
+                                setCurrentMessagesCount(messagesArr.length);
+
+                                const tempArr = [...messages];
+                                for (let a = 0; a < messagesArr.length; a++) {
+                                    if (typeof premium !== "undefined") {
+                                        messagesArr[a].message = await premium.decryptMessage(messagesArr[a].message);
+                                    }
+                                    tempArr.unshift(messagesArr[a]);
+                                }
+                                setMessages(tempArr);
+
+                                if (pageChat == 1) {
+                                    scrollToBottom();
+                                } else {
+                                    scrollToTop();
+                                }
+
+                                const tempFriends = [...friends];
+                                for (let a = 0; a < tempFriends.length; a++) {
+                                    const otherUser = getOther(tempFriends[a]);
+                                    if (otherUser != null) {
+                                        if (otherUser._id == selectedUser._id) {
+                                            otherUser.unreadMessages = 0;
+                                            break;
+                                        }
+                                    }
+                                }
+                                setFriends(tempFriends);
+                            } else {
+                                swal.fire(response.data.title, response.data.message, response.data.status);
+                            }
+                        } catch (exp) {
+                            // swal.fire("Error", exp.message, "error")
+                        } finally {
+                            setLoading(false);
+                        }
+                    }
+
+                    async function sendMessage() {
+                        if (selectedUser == null) {
+                            return;
+                        }
+
+                        const form = event.target;
+                        form.submit.setAttribute("disabled", "disabled");
+                        
+                        const formData = new FormData(form);
+                        formData.append("_id", selectedUser._id);
+
+                        const message = form.message.value;
+                        if (typeof premium !== "undefined") {
+                            const messageForReceiver = await premium.encryptMessage(selectedUser.publicKey || "", message);
+                            const messageForSender = await premium.encryptMessage(localStorage.getItem(publicKeyKey) || "", message);
+
+                            formData.append("messageForReceiver", messageForReceiver);
+                            formData.append("messageForSender", messageForSender);
+                        }
+
+                        try {
+                            const response = await axios.post(
+                                apiUrl + "/chats/send",
+                                formData,
+                                {
+                                    headers: {
+                                        Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                                    }
+                                }
+                            )
+
+                            if (response.data.status == "success") {
+                                const messageObj = response.data.messageObj;
+                                if (messageObj != null) {
+                                    const tempArr = [...messages];
+                                    if (typeof premium !== "undefined") {
+                                        premium.decryptMessage(messageObj.message)
+                                            .then(function (decrypted) {
+                                                messageObj.message = decrypted;
+                                                tempArr.push(messageObj);
+                                                setMessages(tempArr);
+                                            });
+                                    } else {
+                                        tempArr.push(messageObj);
+                                        setMessages(tempArr);
+                                    }
+                                }
+
+                                form.message.value = "";
+
+                                if (typeof premium === "undefined") {
+                                    swal.fire("Message sent", response.data.message, "success");
+                                }
+                            } else {
+                                swal.fire(response.data.title, response.data.message, response.data.status);
+                            }
+                        } catch (exp) {
+                            // swal.fire("Error", exp.message, "error")
+                        } finally {
+                            form.submit.removeAttribute("disabled");
+                        }
+                    }
+
+                    function scrollToBottom() {
+                        setTimeout(function () {
+                            var objDiv = document.getElementById("chatting-area");
+                            objDiv.scrollTop = objDiv.scrollHeight;
+                        }, 1000);
+                    }
+
+                    function scrollToTop() {
+                        setTimeout(function () {
+                            var objDiv = document.getElementById("chatting-area");
+                            objDiv.scrollTop = 0;
+                        }, 1000);
+                    }
+
+                    React.useEffect(function () {
+                        pageChat = 1;
+                        fetchChat();
+                    }, [selectedUser]);
+
+                    React.useEffect(function () {
+                        globalState.listen(async function (newState, updatedState) {
+                            setState(newState);
+
+                            if (typeof updatedState.newMessage !== "undefined") {
+                                const newMessage = updatedState.newMessage;
+
+                                if (selectedUser != null) {
+                                    if (selectedUser._id == newMessage.sender._id) {
+                                        const tempArr = [...messages];
+                                        if (typeof premium !== "undefined") {
+                                            newMessage.message = await premium.decryptMessage(newMessage.message);   
+                                        }
+
+                                        tempArr.push(newMessage);
+                                        setMessages(tempArr);
+                                    }
+                                }
+                            }
+                        });
+                    }, [selectedUser, messages]);
+
+                    React.useEffect(function () {
+                        globalState.listen(async function (newState, updatedState) {
+                            setState(newState);
+
+                            if (typeof updatedState.user !== "undefined") {
+                                getData();
+                            }
+                        });
+
+                        fetch(baseUrl + "/public/sn/components/Sidebar.js")
+                            .then(function (response) {
+                                response.text().then(function (text) {
+                                    const transpiledCode = Babel.transform(text, {
+                                        presets: ["env", "react"]
+                                    }).code;
+
+                                    eval(transpiledCode);
+                                })
+                            });
+                    }, []);
+
+                    return (
+                        <>
+                            <section>
+                                <div className="page-header">
+                                    <div className="header-inner">
+                                        <h2>Chats</h2>
+                                        <nav className="breadcrumb">
+                                            <a href={ `${ baseUrl }/sn/index.html` } className="breadcrumb-item">
+                                                <i className="fa fa-home color-black"></i>
+                                            </a>
+                                            
+                                            <span className="breadcrumb-item active">Chats</span>
+                                        </nav>
+                                    </div>
+                                </div>
+                            </section>
+                                
+                            <section>
+                                <div className="gap gray-bg">
+                                    <div className="container-fluid">
+                                        <div className="row">
+                                            <div className="col-lg-12">
+                                                <div className="row" id="page-contents">
+                                                    <div className="col-lg-3" id="sidebar-app">
+                                                        
+                                                    </div>
+
+                                                    <div className="col-lg-6">
+                                                        <div className="central-meta">
+                                                            <div className="messages">
+                                                                <h5 className="f-title"><i className="ti-bell"></i>All Messages <span className="more-options"><i className="fa fa-ellipsis-h"></i></span></h5>
+                                                                <div className="message-box">
+                                                                    <ul className="peoples">
+                                                                        { friends.map(function (friend) {
+
+                                                                            const otherUser = getOther(friend);
+                                                                            
+                                                                            return (
+                                                                                <li key={ `friend-${ friend._id }` }
+                                                                                    onClick={ function () {
+                                                                                        openChat(otherUser);
+                                                                                    } }>
+                                                                                    <figure>
+                                                                                        <img src={ otherUser?.profileImage }
+                                                                                            onError={ function (event) {
+                                                                                                event.target.src = baseUrl + "/public/img/user-placeholder.png";
+                                                                                            } } />
+                                                                                            
+                                                                                        {/*<span className="status f-online"></span>*/}
+                                                                                    </figure>
+
+                                                                                    <div className="people-name">
+                                                                                        <span>{ otherUser?.name }</span>
+
+                                                                                        { otherUser?.unreadMessages > 0 && (
+                                                                                            <span className="badge badge-primary pull-right unread-messages-counter">{ otherUser?.unreadMessages }</span>
+                                                                                        ) }
+                                                                                    </div>
+                                                                                </li>
+                                                                            );
+                                                                        }) }
+                                                                    </ul>
+
+                                                                    <div className="peoples-mesg-box">
+                                                                        <div className="conversation-head">
+                                                                            { selectedUser != null && (
+                                                                                <>
+                                                                                    <figure>
+                                                                                        <img src={ selectedUser.profileImage }
+                                                                                            onError={ function (event) {
+                                                                                                event.target.src = baseUrl + "/public/img/user-placeholder.png";
+                                                                                            } } />
+                                                                                    </figure>
+                                                                                    
+                                                                                    <span>
+                                                                                        { selectedUser.name }
+                                                                                        {/*<i>online</i>*/}
+                                                                                    </span>
+                                                                                </>
+                                                                            ) }
+                                                                        </div>
+                                                                        <ul className="chatting-area" id="chatting-area">
+                                                                            { currentMessagesCount > 0 && (
+                                                                                <li>
+                                                                                    <button type="button" className="btn-view btn-load-more"
+                                                                                        onClick={ function () {
+                                                                                            loadMoreChat();
+                                                                                        } }>Load More</button>
+                                                                                </li>
+                                                                            ) }
+
+                                                                            { messages.map(function (message) {
+                                                                                return (
+                                                                                    <li key={ `message-${ message._id }` }
+                                                                                        className={ (state.user != null && message.sender._id == state.user._id) ? "me" : "you" }>
+                                                                                        <figure><img src={ message.sender.profileImage } /></figure>
+                                                                                        <p>{ message.message }</p>
+                                                                                    </li>
+                                                                                );
+                                                                            }) }
+
+                                                                            {/*<li className="you">
+                                                                                <figure><img src="images/resources/userlist-2.jpg" /></figure>
+                                                                                <p>what's liz short for? :)</p>
+                                                                            </li>
+                                                                            <li className="me">
+                                                                                <figure><img src="images/resources/userlist-1.jpg" /></figure>
+                                                                                <p>Elizabeth lol</p>
+                                                                            </li>*/}
+                                                                        </ul>
+                                                                        <div className="message-text-container">
+                                                                            <form method="post" onSubmit={ function () {
+                                                                                event.preventDefault();
+                                                                                sendMessage();
+                                                                            } }>
+                                                                                <textarea name="message"></textarea>
+                                                                                <button title="send" type="submit" name="submit">
+                                                                                    <i className="fa fa-paper-plane"></i>
+                                                                                </button>
+                                                                            </form>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>	
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>	
+                            </section>
+                        </>
+                    );
+                }
+
+                ReactDOM.createRoot(
+                    document.getElementById("chat-app")
+                ).render(<Chat />);
+            </script>
+
+            <script src="../public/sn/js/main.min.js"></script>
+            <script src="../public/sn/js/script.js"></script>
+
+        </div>
+    </body>
+
+</html>

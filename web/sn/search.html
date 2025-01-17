@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" /> 
+        <meta http-equiv="Pragma" content="no-cache" /> 
+        <meta http-equiv="Expires" content="0" />
+        <meta name="description" content="" />
+        <meta name="keywords" content="" />
+        <title>Social Network | Search</title>
+        <link rel="icon" href="../public/sn/images/fav.png" type="image/png" sizes="16x16"> 
+        
+        <link rel="stylesheet" href="../public/sn/css/main.min.css">
+        <link rel="stylesheet" href="../public/sn/css/style.css">
+        <link rel="stylesheet" href="../public/sn/css/sn.css">
+        <link rel="stylesheet" href="../public/sn/css/color.css">
+        <link rel="stylesheet" href="../public/sn/css/responsive.css">
+
+        <link rel="stylesheet" href="../public/css/bootstrap.css" />
+        <link rel="stylesheet" href="../public/css/fontawesome.css" />
+        <script src="../public/js/jquery.js"></script>
+        <script src="../public/js/bootstrap.js"></script>
+
+        <script src="../public/js/react.development.js"></script>
+        <script src="../public/js/react-dom.development.js"></script>
+        <script src="../public/js/babel.min.js"></script>
+        <script src="../public/js/axios.min.js"></script>
+        <script src="../public/js/sweetalert2@11.js"></script>
+        <script src="../public/js/fontawesome.js"></script>
+
+        <script src="../public/js/script.js"></script>
+        <script src="../public/sn/js/script.js"></script>
+        <script src="../public/sn/js/main.min.js"></script>
+        <script src="../public/sn/js/sn.js"></script>
+
+    </head>
+
+    <body>
+        <!--<div class="se-pre-con"></div>-->
+        <div class="theme-layout">
+
+            <div id="header-app">
+                
+            </div>
+
+            <script type="text/babel" src="../public/sn/components/Header.js"></script>
+                
+            <section id="search-app">
+
+            </section>
+
+            <script>
+                const urlSearchParams = new URLSearchParams(window.location.search);
+                const search = urlSearchParams.get("search") || "";
+                let page = urlSearchParams.get("page") || 1;
+            </script>
+
+            <script type="text/babel">
+                function Search() {
+
+                    const [state, setState] = React.useState(globalState.state);
+                    const [loading, setLoading] = React.useState(false);
+                    const [users, setUsers] = React.useState([]);
+                    const [currentUsersCount, setCurrentUsersCount] = React.useState(0);
+
+                    function loadMore() {
+                        page++;
+                        getData();
+                    }
+
+                    async function getData() {
+                        setLoading(true);
+
+                        const formData = new FormData();
+                        formData.append("page", page);
+
+                        try {
+                            const response = await axios.post(
+                                apiUrl + "/users/search",
+                                formData,
+                                {
+                                    headers: {
+                                        Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                                    }
+                                }
+                            )
+
+                            if (response.data.status == "success") {
+                                const usersArr = response.data.users;
+                                setCurrentUsersCount(usersArr.length);
+
+                                const tempArr = [...users];
+                                for (let a = 0; a < usersArr.length; a++) {
+                                    tempArr.push(usersArr[a]);
+                                }
+                                setUsers(tempArr);
+                            } else {
+                                swal.fire(response.data.title, response.data.message, response.data.status);
+                            }
+                        } catch (exp) {
+                            // swal.fire("Error", exp.message, "error")
+                        } finally {
+                            setLoading(false);
+                        }
+                    }
+
+                    async function sendFriendRequest(userId) {
+                        const node = event.target;
+                        node.setAttribute("disabled", "disabled");
+
+                        const formData = new FormData();
+                        formData.append("_id", userId);
+
+                        try {
+                            const response = await axios.post(
+                                apiUrl + "/sn/friends/requests/send",
+                                formData,
+                                {
+                                    headers: {
+                                        Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                                    }
+                                }
+                            )
+
+                            if (response.data.status == "success") {
+                                node.remove();
+                            } else {
+                                swal.fire(response.data.title, response.data.message, response.data.status);
+                                node.removeAttribute("disabled");
+                            }
+                        } catch (exp) {
+                            // swal.fire("Error", exp.message, "error")
+                            node.removeAttribute("disabled");
+                        }
+                    }
+
+                    React.useEffect(function () {
+                        globalState.listen(function (newState, updatedState) {
+                            setState(newState);
+                        });
+
+                        getData();
+
+                        fetch(baseUrl + "/public/sn/components/Sidebar.js")
+                            .then(function (response) {
+                                response.text().then(function (text) {
+                                    const transpiledCode = Babel.transform(text, {
+                                        presets: ["env", "react"]
+                                    }).code;
+
+                                    eval(transpiledCode);
+                                })
+                            });
+                    }, []);
+
+                    return (
+                        <>
+                            <section>
+                                <div className="page-header">
+                                    <div className="header-inner">
+                                        <h2>Users</h2>
+                                        <nav className="breadcrumb">
+                                            <a href={ `${ baseUrl }/sn/index.html` } className="breadcrumb-item">
+                                                <i className="fa fa-home color-black"></i>
+                                            </a>
+                                            
+                                            <span className="breadcrumb-item active">Users</span>
+                                        </nav>
+                                    </div>
+                                </div>
+                            </section>
+                                
+                            <section>
+                                <div className="gap gray-bg">
+                                    <div className="container-fluid">
+                                        <div className="row">
+                                            <div className="col-lg-12">
+                                                <div className="row" id="page-contents">
+                                                    <div className="col-lg-3" id="sidebar-app">
+                                                        
+                                                    </div>
+
+                                                    <div className="col-lg-6">
+                                                        <div className="central-meta">
+                                                            {/*<div className="nearby-pepl">
+                                                                <div className="nearby-map">
+                                                                    <div id="map-canvas"></div>
+                                                                </div>
+                                                            </div>*/}
+
+                                                            <ul className="nearby-contct">
+
+                                                                { users.map(function (u) {
+                                                                    return (
+                                                                        <li key={ `user-${ u._id }` }>
+                                                                            <div className="nearly-pepls">
+                                                                                <figure>
+                                                                                    <a href={ `${ baseUrl }/sn/profile.html?id=${ u._id }` }>
+                                                                                        <img src={ u.profileImage }
+                                                                                            className="user-img"
+                                                                                            onError={ function (event) {
+                                                                                                event.target.src = baseUrl + "/public/img/user-placeholder.png";
+                                                                                            } } />
+                                                                                    </a>
+                                                                                </figure>
+
+                                                                                <div className="pepl-info">
+                                                                                    <h4>
+                                                                                        <a href={ `${ baseUrl }/sn/profile.html?id=${ u._id }` }>{ u.name }</a>
+                                                                                    </h4>
+                                                                                    
+                                                                                    {/*<span>ftv model</span>
+
+                                                                                    <em><i className="fa fa-map-marker"></i>400m away</em>*/}
+
+                                                                                    { u.isFriend ? (
+                                                                                        <a href="#" className="add-butn" data-ripple="">remove friend</a>
+                                                                                    ) : (
+                                                                                        <a href="#" onClick={ function () {
+                                                                                            event.preventDefault();
+                                                                                            sendFriendRequest(u._id);
+                                                                                        } } className="add-butn" data-ripple="">add friend</a>
+                                                                                    ) }
+                                                                                    
+                                                                                </div>
+                                                                            </div>
+                                                                        </li>
+                                                                    );
+                                                                }) }
+
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+
+                                                    {/*<div className="col-lg-3">
+                                                        <aside className="sidebar static">
+                                                            <div className="widget friend-list stick-widget">
+                                                                <h4 className="widget-title">Friends</h4>
+                                                                <div id="searchDir"></div>
+                                                                <ul id="people-list" className="friendz-list">
+                                                                    <li>
+                                                                        <figure>
+                                                                            <img src="images/resources/friend-avatar.jpg" alt="">
+                                                                            <span className="status f-online"></span>
+                                                                        </figure>
+                                                                        <div className="friendz-meta">
+                                                                            <a href="time-line.html">bucky barnes</a>
+                                                                            <i><a href="https://wpkixx.com/cdn-cgi/l/email-protection" className="__cf_email__" data-cfemail="addac4c3d9c8dfdec2c1c9c8dfedcac0ccc4c183cec2c0">[email&#160;protected]</a></i>
+                                                                        </div>
+                                                                    </li>
+                                                                </ul>
+                                                                <div className="chat-box">
+                                                                    <div className="chat-head">
+                                                                        <span className="status f-online"></span>
+                                                                        <h6>Bucky Barnes</h6>
+                                                                        <div className="more">
+                                                                            <span><i className="ti-more-alt"></i></span>
+                                                                            <span className="close-mesage"><i className="ti-close"></i></span>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div className="chat-list">
+                                                                        <ul>
+                                                                            <li className="me">
+                                                                                <div className="chat-thumb"><img src="images/resources/chatlist1.jpg" alt=""></div>
+                                                                                <div className="notification-event">
+                                                                                    <span className="chat-message-item">
+                                                                                        Hi James! Please remember to buy the food for tomorrow! I’m gonna be handling the gifts and Jake’s gonna get the drinks
+                                                                                    </span>
+                                                                                    <span className="notification-date"><time datetime="2004-07-24T18:18" className="entry-date updated">Yesterday at 8:10pm</time></span>
+                                                                                </div>
+                                                                            </li>
+                                                                            <li className="you">
+                                                                                <div className="chat-thumb"><img src="images/resources/chatlist2.jpg" alt=""></div>
+                                                                                <div className="notification-event">
+                                                                                    <span className="chat-message-item">
+                                                                                        Hi James! Please remember to buy the food for tomorrow! I’m gonna be handling the gifts and Jake’s gonna get the drinks
+                                                                                    </span>
+                                                                                    <span className="notification-date"><time datetime="2004-07-24T18:18" className="entry-date updated">Yesterday at 8:10pm</time></span>
+                                                                                </div>
+                                                                            </li>
+                                                                            <li className="me">
+                                                                                <div className="chat-thumb"><img src="images/resources/chatlist1.jpg" alt=""></div>
+                                                                                <div className="notification-event">
+                                                                                    <span className="chat-message-item">
+                                                                                        Hi James! Please remember to buy the food for tomorrow! I’m gonna be handling the gifts and Jake’s gonna get the drinks
+                                                                                    </span>
+                                                                                    <span className="notification-date"><time datetime="2004-07-24T18:18" className="entry-date updated">Yesterday at 8:10pm</time></span>
+                                                                                </div>
+                                                                            </li>
+                                                                        </ul>
+                                                                        <form className="text-box">
+                                                                            <textarea placeholder="Post enter to post..."></textarea>
+                                                                            <div className="add-smiles">
+                                                                                <span title="add icon" className="em em-expressionless"></span>
+                                                                            </div>
+                                                                            <div className="smiles-bunch">
+                                                                                <i className="em em---1"></i>
+                                                                                <i className="em em-smiley"></i>
+                                                                                <i className="em em-anguished"></i>
+                                                                                <i className="em em-laughing"></i>
+                                                                                <i className="em em-angry"></i>
+                                                                                <i className="em em-astonished"></i>
+                                                                                <i className="em em-blush"></i>
+                                                                                <i className="em em-disappointed"></i>
+                                                                                <i className="em em-worried"></i>
+                                                                                <i className="em em-kissing_heart"></i>
+                                                                                <i className="em em-rage"></i>
+                                                                                <i className="em em-stuck_out_tongue"></i>
+                                                                            </div>
+                                                                            <button type="submit"></button>
+                                                                        </form>
+                                                                    </div>
+                                                                </div>
+                                                            </div>							
+                                                        </aside>
+                                                    </div>*/}
+                                                </div>	
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>	
+                            </section>
+                        </>
+                    );
+                }
+
+                ReactDOM.createRoot(
+                    document.getElementById("search-app")
+                ).render(<Search />);
+            </script>
+
+            <script src="../public/sn/js/main.min.js"></script>
+            <script src="../public/sn/js/script.js"></script>
+
+        </div>
+    </body>
+
+</html>

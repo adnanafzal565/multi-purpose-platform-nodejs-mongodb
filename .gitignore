@@ -4,9 +4,10 @@ api/uploads/public/media
 api/uploads/public/pages
 api/uploads/public/posts
 api/uploads/public/profiles
+api/node_modules
 docs/nodejs-mongodb.html
 docs/sample.html
 docs/api_docs.sql
 docs/README.md
-api/node_modules
+web/public/js/premium.js
 README.pdf

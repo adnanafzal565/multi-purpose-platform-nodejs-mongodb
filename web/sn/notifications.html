@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" /> 
+        <meta http-equiv="Pragma" content="no-cache" /> 
+        <meta http-equiv="Expires" content="0" />
+        <meta name="description" content="" />
+        <meta name="keywords" content="" />
+        <title>Social Network | Notifications</title>
+        <link rel="icon" href="../public/sn/images/fav.png" type="image/png" sizes="16x16"> 
+        
+        <link rel="stylesheet" href="../public/sn/css/main.min.css">
+        <link rel="stylesheet" href="../public/sn/css/style.css">
+        <link rel="stylesheet" href="../public/sn/css/sn.css">
+        <link rel="stylesheet" href="../public/sn/css/color.css">
+        <link rel="stylesheet" href="../public/sn/css/responsive.css">
+
+        <link rel="stylesheet" href="../public/css/bootstrap.css" />
+        <link rel="stylesheet" href="../public/css/fontawesome.css" />
+        <script src="../public/js/jquery.js"></script>
+        <script src="../public/js/bootstrap.js"></script>
+
+        <script src="../public/js/react.development.js"></script>
+        <script src="../public/js/react-dom.development.js"></script>
+        <script src="../public/js/babel.min.js"></script>
+        <script src="../public/js/axios.min.js"></script>
+        <script src="../public/js/sweetalert2@11.js"></script>
+        <script src="../public/js/fontawesome.js"></script>
+
+        <script src="../public/js/script.js"></script>
+        <script src="../public/sn/js/script.js"></script>
+        <script src="../public/sn/js/main.min.js"></script>
+        <script src="../public/sn/js/sn.js"></script>
+
+    </head>
+
+    <body>
+        <!--<div class="se-pre-con"></div>-->
+        <div class="theme-layout">
+
+            <div id="header-app">
+                
+            </div>
+
+            <script type="text/babel" src="../public/sn/components/Header.js"></script>
+                
+            <section id="notifications-app">
+
+            </section>
+
+            <script>
+                const urlSearchParams = new URLSearchParams(window.location.search);
+                let page = urlSearchParams.get("page") || 1;
+            </script>
+
+            <script type="text/babel">
+                function Notification() {
+
+                    const [state, setState] = React.useState(globalState.state);
+                    const [loading, setLoading] = React.useState(false);
+                    const [notifications, setNotifications] = React.useState([]);
+                    const [currentNotificationsCount, setCurrentNotificationsCount] = React.useState(0);
+
+                    function loadMore() {
+                        page++;
+                        getData();
+                    }
+
+                    async function getData() {
+                        setLoading(true);
+
+                        const formData = new FormData();
+                        formData.append("page", page);
+
+                        try {
+                            const response = await axios.post(
+                                apiUrl + "/notifications/fetch",
+                                formData,
+                                {
+                                    headers: {
+                                        Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                                    }
+                                }
+                            )
+
+                            if (response.data.status == "success") {
+                                const notificationsArr = response.data.notifications;
+                                setCurrentNotificationsCount(notificationsArr.length);
+
+                                const tempArr = [...notifications];
+                                for (let a = 0; a < notificationsArr.length; a++) {
+                                    tempArr.push(notificationsArr[a]);
+                                }
+                                setNotifications(tempArr);
+                            } else {
+                                swal.fire(response.data.title, response.data.message, response.data.status);
+                            }
+                        } catch (exp) {
+                            // swal.fire("Error", exp.message, "error")
+                        } finally {
+                            setLoading(false);
+                        }
+                    }
+
+                    function getHref(notification) {
+                        if (["friendRequest", "friendRequestRejected", "friendRequestAccepted"].includes(notification.type)) {
+                            return baseUrl + "/sn/friends.html";
+                        }
+                        return "";
+                    }
+
+                    React.useEffect(function () {
+                        globalState.listen(function (newState, updatedState) {
+                            setState(newState);
+                        });
+
+                        getData();
+
+                        fetch(baseUrl + "/public/sn/components/Sidebar.js")
+                            .then(function (response) {
+                                response.text().then(function (text) {
+                                    const transpiledCode = Babel.transform(text, {
+                                        presets: ["env", "react"]
+                                    }).code;
+
+                                    eval(transpiledCode);
+                                })
+                            });
+                    }, []);
+
+                    return (
+                        <>
+                            <section>
+                                <div className="page-header">
+                                    <div className="header-inner">
+                                        <h2>Notifications</h2>
+                                        <nav className="breadcrumb">
+                                            <a href={ `${ baseUrl }/sn/index.html` } className="breadcrumb-item">
+                                                <i className="fa fa-home color-black"></i>
+                                            </a>
+                                            
+                                            <span className="breadcrumb-item active">Notifications</span>
+                                        </nav>
+                                    </div>
+                                </div>
+                            </section>
+                                
+                            <section>
+                                <div className="gap gray-bg">
+                                    <div className="container-fluid">
+                                        <div className="row">
+                                            <div className="col-lg-12">
+                                                <div className="row" id="page-contents">
+                                                    <div className="col-lg-3" id="sidebar-app">
+                                                        
+                                                    </div>
+
+                                                    <div className="col-lg-6">
+                                                        <div className="central-meta">
+
+                                                            <ul className="nearby-contct">
+
+                                                                { notifications.map(function (notification) {
+                                                                    return (
+                                                                        <li key={ `notification-${ notification._id }` }>
+                                                                            <div className="nearly-pepls">
+                                                                                <figure>
+                                                                                    <a href={ `${ baseUrl }/profile.html?id=${ notification.sentBy?._id }` }>
+                                                                                        <img src={ notification.sentBy?.profileImage }
+                                                                                            className="user-img"
+                                                                                            onError={ function (event) {
+                                                                                                event.target.src = baseUrl + "/public/img/user-placeholder.png";
+                                                                                            } } />
+                                                                                    </a>
+                                                                                </figure>
+
+                                                                                <div className="pepl-info">
+                                                                                    <h4>
+                                                                                        <a href={ `${ baseUrl }/profile.html?id=${ notification.sentBy?._id }` }>{ notification.sentBy?.name }</a>
+                                                                                    </h4>
+                                                                                    
+                                                                                    <span>{ notification.content }</span>
+
+                                                                                    {/*<em><i className="fa fa-map-marker"></i>400m away</em>*/}
+
+                                                                                    <a href={ getHref(notification) } className="add-butn" data-ripple="">view</a>
+                                                                                </div>
+                                                                            </div>
+                                                                        </li>
+                                                                    );
+                                                                }) }
+
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                </div>	
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>	
+                            </section>
+                        </>
+                    );
+                }
+
+                ReactDOM.createRoot(
+                    document.getElementById("notifications-app")
+                ).render(<Notification />);
+            </script>
+
+            <script src="../public/sn/js/main.min.js"></script>
+            <script src="../public/sn/js/script.js"></script>
+
+        </div>
+    </body>
+
+</html>

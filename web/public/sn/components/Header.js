@@ -1,6 +1,6 @@
 function Header() {
 
-    const [state, setState] = React.useState(globalState.state)
+    const [state, setState] = React.useState(globalState.state);
 
     async function onInit() {
         // if (newMessages > 0) {
@@ -26,7 +26,7 @@ function Header() {
 
                 if (response.data.status == "success") {
                     const user = response.data.user
-                    const newMessages = response.data.new_messages
+                    // const newMessages = response.data.new_messages
 
                     globalState.setState({
                         user: user
@@ -37,9 +37,9 @@ function Header() {
                         userImgs[a].setAttribute("src", user.profileImage);
                     }
 
-                    if (newMessages > 0) {
-                        document.getElementById("message-notification-badge").innerHTML = newMessages
-                    }
+                    // if (newMessages > 0) {
+                    //     document.getElementById("message-notification-badge").innerHTML = newMessages
+                    // }
                 } else {
                     // swal.fire("Error", response.data.message, "error")
                 }
@@ -56,9 +56,13 @@ function Header() {
             // if (typeof updatedState.user !== "undefined") {
             //     onInit()
             // }
-        })
+        });
 
         onInit()
+
+        setTimeout(function () {
+            initScript();
+        }, 1000);
     }, [])
 
     async function logout() {
@@ -129,9 +133,19 @@ function Header() {
                             </>
                         ) }
                     </ul>
+
                     <ul className="setting-area">
-                        
+                        <li>
+                            <a href="#" title="Home" data-ripple=""><i className="ti-search"></i></a>
+                            <div className="searched">
+                                <form method="get" action={ `${ baseUrl }/sn/search.html` } className="form-search">
+                                    <input type="text" name="query" placeholder="Search Users" />
+                                    <button type="button" data-ripple><i className="ti-search"></i></button>
+                                </form>
+                            </div>
+                        </li>
                     </ul>
+                    
                     <div className="user-img">
                         { state.user != null && (
                             <a href={ `${ baseUrl }/sn/profile.html?id=${ state.user._id }` }>
