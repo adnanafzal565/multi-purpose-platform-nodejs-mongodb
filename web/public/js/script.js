@@ -47,10 +47,11 @@ function loadCSS(filename) {
 }
 
 // Dynamically load a JS file
-function loadJS(filename) {
+function loadJS(filename, type = "text/javascript") {
     const script = document.createElement("script");
     script.src = filename;
     script.async = true; // Load asynchronously
+    script.type = type;
     document.head.appendChild(script);
 }
 
@@ -58,13 +59,39 @@ loadCSS(baseUrl + "/public/alertifyjs/css/alertify.min.css");
 loadJS(baseUrl + "/public/alertifyjs/alertify.min.js");
 loadJS(baseUrl + "/public/js/socket.io.js");
 loadJS(baseUrl + "/public/js/premium.js");
+loadCSS(baseUrl + "/public/RichText/richtext.min.css");
+loadJS(baseUrl + "/public/RichText/jquery.richtext.min.js");
+loadJS(baseUrl + "/public/js/html-react-parser.min.js");
+loadJS(baseUrl + "/public/job-portal/SingleJob.js", "text/babel");
 
 let socketIO = null;
+
+function camelCaseSplit(string) {
+    return string.replace(/([a-z])([A-Z])/g, "$1 $2");
+}
+
+function formatBytes(bytes, decimals = 2) {
+    if (bytes === 0) return "0 Bytes";
+
+    const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+    const k = 1024;
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    const size = sizes[i];
+
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(decimals)) + " " + size;
+}
 
 window.addEventListener("load", function () {
     const currentYear = document.getElementById("current-year");
     if (currentYear) {
         currentYear.innerHTML = (new Date()).getFullYear();
+    }
+
+    var inputTypeNumbers = document.querySelectorAll("input[type='number']");
+    for (var a = 0; a < inputTypeNumbers.length; a++) {
+        inputTypeNumbers[a].onwheel = function (event) {
+            event.target.blur();
+        };
     }
 
     // const href = document.querySelectorAll("[data-href]");

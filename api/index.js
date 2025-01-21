@@ -54,6 +54,8 @@ const posts = require("./modules/sn/posts");
 const pages = require("./modules/sn/pages");
 const groups = require("./modules/sn/groups");
 const friends = require("./modules/sn/friends");
+const jobs = require("./modules/job-portal/jobs");
+const cvs = require("./modules/job-portal/cvs");
 
 const port = process.env.PORT || 3000;
 const databaseName = "nodejs_mongodb"
@@ -69,6 +71,15 @@ global.socketIO = require("socket.io")(http, {
 });
  
 global.usersArr = [];
+
+global.isValidURL = function(url) {
+    try {
+        const parsedUrl = new URL(url);
+        return parsedUrl.protocol === "http:" || parsedUrl.protocol === "https:";
+    } catch (error) {
+        return false;
+    }
+};
 
 global.premiumVersionTitle = "Premium Feature";
 global.premiumVersionText = "This feature is available in premium version only.";
@@ -90,6 +101,8 @@ http.listen(port, async function () {
         friends.init(app);
         users.init(app);
         chats.init(app);
+        jobs.init(app);
+        cvs.init(app);
 
         socketIO.on("connection", function (socket) {
  

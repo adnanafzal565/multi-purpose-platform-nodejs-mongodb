@@ -1,3 +1,19 @@
+.job-meta-data li:first-child {
+    margin-left: 0px;
+}
+.job-meta-data li {
+    margin-left: 10px;
+    display: inline-block;
+}
+.job-meta-data {
+    list-style: none;
+    padding-left: 0px;
+}
+.user-img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+}
 .profile-left-menu .active a {
     color: white !important;
 }

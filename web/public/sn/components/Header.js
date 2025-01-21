@@ -100,8 +100,8 @@ function Header() {
                     </span>
                 </div>
                 <div className="mh-head second">
-                    <form className="mh-form">
-                        <input placeholder="search" />
+                    <form className="mh-form" method="get" action={ `${ baseUrl }/sn/search.html` }>
+                        <input name="query" placeholder="Search Users" />
                         <a href="#/" className="fa fa-search"></a>
                     </form>
                 </div>

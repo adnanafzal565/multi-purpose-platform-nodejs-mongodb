@@ -14,6 +14,9 @@ nodemon index.js
 ```
 
 Paste the "nodejs-mongodb" folder in your "htdocs" folder if you are using XAMPP or MAMP, or in "www" folder if you are using WAMP.
+
+Set the path of variable ```baseUrl``` in ```web/public/js/script.js``` to point to your web folder.
+
 Project can be accessed from: `http://localhost/nodejs-mongodb/web/index.html`
 
 ## API Documentation

@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Job Portal</title>
+
+		<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" /> 
+        <meta http-equiv="Pragma" content="no-cache" /> 
+        <meta http-equiv="Expires" content="0" />
+
+        <link rel="stylesheet" href="../public/css/bootstrap.css" />
+        <link rel="stylesheet" href="../public/css/fontawesome.css" />
+        <link rel="stylesheet" href="../public/css/styles.css" />
+        <script src="../public/js/jquery.js"></script>
+        <script src="../public/js/bootstrap.js"></script>
+
+        <script src="../public/js/react.development.js"></script>
+        <script src="../public/js/react-dom.development.js"></script>
+        <script src="../public/js/babel.min.js"></script>
+        <script src="../public/js/axios.min.js"></script>
+        <script src="../public/js/sweetalert2@11.js"></script>
+        <script src="../public/js/fontawesome.js"></script>
+
+        <script src="../public/js/script.js"></script>
+	</head>
+
+	<body>
+		<nav class="navbar navbar-expand-lg navbar-light bg-light" id="header-app">
+            
+        </nav>
+
+        <script type="text/babel" src="../public/components/Header.js"></script>
+
+        <main class="flex-shrink-0">
+            <div class="container mt-5 mb-5" id="jobs-app">
+                
+            </div>
+        </main>
+
+        <script>
+            const urlSearchParams = new URLSearchParams(window.location.search);
+            const p = urlSearchParams.get("page") || 1;
+        </script>
+
+        <script type="text/babel">
+
+            function initApp() {
+
+                function Jobs() {
+                    const [state, setState] = React.useState(globalState.state);
+                    const [page, setPage] = React.useState(p);
+                    const [jobs, setJobs] = React.useState([]);
+                    const [locations, setLocations] = React.useState([]);
+                    const [loading, setLoading] = React.useState(false);
+                    const [currentJobsCount, setCurrentJobsCount] = React.useState(0);
+                    const [refetch, setRefetch] = React.useState(0);
+                    
+                    async function fetchFilters() {
+                        setLoading(true);
+
+                        try {
+                            const response = await axios.post(
+                                apiUrl + "/job-portal/jobs/fetch-filters",
+                                null,
+                                {
+                                    headers: {
+                                        Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                                    }
+                                }
+                            )
+
+                            if (response.data.status == "success") {
+                                setLocations(response.data.locations);
+                                setRefetch(refetch + 1);
+                            } else {
+                                swal.fire("Error", response.data.message, "error")
+                            }
+                        } catch (exp) {
+                            swal.fire("Error", exp.message, "error")
+                        }
+                    }
+
+                    async function getData() {
+                        setLoading(true);
+
+                        const form = document.getElementById("form-filter");
+                        form.submit.setAttribute("disabled", "disabled");
+
+                        const formData = new FormData(form);
+                        formData.append("page", page);
+
+                        try {
+                            const response = await axios.post(
+                                apiUrl + "/job-portal/jobs/fetch",
+                                formData,
+                                {
+                                    headers: {
+                                        Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                                    }
+                                }
+                            )
+
+                            if (response.data.status == "success") {
+                                const jobsArr = response.data.jobs;
+                                setCurrentJobsCount(jobsArr.length);
+
+                                const tempArr = [...jobs];
+                                for (let a = 0; a < jobsArr.length; a++) {
+                                    tempArr.push(jobsArr[a]);
+                                }
+                                setJobs(tempArr);
+                            } else {
+                                swal.fire("Error", response.data.message, "error")
+                            }
+                        } catch (exp) {
+                            swal.fire("Error", exp.message, "error")
+                        } finally {
+                            setLoading(false);
+                            form.submit.removeAttribute("disabled");
+                        }
+                    }
+
+                    function applyFilter() {
+                        setJobs([]);
+                        setPage(1);
+                        setRefetch(refetch + 1);
+                    }
+
+                    React.useEffect(function () {
+                        globalState.listen(function (newState, updatedState) {
+                            setState(newState);
+                        });
+
+                        fetchFilters();
+                    }, []);
+
+                    React.useEffect(function () {
+                        if (refetch > 0) {
+                            getData();
+                        }
+                    }, [refetch]);
+
+                    return (
+                        <>
+                            <div className="row mb-5">
+                                <div className="col-md-12 text-center">
+                                    <h1>Jobs</h1>
+
+                                    { loading && (
+                                        <p>Loading...</p>
+                                    ) }
+                                </div>
+                            </div>
+
+                            <div className="row mb-5">
+                                <div className="col-md-3">
+                                    <h2>Filters</h2>
+
+                                    <form id="form-filter" onSubmit={ function () {
+                                        event.preventDefault();
+                                        applyFilter();
+                                    } }>
+                                        <div className="form-group mt-3 mb-3">
+                                            <label className="form-label">Title</label>
+                                            <input type="text" name="title" className="form-control" />
+                                        </div>
+
+                                        <div className="form-group">
+                                            <label className="form-label">Location</label>
+                                            <select name="location" className="form-control">
+                                                { locations.map(function (loc, index) {
+                                                    return (
+                                                        <option key={ `filter-location-${ index }` }
+                                                            value={ loc }>{ loc }</option>
+                                                    );
+                                                }) }
+                                            </select>
+                                        </div>
+
+                                        <div className="form-group mt-3 mb-3">
+                                            <label className="form-label">Type</label>
+                                            <select name="type" className="form-control">
+                                                <option value="remote">Remote</option>
+                                                <option value="onSite">On-site</option>
+                                                <option value="hybrid">Hybrid</option>
+                                            </select>
+                                        </div>
+
+                                        <div className="form-group">
+                                            <label className="form-label">Nature</label>
+                                            <select name="nature" className="form-control">
+                                                {/*<option value="freelance">Freelance</option>*/}
+                                                <option value="fullTime">Full-time</option>
+                                                <option value="partTime">Part-time</option>
+                                            </select>
+                                        </div>
+
+                                        <div className="form-group mt-3">
+                                            <label className="form-label">Salary range</label>
+
+                                            <div className="row">
+                                                <div className="col-md-6">
+                                                    <input type="number" name="salaryFrom" defaultValue="0" min="0" className="form-control" placeholder="From" />
+                                                </div>
+
+                                                <div className="col-md-6">
+                                                    <input type="number" name="salaryTo" defaultValue="100000" min="0" className="form-control" placeholder="To" />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <input type="submit" name="submit" className="btn btn-primary mt-3" defaultValue="Filter" />
+                                    </form>
+                                </div>
+
+                                <div className="col-md-9">
+
+                                    { jobs.length <= 0 && (
+                                        <p className="text-center">No job found.</p>
+                                    ) }
+
+                                    { jobs.map(function (job) {
+                                        return (
+                                            <SingleJob
+                                                key={ `job-${ job._id }` }
+                                                job={ job }
+                                                onDelete={ function (id) {
+                                                    const tempArr = [ ...jobs ];
+                                                    for (let a = 0; a < tempArr.length; a++) {
+                                                        if (tempArr[a]._id == id) {
+                                                            tempArr.splice(a, 1);
+                                                            break;
+                                                        }
+                                                    }
+                                                    setJobs(tempArr);
+                                                } } />
+                                        );
+                                    }) }
+
+                                    { currentJobsCount > 0 && (
+                                        <div className="row mt-5">
+                                            <div className="col-md-12 text-center">
+                                                <button className="btn btn-primary" onClick={ function () {
+                                                    setPage(page + 1);
+                                                    setRefetch(refetch + 1);
+                                                } }>Load more</button>
+                                            </div>
+                                        </div>
+                                    ) }
+                                </div>
+                            </div>
+                        </>
+                    );
+                }
+
+                ReactDOM.createRoot(
+                    document.getElementById("jobs-app")
+                ).render(<Jobs />);
+            }
+        </script>
+	</body>
+</html>

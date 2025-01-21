@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Job Portal | My Jobs</title>
+
+		<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" /> 
+        <meta http-equiv="Pragma" content="no-cache" /> 
+        <meta http-equiv="Expires" content="0" />
+
+        <link rel="stylesheet" href="../public/css/bootstrap.css" />
+        <link rel="stylesheet" href="../public/css/fontawesome.css" />
+        <link rel="stylesheet" href="../public/css/styles.css" />
+        <script src="../public/js/jquery.js"></script>
+        <script src="../public/js/bootstrap.js"></script>
+
+        <script src="../public/js/react.development.js"></script>
+        <script src="../public/js/react-dom.development.js"></script>
+        <script src="../public/js/babel.min.js"></script>
+        <script src="../public/js/axios.min.js"></script>
+        <script src="../public/js/sweetalert2@11.js"></script>
+        <script src="../public/js/fontawesome.js"></script>
+
+        <script src="../public/js/script.js"></script>
+	</head>
+
+	<body>
+		<nav class="navbar navbar-expand-lg navbar-light bg-light" id="header-app">
+            
+        </nav>
+
+        <script type="text/babel" src="../public/components/Header.js"></script>
+
+        <main class="flex-shrink-0">
+            <div class="container mt-5 mb-5" id="jobs-app">
+                
+            </div>
+        </main>
+
+        <script>
+            const urlSearchParams = new URLSearchParams(window.location.search);
+            let page = urlSearchParams.get("page") || 1;
+        </script>
+
+        <script type="text/babel">
+            function Jobs() {
+
+                const [state, setState] = React.useState(globalState.state);
+                const [jobs, setJobs] = React.useState([]);
+                const [loading, setLoading] = React.useState(false);
+                const [currentJobsCount, setCurrentJobsCount] = React.useState(0);
+
+                function loadMore() {
+                    page++;
+                    getData();
+                }
+
+                async function getData() {
+                    setLoading(true);
+
+                    const formData = new FormData();
+                    formData.append("page", page);
+
+                    try {
+                        const response = await axios.post(
+                            apiUrl + "/job-portal/jobs/fetch-my",
+                            formData,
+                            {
+                                headers: {
+                                    Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                                }
+                            }
+                        )
+
+                        if (response.data.status == "success") {
+                            const jobsArr = response.data.jobs;
+                            setCurrentJobsCount(jobsArr.length);
+
+                            const tempArr = [...jobs];
+                            for (let a = 0; a < jobsArr.length; a++) {
+                                tempArr.push(jobsArr[a]);
+                            }
+                            setJobs(tempArr);
+                        } else {
+                            swal.fire("Error", response.data.message, "error")
+                        }
+                    } catch (exp) {
+                        swal.fire("Error", exp.message, "error")
+                    } finally {
+                        setLoading(false);
+                    }
+                }
+
+                React.useEffect(function () {
+                    globalState.listen(function (newState, updatedState) {
+                        setState(newState);
+                    });
+
+                    getData();
+                }, []);
+
+                return (
+                    <>
+                        <div className="row mb-5">
+                            <div className="col-md-12 text-center">
+                                <h1>My Jobs</h1>
+
+                                { loading && (
+                                    <p>Loading...</p>
+                                ) }
+                            </div>
+                        </div>
+
+                        { jobs.map(function (job) {
+                            return (
+                                <SingleJob
+                                    key={ `job-${ job._id }` }
+                                    job={ job }
+                                    onDelete={ function (id) {
+                                        const tempArr = [ ...jobs ];
+                                        for (let a = 0; a < tempArr.length; a++) {
+                                            if (tempArr[a]._id == id) {
+                                                tempArr.splice(a, 1);
+                                                break;
+                                            }
+                                        }
+                                        setJobs(tempArr);
+                                    } } />
+                            );
+                        }) }
+
+                        { currentJobsCount > 0 && (
+                            <div className="row">
+                                <div className="col-md-12 text-center">
+                                    <button className="btn btn-primary" onClick={ function () {
+                                        loadMore();
+                                    } }>Load more</button>
+                                </div>
+                            </div>
+                        ) }
+                    </>
+                );
+            }
+
+            ReactDOM.createRoot(
+                document.getElementById("jobs-app")
+            ).render(<Jobs />);
+        </script>
+
+    </body>
+</html>

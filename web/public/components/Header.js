@@ -42,6 +42,10 @@ function Header() {
                 // swal.fire("Error", exp.message, "error")
             }
         }
+
+        if (typeof initApp !== "undefined") {
+            initApp();
+        }
     }
 
     React.useEffect(function () {
@@ -124,15 +128,33 @@ function Header() {
                                     </ul>
                                 </li>
                             </ul>
-
-                            <li className="nav-item">
-                                <a className="nav-link" href={ `${ baseUrl }/media/index.html` }>Media</a>
-                            </li>
                         </>
                     ) }
 
                     <li className="nav-item">
+                        <a className="nav-link" href={ `${ baseUrl }/media/index.html` }>Media</a>
+                    </li>
+
+                    <li className="nav-item">
                         <a className="nav-link" href={ `${ baseUrl }/sn/index.html` }>Social Network</a>
+                    </li>
+
+                    <li className="nav-item">
+                        <ul className="navbar-nav">
+                            <li className="nav-item dropdown">
+                                <a className="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Job Portal
+                                </a>
+
+                                <ul className="dropdown-menu">
+                                    <li><a className="dropdown-item" href={ `${ baseUrl }/job-portal/index.html` }>Home</a></li>
+                                    <li><a className="dropdown-item" href={ `${ baseUrl }/job-portal/create.html` }>Create Job</a></li>
+                                    <li><a className="dropdown-item" href={ `${ baseUrl }/job-portal/my.html` }>My Jobs</a></li>
+                                    <li><a className="dropdown-item" href={ `${ baseUrl }/job-portal/applied.html` }>My Applied</a></li>
+                                    <li><a className="dropdown-item" href={ `${ baseUrl }/job-portal/cv-manager.html` }>CV Manager</a></li>
+                                </ul>
+                            </li>
+                        </ul>
                     </li>
                 </ul>
             </div>

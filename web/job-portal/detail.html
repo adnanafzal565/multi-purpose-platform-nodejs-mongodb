@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Job Portal | Detail</title>
+
+		<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" /> 
+        <meta http-equiv="Pragma" content="no-cache" /> 
+        <meta http-equiv="Expires" content="0" />
+
+        <link rel="stylesheet" href="../public/css/bootstrap.css" />
+        <link rel="stylesheet" href="../public/css/fontawesome.css" />
+        <link rel="stylesheet" href="../public/css/styles.css" />
+        <script src="../public/js/jquery.js"></script>
+        <script src="../public/js/bootstrap.js"></script>
+
+        <script src="../public/js/react.development.js"></script>
+        <script src="../public/js/react-dom.development.js"></script>
+        <script src="../public/js/babel.min.js"></script>
+        <script src="../public/js/axios.min.js"></script>
+        <script src="../public/js/sweetalert2@11.js"></script>
+        <script src="../public/js/fontawesome.js"></script>
+
+        <script src="../public/js/script.js"></script>
+	</head>
+
+	<body>
+		<nav class="navbar navbar-expand-lg navbar-light bg-light" id="header-app">
+            
+        </nav>
+
+        <script type="text/babel" src="../public/components/Header.js"></script>
+
+        <main class="flex-shrink-0">
+            <div class="container mt-5 mb-5" id="job-detail-app">
+                
+            </div>
+        </main>
+
+        <script>
+            const urlSearchParams = new URLSearchParams(window.location.search);
+            const id = urlSearchParams.get("id") || "";
+            let page = urlSearchParams.get("page") || 1;
+        </script>
+
+        <script type="text/babel">
+            function JobDetail() {
+
+                const [state, setState] = React.useState(globalState.state);
+                const [job, setJob] = React.useState(null);
+                const [cvs, setCvs] = React.useState([]);
+                const [applications, setApplications] = React.useState([]);
+                const [currentApplicationsCount, setCurrentApplicationsCount] = React.useState(0);
+
+                async function loadMoreApplications() {
+                    page++;
+
+                    const formData = new FormData();
+                    formData.append("_id", id);
+                    formData.append("page", page);
+
+                    try {
+                        const response = await axios.post(
+                            apiUrl + "/job-portal/jobs/fetch-applications",
+                            formData,
+                            {
+                                headers: {
+                                    Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                                }
+                            }
+                        )
+
+                        if (response.data.status == "success") {
+                            const newApplications = response.data.applications;
+                            setCurrentApplicationsCount(newApplications.length);
+
+                            const tempArr = [ ...applications ];
+                            for (let a = 0; a < newApplications.length; a++) {
+                                tempArr.push(newApplications[a]);
+                            }
+                            setApplications(tempArr);
+                        } else {
+                            swal.fire("Error", response.data.message, "error")
+                        }
+                    } catch (exp) {
+                        swal.fire("Error", exp.message, "error")
+                    }
+                }
+
+                async function getData() {
+                    const formData = new FormData();
+                    formData.append("_id", id);
+                    formData.append("page", page);
+
+                    try {
+                        const response = await axios.post(
+                            apiUrl + "/job-portal/jobs/fetch-single",
+                            formData,
+                            {
+                                headers: {
+                                    Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                                }
+                            }
+                        )
+
+                        if (response.data.status == "success") {
+                            setJob(response.data.job);
+                            setCvs(response.data.cvs);
+                            setApplications(response.data.applications);
+                            setCurrentApplicationsCount(response.data.applications.length);
+                        } else {
+                            swal.fire("Error", response.data.message, "error")
+                        }
+                    } catch (exp) {
+                        swal.fire("Error", exp.message, "error")
+                    }
+                }
+
+                function getDefaultCV() {
+                    const tempArr = [...cvs];
+                    for (let a = 0; a < tempArr.length; a++) {
+                        if (tempArr[a].isDefault == 1) {
+                            return tempArr[a]._id;
+                        }
+                    }
+                    return "";
+                }
+
+                async function applyToJob() {
+                    const form = event.target;
+                    form.submit.setAttribute("disabled", "disabled");
+
+                    const formData = new FormData(form);
+                    formData.append("_id", id);
+
+                    try {
+                        const response = await axios.post(
+                            apiUrl + "/job-portal/jobs/apply",
+                            formData,
+                            {
+                                headers: {
+                                    Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                                }
+                            }
+                        )
+
+                        if (response.data.status == "success") {
+                            const application = response.data.application;
+                            $("#apply-modal").modal("hide");
+
+                            const tempObj = { ...job };
+                            tempObj.applications++;
+                            setJob(tempObj);
+
+                            const tempArr = [ ...applications ];
+                            tempArr.unshift(application);
+                            setApplications(tempArr);
+
+                            swal.fire("Applied", response.data.message, "success");
+                        } else {
+                            swal.fire("Error", response.data.message, "error")
+                        }
+                    } catch (exp) {
+                        swal.fire("Error", exp.message, "error")
+                    } finally {
+                        form.submit.removeAttribute("disabled");
+                    }
+                }
+
+                async function changeApplicationStatus(id, status) {
+                    if (status == "rejected") {
+                        Swal.fire({
+                            title: "Enter reason to reject",
+                            input: "text",
+                            inputAttributes: {
+                                autocapitalize: "off"
+                            },
+                            showCancelButton: true,
+                            confirmButtonText: "Reject",
+                            showLoaderOnConfirm: true,
+                            preConfirm: async (value) => {
+                                try {
+                                    // const url = `
+                                    //   https://api.github.com/users/${value}
+                                    // `;
+                                    const url = apiUrl + "/job-portal/jobs/reject-application";
+                                    const response = await fetch(url, {
+                                        method: 'POST', // Specify POST method
+                                        headers: {
+                                            'Content-Type': 'application/json', // Header to indicate JSON content
+                                            'Authorization': 'Bearer ' + localStorage.getItem(accessTokenKey) // Optional authorization header
+                                        },
+                                        body: JSON.stringify({
+                                            // name: 'John Doe',
+                                            // email: 'john@example.com',
+                                            // message: 'Hello, this is a sample message',
+                                            _id: id,
+                                            rejectReason: value
+                                        }) // Convert data object to JSON string
+                                    });
+
+                                    if (!response.ok) {
+                                        return Swal.showValidationMessage(`
+                                            ${JSON.stringify(await response.json())}
+                                        `);
+                                    }
+
+                                    return response.json();
+                                } catch (error) {
+                                    Swal.showValidationMessage(`
+                                        Request failed: ${error}
+                                    `);
+                                }
+                            },
+
+                            allowOutsideClick: () => !Swal.isLoading()
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                // console.log(result.value);
+                                // Swal.fire({
+                                //   title: `${result.value.login}'s avatar`,
+                                //   imageUrl: result.value.avatar_url
+                                // });
+
+                                const response = result.value;
+                                if (response.status == "success") {
+
+                                    const tempArr = [ ...applications ];
+                                    for (let a = 0; a < tempArr.length; a++) {
+                                        if (tempArr[a]._id == id) {
+                                            tempArr[a].status = status;
+                                            tempArr[a].rejectReason = response.rejectReason;
+                                            break;
+                                        }
+                                    }
+                                    setApplications(tempArr);
+
+                                    Swal.fire({
+                                        title: `${response.message}`,
+                                        icon: "success"
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        title: `${response.message}`,
+                                        icon: response.status
+                                    });
+                                }
+                            }
+                        });
+                    } else {
+                        const formData = new FormData();
+                        formData.append("_id", id);
+                        formData.append("status", status);
+
+                        try {
+                            const response = await axios.post(
+                                apiUrl + "/job-portal/jobs/change-application-status",
+                                formData,
+                                {
+                                    headers: {
+                                        Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                                    }
+                                }
+                            )
+
+                            if (response.data.status == "success") {
+                                const tempArr = [ ...applications ];
+                                for (let a = 0; a < tempArr.length; a++) {
+                                    if (tempArr[a]._id == id) {
+                                        tempArr[a].status = status;
+                                        break;
+                                    }
+                                }
+                                setApplications(tempArr);
+                            } else {
+                                swal.fire("Error", response.data.message, "error")
+                            }
+                        } catch (exp) {
+                            swal.fire("Error", exp.message, "error")
+                        }
+                    }
+                }
+
+                React.useEffect(function () {
+                    globalState.listen(function (newState, updatedState) {
+                        setState(newState);
+                    });
+
+                    getData();
+                }, []);
+
+                return (
+                    <>
+                        { job != null && (
+                            <>
+                                <div className="row">
+                                    <div className="col-md-12 text-center">
+                                        <h1>{ job.title }</h1>
+                                    </div>
+                                </div>
+
+                                <div className="row mt-5 mb-5">
+                                    <div className="offset-md-2 col-md-4">
+                                        <h2>Job Description</h2>
+
+                                        { HTMLReactParser(job.description) }
+                                    </div>
+
+                                    <div className="col-md-4">
+                                        <div className="card">
+                                            <div className="card-header">
+                                                <h3 className="card-title">Job Overview</h3>
+                                            </div>
+
+                                            <div className="card-body">
+                                                <p>Posted on: { job.createdAt.split(", ")[0] }</p>
+                                                <p>Type: { camelCaseSplit(job.type).toUpperCase() }</p>
+                                                <p>Job nature: { camelCaseSplit(job.nature).toUpperCase() }</p>
+                                                <p>{ job.nature == "freelance" ? "Amount" : "Salary" }: { job.currency.toUpperCase() } { job.amount }</p>
+
+                                                { job.nature == "freelance" ? (
+                                                    <>
+                                                        <p>Deadline: { job.deadline } days</p>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <p>Location: { job.location }</p>
+                                                        <p>Vacancies: { job.vacancies }</p>
+                                                    </>
+                                                ) }
+                                            
+                                                { job.nature == "freelance" ? (
+                                                    <button type="button" className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#bid-modal">
+                                                        Bid ({ job.bids })
+                                                    </button>
+                                                ) : (
+                                                    <button type="button" className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#apply-modal">
+                                                        Apply Now ({ job.applications })
+                                                    </button>
+                                                ) }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                { (state.user != null && state.user._id == job.user._id) && (
+                                    <>
+                                        { job.type == "freelance" ? (
+                                            <div className="row">
+                                                <div className="col-md-12">
+                                                    <h2>Bids</h2>
+
+                                                    <table className="table table-bordered table-responsive">
+                                                        <thead>
+                                                            <tr>
+                                                                <th></th>
+                                                            </tr>
+                                                        </thead>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div className="row">
+                                                <div className="col-md-12">
+                                                    <h2>Applications</h2>
+
+                                                    <table className="table table-bordered table-responsive mt-3">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Applicant</th>
+                                                                <th>CV</th>
+                                                                <th>Status</th>
+                                                                <th>Actions</th>
+                                                            </tr>
+                                                        </thead>
+
+                                                        <tbody>
+                                                            { applications.map(function (application) {
+                                                                return (
+                                                                    <tr key={ `application-${ application._id }` }>
+                                                                        <td>
+                                                                            <img src={ application.user.profileImage }
+                                                                                onError={ function () {
+                                                                                    event.target.src = baseUrl + "/public/img/user-placeholder.png";
+                                                                                } }
+                                                                                className="user-img" />&nbsp;
+
+                                                                            { application.user.name }
+                                                                        </td>
+
+                                                                        <td>
+                                                                            <a href={ application.cv.path }
+                                                                                target="_blank">
+                                                                                { application.cv.name }
+                                                                            </a>
+                                                                        </td>
+
+                                                                        <td>
+                                                                            { application.status.toUpperCase() }
+
+                                                                            { application.status == "rejected" && (
+                                                                                <p className="text-danger mt-3">
+                                                                                    { application.rejectReason }
+                                                                                </p>
+                                                                            ) }
+                                                                        </td>
+
+                                                                        <td>
+                                                                            <div className="form-group">
+                                                                                <label className="form-label">Change Status</label>
+                                                                                <select className="form-control" defaultValue={ application.status }
+                                                                                    onChange={ function () {
+                                                                                        changeApplicationStatus(application._id, event.target.value);
+                                                                                    } }>
+                                                                                    <option value="submitted">Submitted</option>
+                                                                                    <option value="shortlisted">Shortlisted</option>
+                                                                                    <option value="interviewing">Interviewing</option>
+                                                                                    <option value="rejected">Rejected</option>
+                                                                                    <option value="selected">Selected</option>
+                                                                                </select>
+                                                                            </div>
+                                                                        </td>
+                                                                    </tr>
+                                                                );
+                                                            }) }
+                                                        </tbody>
+                                                    </table>
+
+                                                    { currentApplicationsCount > 0 && (
+                                                        <div className="row">
+                                                            <div className="col-md-12 text-center">
+                                                                <button className="btn btn-primary" onClick={ function () {
+                                                                    loadMoreApplications();
+                                                                } }>Load more</button>
+                                                            </div>
+                                                        </div>
+                                                    ) }
+                                                </div>
+                                            </div>
+                                        ) }
+                                    </>
+                                ) }
+
+                                <div className="modal fade" id="apply-modal" tabIndex="-1" aria-hidden="true">
+                                    <div className="modal-dialog modal-lg">
+                                        <div className="modal-content">
+                                            <div className="modal-header">
+                                                <h5 className="modal-title">Apply for <b>{ job.title }</b></h5>
+                                                <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+
+                                            <div className="modal-body">
+                                                <form id="form-apply" onSubmit={ function () {
+                                                    event.preventDefault();
+                                                    applyToJob();
+                                                } }>
+                                                    <div className="form-group">
+                                                        <label className="form-label">Select CV</label>
+                                                        <select name="cvId" required className="form-control"
+                                                            defaultValue={ getDefaultCV() }>
+                                                            { cvs.map(function (cv) {
+                                                                return (
+                                                                    <option key={ `cv-${ cv._id }` }
+                                                                        value={ cv._id }>
+                                                                        { cv.name }
+                                                                        { cv.isDefault == 1 && (
+                                                                            "(Default)"
+                                                                        ) }
+                                                                    </option>
+                                                                );
+                                                            }) }
+                                                        </select>
+
+                                                        { cvs.length <= 0 && (
+                                                            <p className="mt-3">
+                                                                <a href={ `${ baseUrl }/job-portal/cv-manager.html` }>Upload your CV here</a>
+                                                            </p>
+                                                        ) }
+                                                    </div>
+                                                </form>
+                                            </div>
+
+                                            <div className="modal-footer">
+                                                <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                <button type="submit" name="submit" form="form-apply" className="btn btn-primary">Apply</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </>
+                        ) }
+                    </>
+                );
+            }
+
+            ReactDOM.createRoot(
+                document.getElementById("job-detail-app")
+            ).render(<JobDetail />);
+        </script>
+    </body>
+</body>
