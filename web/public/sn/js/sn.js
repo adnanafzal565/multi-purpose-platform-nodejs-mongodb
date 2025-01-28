@@ -122,7 +122,7 @@ function renderSingleFollower(follower) {
 
 function renderSinglePage(page) {
     let html = "";
-    html += `<li>
+    html += `<li style="margin-right: 10px;">
         <div class="f-page">
             <figure>
                 <a href="` + baseUrl + `/sn/pages/detail.html?id=` + page._id + `" title=""><img src="` + page.image + `" alt=""></a>
@@ -331,6 +331,7 @@ async function postComments(_id, page = 1) {
     postCommentsPage = page;
 
     $("#post-comments-modal").modal("show");
+    $(".modal-backdrop").remove();
     $("#post-comments-modal .modal-body .loading").show();
 
     const formData = new FormData();
@@ -676,6 +677,10 @@ function renderSinglePost(post) {
         image = post.page.image;
         name = post.page.name;
         href = baseUrl + "/sn/pages/detail.html?id=" + post.page._id;
+    } else if (typeof post.group !== "undefined") {
+        image = post.group.image;
+        name = post.group.name;
+        href = baseUrl + "/sn/groups/detail.html?id=" + post.group._id;
     }
 
     html += `<div data-post-id="` + post._id + `" class="central-meta item">
@@ -704,8 +709,12 @@ function renderSinglePost(post) {
                     if (isMyPost) {
                         html += `<a href="` + baseUrl + `/sn/edit-post.html?id=` + post._id + `">Edit</a>`;
                     }
-                    html += `&nbsp;<button type="button" class="btn btn-danger btn-sm" onclick="deletePost('` + post._id + `');">Delete</button>`;
+                    html += `&nbsp;&nbsp;<button type="button" class="btn btn-danger btn-sm" onclick="deletePost('` + post._id + `');">Delete</button>`;
                 }
+
+                html += `<a href="` + baseUrl + `/sn/post.html?id=` + post._id + `" class="pull-right">
+                    <i class="fa fa-eye"></i>
+                </a>`;
 
                 if (isMeGroupAdmin && post.status == "pending") {
                     html += `<button type="button" class="btn btn-success btn-sm" onclick="acceptPost('` + post._id +`');">Accept</button>

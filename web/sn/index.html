@@ -117,11 +117,9 @@
             <script>
                 let page = 1;
 
-                globalState.listen(function (newState, updatedState) {
-                    if (typeof updatedState.user !== "undefined" && updatedState.user) {
-                        fetchPosts();
-                    }
-                });
+                function initApp() {
+                    fetchPosts();
+                }
 
                 function loadMore() {
                     page++;

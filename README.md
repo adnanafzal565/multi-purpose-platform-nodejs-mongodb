@@ -1,4 +1,10 @@
-# Node JS and Mongo DB
+# Multi-purpose platform - Node JS and Mongo DB
+
+A multi-purpose platform is created in Node JS and Mongo DB that allows you to do user registration and profile management.
+
+It has a social network that allows users to share posts on their timeline. Other users can like, comment or share the post. Post creator can reply to all the comments he has received. Business owners can create pages to post related to their products or services. You can create groups to create a community. Other users can join the group and start posting in that group. Admin of the group can delete any post that he seem irrelevant. Admin can also remove a member from the group if he keeps posting irrelevant posts. You can create friends and have end-to-end encrypted realtime chat with them.
+
+A job portal platform is also added that allows recruiter to post jobs and candidates can apply on that job. Recruiter can see all the applications he has received on a job and can change the status of applicant to shortlisted, interviewing, rejected or selected etc. Candidate can upload multiple CVs and choose the relevant CV while applying for the job. Recruiter can update or delete the job any time.
 
 I created an API in Node JS and Mongo DB for user authentication, user profile, social network posts, and media upload.  
 It allows you to design the frontend as you want. All the APIs are provided; you just need to call them and render it in the design of your choice.
@@ -13,11 +19,11 @@ npm install nodemon
 nodemon index.js
 ```
 
-Paste the "nodejs-mongodb" folder in your "htdocs" folder if you are using XAMPP or MAMP, or in "www" folder if you are using WAMP.
+Paste the "multi-purpose-platform-nodejs-mongodb" folder in your "htdocs" folder if you are using XAMPP or MAMP, or in "www" folder if you are using WAMP.
 
 Set the path of variable ```baseUrl``` in ```web/public/js/script.js``` to point to your web folder.
 
-Project can be accessed from: `http://localhost/nodejs-mongodb/web/index.html`
+Project can be accessed from: `http://localhost/multi-purpose-platform-nodejs-mongodb/web/index.html`
 
 ## API Documentation
 
@@ -2138,6 +2144,10 @@ curl -X POST http://localhost:3000/media/delete \
 }
 ```
 </details>
+
+<br />
+
+Buy full version: https://adnan-tech.com/multi-purpose-platform-nodejs-mongodb/
 
 <br />
 

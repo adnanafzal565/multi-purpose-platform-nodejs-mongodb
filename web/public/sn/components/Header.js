@@ -30,7 +30,7 @@ function Header() {
 
                     globalState.setState({
                         user: user
-                    })
+                    });
 
                     const userImgs = document.querySelectorAll(".user-img");
                     for (let a = 0; a < userImgs.length; a++) {
@@ -46,6 +46,10 @@ function Header() {
             } catch (exp) {
                 // swal.fire("Error", exp.message, "error")
             }
+        }
+
+        if (typeof initApp !== "undefined") {
+            initApp();
         }
     }
 
@@ -125,13 +129,8 @@ function Header() {
                 <div className="top-area">
                     <ul className="main-menu">
                         <li><a href={ `${ baseUrl }` } title="">Home</a></li>
-
-                        { state.user != null && (
-                            <>
-                                <li><a href={ `${ baseUrl }/sn/pages/index.html` }>Pages</a></li>
-                                <li><a href={ `${ baseUrl }/sn/groups/index.html` }>Groups</a></li>
-                            </>
-                        ) }
+                        <li><a href={ `${ baseUrl }/sn/pages/index.html` }>Pages</a></li>
+                        <li><a href={ `${ baseUrl }/sn/groups/index.html` }>Groups</a></li>
                     </ul>
 
                     <ul className="setting-area">

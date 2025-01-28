@@ -10,6 +10,10 @@ function SinglePost({ post }) {
             setImage(post.page.image);
             setName(post.page.name);
             setHref(baseUrl + "/sn/pages/detail.html?id=" + post.page._id);
+        } else if (typeof post.group !== "undefined") {
+            setImage(post.group.image);
+            setName(post.group.name);
+            setHref(baseUrl + "/sn/groups/detail.html?id=" + post.group._id);
         }
 
         globalState.listen(function (newState, updatedState) {
@@ -104,11 +108,15 @@ function SinglePost({ post }) {
                                         <a href={ `${ baseUrl }/sn/edit-post.html?id=${ post._id }` }>Edit</a>
                                     ) }
 
-                                    &nbsp;<button type="button" className="btn btn-danger btn-sm" onClick={ function () {
+                                    &nbsp;&nbsp;<button type="button" className="btn btn-danger btn-sm" onClick={ function () {
                                         deletePost(post._id);
                                     } }>Delete</button>
                                 </>
                             ) }
+
+                            <a href={ `${ baseUrl }/sn/post.html?id=${ post._id }` } className="pull-right">
+                                <i className="fa fa-eye"></i>
+                            </a>
 
                             { (isMeGroupAdmin() && post.status == "pending") && (
                                 <>

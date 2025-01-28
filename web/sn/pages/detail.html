@@ -116,11 +116,9 @@
             const id = urlSearchParams.get("id") || "";
             let page = urlSearchParams.get("page") || 1;
 
-            globalState.listen(function (newState, updatedState) {
-                if (typeof updatedState.user !== "undefined" && updatedState.user) {
-                    getData();
-                }
-            });
+            function initApp() {
+                getData();
+            }
 
             function loadMore() {
                 page++;
@@ -136,7 +134,7 @@
 
                 try {
                     const response = await axios.post(
-                        apiUrl + "/sn/posts/fetch",
+                        apiUrl + "/sn/pages/fetch-posts",
                         formData,
                         {
                             headers: {

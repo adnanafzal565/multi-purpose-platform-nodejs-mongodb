@@ -96,7 +96,7 @@
                                 }
                                 setNotifications(tempArr);
                             } else {
-                                swal.fire(response.data.title, response.data.message, response.data.status);
+                                // swal.fire(response.data.title, response.data.message, response.data.status);
                             }
                         } catch (exp) {
                             // swal.fire("Error", exp.message, "error")
@@ -206,9 +206,11 @@
                     );
                 }
 
-                ReactDOM.createRoot(
-                    document.getElementById("notifications-app")
-                ).render(<Notification />);
+                function initApp() {
+                    ReactDOM.createRoot(
+                        document.getElementById("notifications-app")
+                    ).render(<Notification />);
+                }
             </script>
 
             <script src="../public/sn/js/main.min.js"></script>

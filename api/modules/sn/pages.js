@@ -62,7 +62,10 @@ module.exports = {
                         as: "user"
                     }
                 }, {
-                    $unwind: "$user"
+                    $unwind: {
+                        path: "$user",
+                        preserveNullAndEmptyArrays: true
+                    }
                 }]).toArray();
 
             if (pages.length == 0) {
@@ -88,9 +91,9 @@ module.exports = {
                 name: page.name || "",
                 description: page.description || "",
                 user: {
-                    _id: page.user._id || "",
-                    name: page.user.name || "",
-                    profileImage: page.user.profileImage?.path || "",
+                    _id: page.userId || "",
+                    name: page.user?.name || "",
+                    profileImage: page.user?.profileImage?.path || "",
                 },
                 followersCount: page.followers || 0,
                 image: page.image?.path || "",
@@ -108,7 +111,13 @@ module.exports = {
             }
 
             obj.posts = await posts.fetch({
-                pageId: page._id
+                $and: [{
+					pageId: page._id
+				}, {
+					type: {
+						$in: ["post", "shared", "group", "page", "sponsored"]
+					}
+				}]
             }, pageNumber, user);
 
             if (user != null) {
@@ -121,6 +130,59 @@ module.exports = {
                 status: "success",
                 message: "Data has been fetched.",
                 page: obj
+            });
+        });
+
+        router.post("/fetch-posts", authOptional, async function (request, result) {
+            const user = request.user;
+            const _id = request.fields._id || "";
+            const pageNumber = request.fields.page || 1;
+
+            if (!_id) {
+                result.json({
+                    status: "error",
+                    message: "Required field missing."
+                });
+                return;
+            }
+
+            if (!ObjectId.isValid(_id)) {
+                result.json({
+                    status: "error",
+                    message: "In-valid '_id' value."
+                });
+                return;
+            }
+
+            const page = await db.collection("pages")
+                .findOne({
+                    _id: ObjectId.createFromHexString(_id)
+                });
+
+            if (page == null) {
+                result.json({
+                    status: "error",
+                    message: "Page not found."
+                });
+                return;
+            }
+
+            const postsArr = await posts.fetch({
+                $and: [{
+                    pageId: page._id
+                }, {
+                    status: "published"
+                }, {
+                    type: {
+                        $in: ["post", "shared", "group", "page", "sponsored"]
+                    }
+                }]
+            }, pageNumber, user);
+
+            result.json({
+                status: "success",
+                message: "Data has been fetched.",
+                posts: postsArr
             });
         });
 

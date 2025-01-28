@@ -185,11 +185,9 @@
                 }
             }
 
-            globalState.listen(function (newState, updatedState) {
-                if (typeof updatedState.user !== "undefined" && updatedState.user) {
-                    getData();
-                }
-            });
+            function initApp() {
+                getData();
+            }
         </script>
     </body>
 </html>

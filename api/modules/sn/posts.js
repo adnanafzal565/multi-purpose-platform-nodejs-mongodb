@@ -42,6 +42,20 @@ module.exports = {
                     as: "sharedPostUser"
                 }
             }, {
+                $lookup: {
+                    from: "pages",
+                    localField: "pageId",
+                    foreignField: "_id",
+                    as: "page"
+                }
+            }, {
+                $lookup: {
+                    from: "groups",
+                    localField: "groupId",
+                    foreignField: "_id",
+                    as: "group"
+                }
+            }, {
                 $unwind: "$user"
             }, {
                 $unwind: {
@@ -53,6 +67,16 @@ module.exports = {
                     "sharedPost.user": {
                         $arrayElemAt: ["$sharedPostUser", 0]
                     }
+                }
+            }, {
+                $unwind: {
+                    path: "$page",
+                    preserveNullAndEmptyArrays: true
+                }
+            }, {
+                $unwind: {
+                    path: "$group",
+                    preserveNullAndEmptyArrays: true
                 }
             }, {
                 $project: {
@@ -156,6 +180,33 @@ module.exports = {
                 sharedPostObj.files = sharedPostFiles;
 
                 obj.sharedPost = sharedPostObj;
+            }
+
+            if (typeof posts[a].page !== "undefined") {
+                obj.page = {
+                    _id: posts[a].page._id,
+                    name: posts[a].page.name || "",
+                    followers: posts[a].page.followers || 0,
+                    image: posts[a].page.image?.path || "",
+                };
+
+                if (obj.page.image && fs.existsSync(obj.page.image)) {
+                    obj.page.image = baseUrl + "/" + obj.page.image;
+                }
+            }
+
+            if (typeof posts[a].group !== "undefined") {
+                obj.group = {
+                    _id: posts[a].group._id,
+                    userId: posts[a].group.userId || "",
+                    name: posts[a].group.name || "",
+                    members: posts[a].group.members || 0,
+                    image: posts[a].group.image?.path || ""
+                };
+
+                if (obj.group.image && fs.existsSync(obj.group.image)) {
+                    obj.group.image = baseUrl + "/" + obj.group.image;
+                }
             }
 
             postsArr.push(obj);
@@ -1632,6 +1683,12 @@ module.exports = {
             const page = parseInt(request.fields.page || 1);
             let searchArr = [];
 
+            searchArr.push({
+                type: {
+                    $in: ["post", "shared", "group", "page", "sponsored"]
+                }
+            });
+
             if (_id != "") {
                 if (!ObjectId.isValid(_id)) {
                     result.json({
@@ -1666,6 +1723,36 @@ module.exports = {
 
                 searchArr.push({
                     userId: ObjectId.createFromHexString(userId)
+                });
+            }
+
+            if (user != null) {
+                const groups = await db.collection("groups")
+                    .aggregate([{
+                        $match: {
+                            userId: user._id
+                        }
+                    }, {
+                        $sample: {
+                            size: self.limit
+                        }
+                    }]).toArray();
+
+                const groupIds = [];                
+                for (let a = 0; a < groups.length; a++) {
+                    groupIds.push(groups[a]._id);
+                }
+
+                searchArr.push({
+                    $or: [{
+                        groupId: {
+                            $exists: false
+                        }
+                    }, {
+                        groupId: {
+                            $in: groupIds
+                        }
+                    }]
                 });
             }
 

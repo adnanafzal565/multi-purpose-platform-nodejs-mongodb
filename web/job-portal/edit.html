@@ -54,182 +54,184 @@
         </script>
 
         <script type="text/babel">
-            function EditJob() {
+            function initApp() {
 
-                const [nature, setNature] = React.useState("fullTime");
-                const [type, setType] = React.useState("remote");
-                const [job, setJob] = React.useState(null);
+                function EditJob() {
+                    const [nature, setNature] = React.useState("fullTime");
+                    const [type, setType] = React.useState("remote");
+                    const [job, setJob] = React.useState(null);
 
-                async function updateJob() {
-                    const form = event.target;
-                    const formData = new FormData(form);
-                    formData.append("_id", id);
+                    async function updateJob() {
+                        const form = event.target;
+                        const formData = new FormData(form);
+                        formData.append("_id", id);
 
-                    form.submit.setAttribute("disabled", "disabled");
+                        form.submit.setAttribute("disabled", "disabled");
 
-                    try {
-                        const response = await axios.post(
-                            apiUrl + "/job-portal/jobs/update",
-                            formData,
-                            {
-                                headers: {
-                                    Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                        try {
+                            const response = await axios.post(
+                                apiUrl + "/job-portal/jobs/update",
+                                formData,
+                                {
+                                    headers: {
+                                        Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                                    }
                                 }
+                            )
+
+                            if (response.data.status == "success") {
+                                swal.fire("Update Job", response.data.message, "success");
+                            } else {
+                                swal.fire("Error", response.data.message, "error")
                             }
-                        )
-
-                        if (response.data.status == "success") {
-                            swal.fire("Update Job", response.data.message, "success");
-                        } else {
-                            swal.fire("Error", response.data.message, "error")
+                        } catch (exp) {
+                            swal.fire("Error", exp.message, "error")
+                        } finally {
+                            form.submit.removeAttribute("disabled");
                         }
-                    } catch (exp) {
-                        swal.fire("Error", exp.message, "error")
-                    } finally {
-                        form.submit.removeAttribute("disabled");
                     }
-                }
 
-                async function getData() {
-                    const formData = new FormData();
-                    formData.append("_id", id);
+                    async function getData() {
+                        const formData = new FormData();
+                        formData.append("_id", id);
 
-                    try {
-                        const response = await axios.post(
-                            apiUrl + "/job-portal/jobs/fetch-single",
-                            formData,
-                            {
-                                headers: {
-                                    Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                        try {
+                            const response = await axios.post(
+                                apiUrl + "/job-portal/jobs/fetch-single",
+                                formData,
+                                {
+                                    headers: {
+                                        Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                                    }
                                 }
+                            )
+
+                            if (response.data.status == "success") {
+                                setJob(response.data.job);
+                            } else {
+                                swal.fire("Error", response.data.message, "error")
                             }
-                        )
-
-                        if (response.data.status == "success") {
-                            setJob(response.data.job);
-                        } else {
-                            swal.fire("Error", response.data.message, "error")
+                        } catch (exp) {
+                            swal.fire("Error", exp.message, "error")
                         }
-                    } catch (exp) {
-                        swal.fire("Error", exp.message, "error")
                     }
-                }
 
-                React.useEffect(function () {
-                    setTimeout(function () {
-                        $("textarea[name='description']").richText();
-                    }, 1000);
+                    React.useEffect(function () {
+                        setTimeout(function () {
+                            $("textarea[name='description']").richText();
+                        }, 1000);
 
-                    getData();
-                }, []);
+                        getData();
+                    }, []);
 
-                return (
-                    <>
-                        { job != null && (
-                            <>
-                                <form onSubmit={ function () {
-                                    event.preventDefault();
-                                    updateJob();
-                                } }>
-                                    <div className="form-group">
-                                        <label className="form-label">Job Title</label>
-                                        <input type="text" name="title" className="form-control"
-                                            defaultValue={ job.title } required />
-                                    </div>
-
-                                    <div className="form-group mt-3 mb-3">
-                                        <label className="form-label">Type</label>
-                                        <select name="type" className="form-control" defaultValue={ job.type }
-                                            onChange={ function () {
-                                                const tempObj = { ...job };
-                                                tempObj.type = event.target.value;
-                                                setJob(tempObj);
-                                            } }>
-                                            <option value="remote">Remote</option>
-                                            <option value="onSite">On-site</option>
-                                            <option value="hybrid">Hybrid</option>
-                                        </select>
-                                    </div>
-
-                                    { job.type != "remote" && (
+                    return (
+                        <>
+                            { job != null && (
+                                <>
+                                    <form onSubmit={ function () {
+                                        event.preventDefault();
+                                        updateJob();
+                                    } }>
                                         <div className="form-group">
-                                            <label className="form-label">Location</label>
-                                            <input type="text" name="location" className="form-control"
-                                                defaultValue={ job.location } />
+                                            <label className="form-label">Job Title</label>
+                                            <input type="text" name="title" className="form-control"
+                                                defaultValue={ job.title } required />
                                         </div>
-                                    ) }
 
-                                    <div className="form-group mt-3 mb-3">
-                                        <label className="form-label">Job Nature</label>
-                                        <select name="nature" className="form-control" value={ job.nature }
-                                            onChange={ function () {
-                                                const tempObj = { ...job };
-                                                tempObj.nature = event.target.value;
-                                                setJob(tempObj);
-                                            } }>
-                                            {/*<option value="freelance">Freelance</option>*/}
-                                            <option value="fullTime">Full-time</option>
-                                            <option value="partTime">Part-time</option>
-                                        </select>
-                                    </div>
-
-                                    { job.nature == 'freelance' && (
-                                        <div className="form-group mb-3">
-                                            <label className="form-label">Deadline (in days)</label>
-                                            <input type="number" min="1" name="deadline" className="form-control"
-                                                defaultValue={ job.deadline } />
+                                        <div className="form-group mt-3 mb-3">
+                                            <label className="form-label">Type</label>
+                                            <select name="type" className="form-control" defaultValue={ job.type }
+                                                onChange={ function () {
+                                                    const tempObj = { ...job };
+                                                    tempObj.type = event.target.value;
+                                                    setJob(tempObj);
+                                                } }>
+                                                <option value="remote">Remote</option>
+                                                <option value="onSite">On-site</option>
+                                                <option value="hybrid">Hybrid</option>
+                                            </select>
                                         </div>
-                                    ) }
 
-                                    <div className="row">
-                                        <div className="col-md-6">
+                                        { job.type != "remote" && (
                                             <div className="form-group">
-                                                <label className="form-label">Currency</label>
-                                                <input type="text" name="currency" className="form-control"
-                                                    defaultValue={ job.currency } />
+                                                <label className="form-label">Location</label>
+                                                <input type="text" name="location" className="form-control"
+                                                    defaultValue={ job.location } />
+                                            </div>
+                                        ) }
+
+                                        <div className="form-group mt-3 mb-3">
+                                            <label className="form-label">Job Nature</label>
+                                            <select name="nature" className="form-control" value={ job.nature }
+                                                onChange={ function () {
+                                                    const tempObj = { ...job };
+                                                    tempObj.nature = event.target.value;
+                                                    setJob(tempObj);
+                                                } }>
+                                                {/*<option value="freelance">Freelance</option>*/}
+                                                <option value="fullTime">Full-time</option>
+                                                <option value="partTime">Part-time</option>
+                                            </select>
+                                        </div>
+
+                                        { job.nature == 'freelance' && (
+                                            <div className="form-group mb-3">
+                                                <label className="form-label">Deadline (in days)</label>
+                                                <input type="number" min="1" name="deadline" className="form-control"
+                                                    defaultValue={ job.deadline } />
+                                            </div>
+                                        ) }
+
+                                        <div className="row">
+                                            <div className="col-md-6">
+                                                <div className="form-group">
+                                                    <label className="form-label">Currency</label>
+                                                    <input type="text" name="currency" className="form-control"
+                                                        defaultValue={ job.currency } />
+                                                </div>
+                                            </div>
+
+                                            <div className="col-md-6">
+                                                <div className="form-group">
+                                                    <label className="form-label">{ job.nature == 'freelance' ? 'Price' : 'Salary' }</label>
+                                                    <input type="number" min="0" name="amount" className="form-control"
+                                                        defaultValue={ job.amount } />
+                                                </div>
                                             </div>
                                         </div>
 
-                                        <div className="col-md-6">
+                                        <div className="form-group mt-3 mb-3">
+                                            <label className="form-label">Description</label>
+                                            <textarea name="description" className="form-control" defaultValue={ job.description }></textarea>
+                                        </div>
+
+                                        { job.nature != 'freelance' && (
                                             <div className="form-group">
-                                                <label className="form-label">{ job.nature == 'freelance' ? 'Price' : 'Salary' }</label>
-                                                <input type="number" min="0" name="amount" className="form-control"
-                                                    defaultValue={ job.amount } />
+                                                <label className="form-label">Vacancies</label>
+                                                <input type="number" min="1" name="vacancies" className="form-control" defaultValue={ job.vacancies } />
                                             </div>
+                                        ) }
+
+                                        <div className="form-group mt-3 mb-3">
+                                            <label className="form-label">Status</label>
+                                            <select name="status" className="form-control" defaultValue={ job.status }>
+                                                <option value="active">Active</option>
+                                                <option value="inActive">In-active</option>
+                                            </select>
                                         </div>
-                                    </div>
 
-                                    <div className="form-group mt-3 mb-3">
-                                        <label className="form-label">Description</label>
-                                        <textarea name="description" className="form-control" defaultValue={ job.description }></textarea>
-                                    </div>
+                                        <input type="submit" name="submit" className="btn btn-warning mt-3" defaultValue="Update Job" />
+                                    </form>
+                                </>
+                            ) }
+                        </>
+                    );
+                }
 
-                                    { job.nature != 'freelance' && (
-                                        <div className="form-group">
-                                            <label className="form-label">Vacancies</label>
-                                            <input type="number" min="1" name="vacancies" className="form-control" defaultValue={ job.vacancies } />
-                                        </div>
-                                    ) }
-
-                                    <div className="form-group mt-3 mb-3">
-                                        <label className="form-label">Status</label>
-                                        <select name="status" className="form-control" defaultValue={ job.status }>
-                                            <option value="active">Active</option>
-                                            <option value="inActive">In-active</option>
-                                        </select>
-                                    </div>
-
-                                    <input type="submit" name="submit" className="btn btn-warning mt-3" defaultValue="Update Job" />
-                                </form>
-                            </>
-                        ) }
-                    </>
-                );
+                ReactDOM.createRoot(
+                    document.getElementById("edit-job-app")
+                ).render(<EditJob />);
             }
-
-            ReactDOM.createRoot(
-                document.getElementById("edit-job-app")
-            ).render(<EditJob />);
         </script>
 	</body>
 </html>

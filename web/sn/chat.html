@@ -465,9 +465,11 @@
                     );
                 }
 
-                ReactDOM.createRoot(
-                    document.getElementById("chat-app")
-                ).render(<Chat />);
+                function initApp() {
+                    ReactDOM.createRoot(
+                        document.getElementById("chat-app")
+                    ).render(<Chat />);
+                }
             </script>
 
             <script src="../public/sn/js/main.min.js"></script>

@@ -107,7 +107,7 @@
                                 }
                                 setFriends(tempArr);
                             } else {
-                                swal.fire(response.data.title, response.data.message, response.data.status);
+                                // swal.fire(response.data.title, response.data.message, response.data.status);
                             }
                         } catch (exp) {
                             // swal.fire("Error", exp.message, "error")
@@ -144,7 +144,7 @@
                                 }
                                 setRequests(tempArr);
                             } else {
-                                swal.fire(response.data.title, response.data.message, response.data.status);
+                                // swal.fire(response.data.title, response.data.message, response.data.status);
                             }
                         } catch (exp) {
                             // swal.fire("Error", exp.message, "error")
@@ -535,9 +535,11 @@
                     );
                 }
 
-                ReactDOM.createRoot(
-                    document.getElementById("friends-app")
-                ).render(<Friends />);
+                function initApp() {
+                    ReactDOM.createRoot(
+                        document.getElementById("friends-app")
+                    ).render(<Friends />);
+                }
             </script>
 
             <script src="../public/sn/js/main.min.js"></script>

@@ -240,9 +240,11 @@
                     );
                 }
 
-                ReactDOM.createRoot(
-                    document.getElementById("group-detail-app")
-                ).render(<GroupDetail />);
+                function initApp() {
+                    ReactDOM.createRoot(
+                        document.getElementById("group-detail-app")
+                    ).render(<GroupDetail />);
+                }
             </script>
         </div>
     </body>

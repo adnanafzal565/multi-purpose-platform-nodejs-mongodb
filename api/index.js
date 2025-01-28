@@ -58,10 +58,10 @@ const jobs = require("./modules/job-portal/jobs");
 const cvs = require("./modules/job-portal/cvs");
 
 const port = process.env.PORT || 3000;
-const databaseName = "nodejs_mongodb"
+const databaseName = "multi_purpose_platform"
 
 global.db = null;
-global.jwtSecret = "NodeJS_MongoDB_1234567890";
+global.jwtSecret = "multi_purpose_platform_1234567890";
 global.baseUrl = "http://localhost:" + port;
 
 global.socketIO = require("socket.io")(http, {

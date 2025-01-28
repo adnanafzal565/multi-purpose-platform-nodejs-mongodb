@@ -211,9 +211,11 @@
                 );
             }
 
-            ReactDOM.createRoot(
-                document.getElementById("page-contents")
-            ).render(<EditGroup />);
+            function initApp() {
+                ReactDOM.createRoot(
+                    document.getElementById("page-contents")
+                ).render(<EditGroup />);
+            }
         </script>
     </body>
 </html>

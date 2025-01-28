@@ -16,12 +16,12 @@ function RightSidebar() {
                     <ul className="naves">
                         <li>
                             <i className="fa fa-file"></i>&nbsp;
-                            <a href={ `${ baseUrl }/sn/pages/my.html` }>My Created</a>
+                            <a href={ `${ baseUrl }/sn/pages/my.html` }>My created</a>
                         </li>
 
                         <li>
                             <i className="fa fa-file"></i>&nbsp;
-                            <a href={ `${ baseUrl }/sn/pages/my-followed.html` }>My Followed</a>
+                            <a href={ `${ baseUrl }/sn/pages/my-followed.html` }>My followed</a>
                         </li>
                     </ul>
                 </div>
@@ -33,12 +33,12 @@ function RightSidebar() {
                     <ul className="naves">
                         <li>
                             <i className="fa fa-file"></i>&nbsp;
-                            <a href={ `${ baseUrl }/sn/groups/my.html` }>My Created</a>
+                            <a href={ `${ baseUrl }/sn/groups/my.html` }>My created</a>
                         </li>
 
                         <li>
                             <i className="fa fa-file"></i>&nbsp;
-                            <a href={ `${ baseUrl }/sn/groups/my-joined.html` }>My Joined</a>
+                            <a href={ `${ baseUrl }/sn/groups/my-joined.html` }>My joined</a>
                         </li>
                     </ul>
                 </div>

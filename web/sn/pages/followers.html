@@ -106,11 +106,9 @@
             const id = urlSearchParams.get("id") || "";
             let page = urlSearchParams.get("page") || 1;
 
-            globalState.listen(function (newState, updatedState) {
-                if (typeof updatedState.user !== "undefined" && updatedState.user) {
-                    getData();
-                }
-            });
+            function initApp() {
+                getData();
+            }
 
             async function loadMore() {
                 page++;

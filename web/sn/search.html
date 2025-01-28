@@ -326,9 +326,11 @@
                     );
                 }
 
-                ReactDOM.createRoot(
-                    document.getElementById("search-app")
-                ).render(<Search />);
+                function initApp() {
+                    ReactDOM.createRoot(
+                        document.getElementById("search-app")
+                    ).render(<Search />);
+                }
             </script>
 
             <script src="../public/sn/js/main.min.js"></script>

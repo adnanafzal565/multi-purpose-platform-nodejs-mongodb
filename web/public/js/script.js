@@ -1,9 +1,9 @@
-const accessTokenKey = "NodeJSMongoDBAccessToken";
-const privateKeyKey = "NodeJSMongoDBPrivateKey";
-const publicKeyKey = "NodeJSMongoDBPublicKey";
-const baseUrl = "http://localhost:8888/nodejs-mongodb/web";
+const accessTokenKey = "multi_purpose_platform_access_token";
+const privateKeyKey = "multi_purpose_platform_private_key";
+const publicKeyKey = "multi_purpose_platform_public_key";
+const baseUrl = "http://localhost:8888/multi-purpose-platform-nodejs-mongodb/web";
 const apiUrl = "http://localhost:3000";
-const appName = "Node JS and Mongo DB";
+const appName = "Multi-purpose platform";
 
 const globalState = {
     state: {

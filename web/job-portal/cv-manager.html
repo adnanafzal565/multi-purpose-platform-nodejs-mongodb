@@ -44,301 +44,303 @@
         </script>
 
         <script type="text/babel">
-            function CVManager() {
+            function initApp() {
 
-                const [state, setState] = React.useState(globalState.state);
-                const [cvs, setCvs] = React.useState([]);
-                const [loading, setLoading] = React.useState(false);
-                const [currentCVCount, setCurrentCVCount] = React.useState(0);
+                function CVManager() {
+                    const [state, setState] = React.useState(globalState.state);
+                    const [cvs, setCvs] = React.useState([]);
+                    const [loading, setLoading] = React.useState(false);
+                    const [currentCVCount, setCurrentCVCount] = React.useState(0);
 
-                function loadMore() {
-                    page++;
-                    getData();
-                }
-
-                async function getData() {
-                    setLoading(true);
-
-                    const formData = new FormData();
-                    formData.append("page", page);
-
-                    try {
-                        const response = await axios.post(
-                            apiUrl + "/job-portal/cvs/fetch-my",
-                            formData,
-                            {
-                                headers: {
-                                    Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
-                                }
-                            }
-                        )
-
-                        if (response.data.status == "success") {
-                            const cvsArr = response.data.cvs;
-                            setCurrentCVCount(cvsArr.length);
-
-                            const tempArr = [...cvs];
-                            for (let a = 0; a < cvsArr.length; a++) {
-                                tempArr.push(cvsArr[a]);
-                            }
-                            setCvs(tempArr);
-                        } else {
-                            swal.fire(response.data.title, response.data.message, response.data.status);
-                        }
-                    } catch (exp) {
-                        swal.fire("Error", exp.message, "error")
-                    } finally {
-                        setLoading(false);
+                    function loadMore() {
+                        page++;
+                        getData();
                     }
-                }
 
-                async function uploadCV() {
-                    const form = event.target;
-                    const formData = new FormData(form);
+                    async function getData() {
+                        setLoading(true);
 
-                    const isDefault = form.querySelector(".set-as-default").checked ? 1 : 0;
-                    formData.append("setAsDefault", isDefault);
+                        const formData = new FormData();
+                        formData.append("page", page);
 
-                    form.submit.setAttribute("disabled", "disabled");
-                    try {
-                        const response = await axios.post(
-                            apiUrl + "/job-portal/cvs/upload",
-                            formData,
-                            {
-                                headers: {
-                                    Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
-                                }
-                            }
-                        )
-
-                        if (response.data.status == "success") {
-                            const tempCV = response.data.cv;
-
-                            const tempArr = [...cvs];
-
-                            if (isDefault == 1) {
-                                for (let a = 0; a < tempArr.length; a++) {
-                                    tempArr[a].isDefault = 0;
-                                }
-                            }
-
-                            tempArr.unshift(tempCV);
-                            setCvs(tempArr);
-
-                            $("#upload-cv-modal").modal("hide");
-                        } else {
-                            swal.fire(response.data.title, response.data.message, response.data.status);
-                        }
-                    } catch (exp) {
-                        swal.fire("Error", exp.message, "error")
-                    } finally {
-                        form.submit.removeAttribute("disabled");
-                    }
-                }
-
-                function deleteCV(id) {
-                    const node = event.target;
-
-                    swal.fire({
-                        title: "Delete CV",
-                        text: "Are you sure you want to delete this CV ?",
-                        icon: "warning",
-                        showCancelButton: true,
-                        confirmButtonText: "Yes, delete it",
-                    }).then(async function (result) {
-                        /* Read more about isConfirmed, isDenied below */
-                        if (result.isConfirmed) {
-                            node.setAttribute("disabled", "disabled");
-
-                            const formData = new FormData();
-                            formData.append("_id", id);
-
-                            try {
-                                const response = await axios.post(
-                                    apiUrl + "/job-portal/cvs/delete",
-                                    formData,
-                                    {
-                                        headers: {
-                                            Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
-                                        }
+                        try {
+                            const response = await axios.post(
+                                apiUrl + "/job-portal/cvs/fetch-my",
+                                formData,
+                                {
+                                    headers: {
+                                        Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
                                     }
-                                )
+                                }
+                            )
 
-                                if (response.data.status == "success") {
-                                    const tempArr = [...cvs];
+                            if (response.data.status == "success") {
+                                const cvsArr = response.data.cvs;
+                                setCurrentCVCount(cvsArr.length);
+
+                                const tempArr = [...cvs];
+                                for (let a = 0; a < cvsArr.length; a++) {
+                                    tempArr.push(cvsArr[a]);
+                                }
+                                setCvs(tempArr);
+                            } else {
+                                swal.fire(response.data.title, response.data.message, response.data.status);
+                            }
+                        } catch (exp) {
+                            swal.fire("Error", exp.message, "error")
+                        } finally {
+                            setLoading(false);
+                        }
+                    }
+
+                    async function uploadCV() {
+                        const form = event.target;
+                        const formData = new FormData(form);
+
+                        const isDefault = form.querySelector(".set-as-default").checked ? 1 : 0;
+                        formData.append("setAsDefault", isDefault);
+
+                        form.submit.setAttribute("disabled", "disabled");
+                        try {
+                            const response = await axios.post(
+                                apiUrl + "/job-portal/cvs/upload",
+                                formData,
+                                {
+                                    headers: {
+                                        Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                                    }
+                                }
+                            )
+
+                            if (response.data.status == "success") {
+                                const tempCV = response.data.cv;
+
+                                const tempArr = [...cvs];
+
+                                if (isDefault == 1) {
                                     for (let a = 0; a < tempArr.length; a++) {
-                                        if (tempArr[a]._id == id) {
-                                            tempArr.splice(a, 1);
-                                            break;
-                                        }
+                                        tempArr[a].isDefault = 0;
                                     }
-                                    setCvs(tempArr);
-                                } else {
-                                    swal.fire(response.data.title, response.data.message, response.data.status);
                                 }
-                            } catch (exp) {
-                                // swal.fire("Error", exp.message, "error")
-                            } finally {
-                                node.removeAttribute("disabled");
+
+                                tempArr.unshift(tempCV);
+                                setCvs(tempArr);
+
+                                $("#upload-cv-modal").modal("hide");
+                            } else {
+                                swal.fire(response.data.title, response.data.message, response.data.status);
                             }
+                        } catch (exp) {
+                            swal.fire("Error", exp.message, "error")
+                        } finally {
+                            form.submit.removeAttribute("disabled");
                         }
-                    });
-                }
-
-                async function setAsDefault(id) {
-                    const formData = new FormData();
-                    formData.append("_id", id);
-
-                    try {
-                        const response = await axios.post(
-                            apiUrl + "/job-portal/cvs/set-as-default",
-                            formData,
-                            {
-                                headers: {
-                                    Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
-                                }
-                            }
-                        )
-
-                        if (response.data.status == "success") {
-                            const tempArr = [...cvs];
-                            for (let a = 0; a < tempArr.length; a++) {
-                                tempArr[a].isDefault = (tempArr[a]._id == id) ? 1 : 0;
-                            }
-                            setCvs(tempArr);
-                        } else {
-                            swal.fire(response.data.title, response.data.message, response.data.status);
-                        }
-                    } catch (exp) {
-                        // swal.fire("Error", exp.message, "error")
                     }
+
+                    function deleteCV(id) {
+                        const node = event.target;
+
+                        swal.fire({
+                            title: "Delete CV",
+                            text: "Are you sure you want to delete this CV ?",
+                            icon: "warning",
+                            showCancelButton: true,
+                            confirmButtonText: "Yes, delete it",
+                        }).then(async function (result) {
+                            /* Read more about isConfirmed, isDenied below */
+                            if (result.isConfirmed) {
+                                node.setAttribute("disabled", "disabled");
+
+                                const formData = new FormData();
+                                formData.append("_id", id);
+
+                                try {
+                                    const response = await axios.post(
+                                        apiUrl + "/job-portal/cvs/delete",
+                                        formData,
+                                        {
+                                            headers: {
+                                                Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                                            }
+                                        }
+                                    )
+
+                                    if (response.data.status == "success") {
+                                        const tempArr = [...cvs];
+                                        for (let a = 0; a < tempArr.length; a++) {
+                                            if (tempArr[a]._id == id) {
+                                                tempArr.splice(a, 1);
+                                                break;
+                                            }
+                                        }
+                                        setCvs(tempArr);
+                                    } else {
+                                        swal.fire(response.data.title, response.data.message, response.data.status);
+                                    }
+                                } catch (exp) {
+                                    // swal.fire("Error", exp.message, "error")
+                                } finally {
+                                    node.removeAttribute("disabled");
+                                }
+                            }
+                        });
+                    }
+
+                    async function setAsDefault(id) {
+                        const formData = new FormData();
+                        formData.append("_id", id);
+
+                        try {
+                            const response = await axios.post(
+                                apiUrl + "/job-portal/cvs/set-as-default",
+                                formData,
+                                {
+                                    headers: {
+                                        Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                                    }
+                                }
+                            )
+
+                            if (response.data.status == "success") {
+                                const tempArr = [...cvs];
+                                for (let a = 0; a < tempArr.length; a++) {
+                                    tempArr[a].isDefault = (tempArr[a]._id == id) ? 1 : 0;
+                                }
+                                setCvs(tempArr);
+                            } else {
+                                swal.fire(response.data.title, response.data.message, response.data.status);
+                            }
+                        } catch (exp) {
+                            // swal.fire("Error", exp.message, "error")
+                        }
+                    }
+
+                    React.useEffect(function () {
+                        globalState.listen(function (newState, updatedState) {
+                            setState(newState);
+                        });
+
+                        getData();
+                    }, []);
+
+                    return (
+                        <>
+                            <div className="row mb-5">
+                                <div className="col-md-12 text-center">
+                                    <h1>CV Manager</h1>
+
+                                    { loading && (
+                                        <p>Loading...</p>
+                                    ) }
+                                </div>
+                            </div>
+
+                            <div className="row mb-5">
+                                <div className="col-md-12">
+                                    <button type="button" className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#upload-cv-modal">
+                                        Upload CV
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="row mb-5">
+                                <div className="col-md-12">
+                                    <table className="table table-bordered table-responsive">
+                                        <thead>
+                                            <tr>
+                                                <th>Name</th>
+                                                <th>Size</th>
+                                                <th>Is Default ?</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+
+                                        <tbody>
+                                            { cvs.map(function (cv) {
+                                                return (
+                                                    <tr key={ `cv-${ cv._id }` }>
+                                                        <td>
+                                                            <a href={ cv.path } target="_blank">{ cv.name }</a>
+                                                        </td>
+                                                        <td>{ formatBytes(cv.size) }</td>
+                                                        <td>{ cv.isDefault == 1 ? "Yes" : "No" }</td>
+                                                        <td>
+                                                            { cv.isDefault == 0 && (
+                                                                <label className="me-3">
+                                                                    Set as Default ?
+                                                                    &nbsp;<input type="checkbox" onClick={ function () {
+                                                                        if (event.target.checked) {
+                                                                            setAsDefault(cv._id);
+                                                                        }
+                                                                    } } />
+                                                                </label>
+                                                            ) }
+
+                                                            <button type="button" className="btn btn-danger" onClick={ function () {
+                                                                deleteCV(cv._id);
+                                                            } }>Delete</button>
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            }) }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            { currentCVCount > 0 && (
+                                <div className="row">
+                                    <div className="col-md-12 text-center">
+                                        <button className="btn btn-primary" onClick={ function () {
+                                            loadMore();
+                                        } }>Load more</button>
+                                    </div>
+                                </div>
+                            ) }
+
+                            <div className="modal fade" id="upload-cv-modal" tabIndex="-1" aria-hidden="true">
+                                <div className="modal-dialog modal-lg">
+                                    <div className="modal-content">
+                                        <div className="modal-header">
+                                            <h5 className="modal-title">Upload CV</h5>
+                                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+
+                                        <div className="modal-body">
+                                            <form id="form-upload-cv" onSubmit={ function () {
+                                                event.preventDefault();
+                                                uploadCV();
+                                            } } encType="multipart/form-data">
+                                                <div className="form-group">
+                                                    <label className="form-label">Upload CV</label>
+                                                    <input type="file" name="file" accept=".pdf" className="form-control" required />
+                                                </div>
+
+                                                <div className="form-group mt-3">
+                                                    <label className="form-label">
+                                                        Set as Default ?
+                                                        &nbsp;
+                                                        <input type="checkbox" className="set-as-default" />
+                                                    </label>
+                                                </div>
+                                            </form>
+                                        </div>
+
+                                        <div className="modal-footer">
+                                            <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                            <button type="submit" name="submit" form="form-upload-cv" className="btn btn-primary">Upload</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </>
+                    );
                 }
 
-                React.useEffect(function () {
-                    globalState.listen(function (newState, updatedState) {
-                        setState(newState);
-                    });
-
-                    getData();
-                }, []);
-
-                return (
-                    <>
-                        <div className="row mb-5">
-                            <div className="col-md-12 text-center">
-                                <h1>CV Manager</h1>
-
-                                { loading && (
-                                    <p>Loading...</p>
-                                ) }
-                            </div>
-                        </div>
-
-                        <div className="row mb-5">
-                            <div className="col-md-12">
-                                <button type="button" className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#upload-cv-modal">
-                                    Upload CV
-                                </button>
-                            </div>
-                        </div>
-
-                        <div className="row mb-5">
-                            <div className="col-md-12">
-                                <table className="table table-bordered table-responsive">
-                                    <thead>
-                                        <tr>
-                                            <th>Name</th>
-                                            <th>Size</th>
-                                            <th>Is Default ?</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-
-                                    <tbody>
-                                        { cvs.map(function (cv) {
-                                            return (
-                                                <tr key={ `cv-${ cv._id }` }>
-                                                    <td>
-                                                        <a href={ cv.path } target="_blank">{ cv.name }</a>
-                                                    </td>
-                                                    <td>{ formatBytes(cv.size) }</td>
-                                                    <td>{ cv.isDefault == 1 ? "Yes" : "No" }</td>
-                                                    <td>
-                                                        { cv.isDefault == 0 && (
-                                                            <label className="me-3">
-                                                                Set as Default ?
-                                                                &nbsp;<input type="checkbox" onClick={ function () {
-                                                                    if (event.target.checked) {
-                                                                        setAsDefault(cv._id);
-                                                                    }
-                                                                } } />
-                                                            </label>
-                                                        ) }
-
-                                                        <button type="button" className="btn btn-danger" onClick={ function () {
-                                                            deleteCV(cv._id);
-                                                        } }>Delete</button>
-                                                    </td>
-                                                </tr>
-                                            );
-                                        }) }
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        { currentCVCount > 0 && (
-                            <div className="row">
-                                <div className="col-md-12 text-center">
-                                    <button className="btn btn-primary" onClick={ function () {
-                                        loadMore();
-                                    } }>Load more</button>
-                                </div>
-                            </div>
-                        ) }
-
-                        <div className="modal fade" id="upload-cv-modal" tabIndex="-1" aria-hidden="true">
-                            <div className="modal-dialog modal-lg">
-                                <div className="modal-content">
-                                    <div className="modal-header">
-                                        <h5 className="modal-title">Upload CV</h5>
-                                        <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-
-                                    <div className="modal-body">
-                                        <form id="form-upload-cv" onSubmit={ function () {
-                                            event.preventDefault();
-                                            uploadCV();
-                                        } } encType="multipart/form-data">
-                                            <div className="form-group">
-                                                <label className="form-label">Upload CV</label>
-                                                <input type="file" name="file" accept=".pdf" className="form-control" required />
-                                            </div>
-
-                                            <div className="form-group mt-3">
-                                                <label className="form-label">
-                                                    Set as Default ?
-                                                    &nbsp;
-                                                    <input type="checkbox" className="set-as-default" />
-                                                </label>
-                                            </div>
-                                        </form>
-                                    </div>
-
-                                    <div className="modal-footer">
-                                        <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                        <button type="submit" name="submit" form="form-upload-cv" className="btn btn-primary">Upload</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </>
-                );
+                ReactDOM.createRoot(
+                    document.getElementById("cv-manager-app")
+                ).render(<CVManager />);
             }
-
-            ReactDOM.createRoot(
-                document.getElementById("cv-manager-app")
-            ).render(<CVManager />);
         </script>
 
     </body>

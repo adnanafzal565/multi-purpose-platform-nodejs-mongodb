@@ -213,11 +213,9 @@
                 }
             }
 
-            globalState.listen(function (newState, updatedState) {
-                if (typeof updatedState.user !== "undefined" && updatedState.user) {
-                    getProfile();
-                }
-            });
+            function initApp() {
+                getProfile();
+            }
         </script>
     </body>
 </html>
