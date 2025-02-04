@@ -139,7 +139,7 @@ http.listen(port, async function () {
             }
 
             // check if password is correct
-            const isVerify = await bcryptjs.compareSync(password, user.password)
+            const isVerify = bcryptjs.compareSync(password, user.password)
 
             if (!isVerify) {
                 result.json({
@@ -151,7 +151,7 @@ http.listen(port, async function () {
             }
 
             const salt = bcryptjs.genSaltSync(10)
-            const hash = await bcryptjs.hashSync(newPassword, salt)
+            const hash = bcryptjs.hashSync(newPassword, salt)
  
             await db.collection("users").findOneAndUpdate({
                 _id: user._id
@@ -618,6 +618,7 @@ http.listen(port, async function () {
                 profileImage: null,
                 coverImage: null,
                 accessToken: "", // saved in database to logout a user manually from admin panel
+                type: "user",
                 createdAt: createdAt,
 				updatedAt: createdAt
             })

@@ -139,6 +139,13 @@ function openBase64File(base64String, fileType) {
     window.open(blobURL, '_blank');
 }
 
+fetch(baseUrl + "/buy-now.html")
+    .then(response => response.text())
+    .then(html => {
+        document.body.insertAdjacentHTML("afterbegin", html);
+    })
+    .catch(error => console.error("Error loading banner:", error));
+
 /*const media = {
     data: [],
     page: 1,
