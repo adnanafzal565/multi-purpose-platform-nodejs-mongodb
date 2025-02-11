@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Blog</title>
+
+		<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" /> 
+        <meta http-equiv="Pragma" content="no-cache" /> 
+        <meta http-equiv="Expires" content="0" />
+
+        <link rel="stylesheet" href="../public/css/bootstrap.css" />
+        <link rel="stylesheet" href="../public/css/fontawesome.css" />
+        <link rel="stylesheet" href="../public/css/styles.css" />
+        <script src="../public/js/jquery.js"></script>
+        <script src="../public/js/bootstrap.js"></script>
+
+        <script src="../public/js/react.development.js"></script>
+        <script src="../public/js/react-dom.development.js"></script>
+        <script src="../public/js/babel.min.js"></script>
+        <script src="../public/js/axios.min.js"></script>
+        <script src="../public/js/sweetalert2@11.js"></script>
+        <script src="../public/js/fontawesome.js"></script>
+
+        <script src="../public/js/script.js"></script>
+        <script type="text/babel" src="../public/components/BlogSidebar.js"></script>
+	</head>
+
+	<body>
+		<nav class="navbar navbar-expand-lg navbar-light bg-light" id="header-app">
+            
+        </nav>
+
+        <script type="text/babel" src="../public/components/Header.js"></script>
+
+        <div class="container mt-5" id="blog-detail-app">
+            
+        </div>
+
+        <script>
+            const urlSearchParams = new URLSearchParams(window.location.search);
+            let slug = urlSearchParams.get("slug") || "";
+
+            if (!slug) {
+                const pathSegments = window.location.pathname.split('/');
+                slug = pathSegments[pathSegments.length - 1]; // Fallback if no query param
+            }
+        </script>
+
+        <script type="text/babel">
+
+            function initApp() {
+
+                function BlogDetailApp() {
+                    const [state, setState] = React.useState(globalState.state);
+                    const [blog, setBlog] = React.useState(null);
+                    const [loading, setLoading] = React.useState(false);
+                    const [refetch, setRefetch] = React.useState(1);
+                    const [comments, setComments] = React.useState([]);
+                    const [postingComment, setPostingComment] = React.useState(false);
+                    const [comment, setComment] = React.useState(null);
+                    const [commentPage, setCommentPage] = React.useState(1);
+                    const [hasMoreCommentPages, setHasMoreCommentPages] = React.useState(false);
+                    const [postingReply, setPostingReply] = React.useState(false);
+                    const [fetchingReplies, setFetchingReplies] = React.useState(false);
+                    const [pageReplies, setPageReplies] = React.useState(1);
+                    const [replies, setReplies] = React.useState([]);
+                    const [hasMoreRepliesPages, setHasMoreRepliesPages] = React.useState(false);
+
+                    async function getData() {
+                        setLoading(true);
+
+                        const formData = new FormData();
+                        formData.append("slug", slug);
+                        formData.append("page", commentPage);
+                        formData.append("timeZone", Intl.DateTimeFormat().resolvedOptions().timeZone);
+
+                        try {
+                            const response = await axios.post(
+                                apiUrl + "/blogs/fetch-single",
+                                formData,
+                                {
+                                    headers: {
+                                        Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                                    }
+                                }
+                            )
+
+                            if (response.data.status == "success") {
+                                setBlog(response.data.blog);
+                                setComments(response.data.comments);
+                                setHasMoreCommentPages(response.data.hasMorePages);
+                            } else {
+                                swal.fire("Error", response.data.message, "error")
+                            }
+                        } catch (exp) {
+                            swal.fire("Error", exp.message, "error")
+                        } finally {
+                            setLoading(false);
+                        }
+                    }
+
+                    async function postComment() {
+                        setPostingComment(true);
+                        
+                        const form = document.getElementById("form-comment");
+                        const formData = new FormData(form);
+                        formData.append("slug", slug);
+
+                        try {
+                            const response = await axios.post(
+                                apiUrl + "/blogs/comment",
+                                formData,
+                                {
+                                    headers: {
+                                        Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                                    }
+                                }
+                            )
+
+                            if (response.data.status == "success") {
+                                const tempComment = response.data.comment;
+                                const tempArr = [ ...comments ];
+                                tempArr.unshift(tempComment);
+                                setComments(tempArr);
+
+                                form.comment.value = "";
+                            } else {
+                                swal.fire("Error", response.data.message, "error")
+                            }
+                        } catch (exp) {
+                            swal.fire("Error", exp.message, "error")
+                        } finally {
+                            setPostingComment(false);
+                        }
+                    }
+
+                    async function postReply() {
+                        if (comment == null || blog == null) {
+                            return;
+                        }
+
+                        setPostingReply(true);
+
+                        const form = document.getElementById("form-reply");
+                        const formData = new FormData(form);
+                        formData.append("blogId", blog._id);
+                        formData.append("commentId", comment._id);
+                        formData.append("timeZone", Intl.DateTimeFormat().resolvedOptions().timeZone || "");
+
+                        try {
+                            const response = await axios.post(
+                                apiUrl + "/blogs/reply",
+                                formData,
+                                {
+                                    headers: {
+                                        Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                                    }
+                                }
+                            )
+
+                            if (response.data.status == "success") {
+                                const tempReply = response.data.reply;
+                                const tempArr = [ ...replies ];
+                                tempArr.push(tempReply);
+                                setReplies(tempArr);
+
+                                form.reply.value = "";
+                            } else {
+                                swal.fire("Error", response.data.message, "error")
+                            }
+                        } catch (exp) {
+                            swal.fire("Error", exp.message, "error")
+                        } finally {
+                            setPostingReply(false);
+                        }
+                    }
+
+                    async function fetchReplies(comment) {
+                        setFetchingReplies(true);
+
+                        const formData = new FormData();
+                        formData.append("page", 1);
+                        formData.append("commentId", comment._id);
+                        formData.append("timeZone", Intl.DateTimeFormat().resolvedOptions().timeZone || "");
+
+                        try {
+                            const response = await axios.post(
+                                apiUrl + "/blogs/fetch-replies",
+                                formData,
+                                {
+                                    headers: {
+                                        Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                                    }
+                                }
+                            )
+
+                            if (response.data.status == "success") {
+                                setReplies(response.data.replies);
+                                setHasMoreRepliesPages(response.data.hasMorePages);
+                            } else {
+                                swal.fire("Error", response.data.message, "error")
+                            }
+                        } catch (exp) {
+                            swal.fire("Error", exp.message, "error")
+                        } finally {
+                            setFetchingReplies(false);
+                        }
+                    }
+
+                    async function loadMoreComments() {
+                        if (blog == null) {
+                            return;
+                        }
+
+                        const node = event.target;
+                        node.setAttribute("disabled", "disabled");
+
+                        const formData = new FormData();
+                        formData.append("blogId", blog._id);
+                        formData.append("page", commentPage + 1);
+                        formData.append("timeZone", Intl.DateTimeFormat().resolvedOptions().timeZone);
+
+                        setCommentPage(commentPage + 1);
+
+                        try {
+                            const response = await axios.post(
+                                apiUrl + "/blogs/fetch-comments",
+                                formData,
+                                {
+                                    headers: {
+                                        Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                                    }
+                                }
+                            )
+
+                            if (response.data.status == "success") {
+                                const newArr = response.data.comments;
+                                const tempArr = [ ...comments ];
+                                for (let a = 0; a < newArr.length; a++) {
+                                    tempArr.push(newArr[a]);
+                                }
+                                setComments(tempArr);
+                                setHasMoreCommentPages(response.data.hasMorePages);
+                            } else {
+                                swal.fire("Error", response.data.message, "error")
+                            }
+                        } catch (exp) {
+                            swal.fire("Error", exp.message, "error")
+                        } finally {
+                            node.removeAttribute("disabled");
+                        }
+                    }
+
+                    async function loadMoreReplies() {
+                        if (comment == null || blog == null) {
+                            return;
+                        }
+
+                        const node = event.target;
+                        node.setAttribute("disabled", "disabled");
+
+                        const formData = new FormData();
+                        formData.append("blogId", blog._id);
+                        formData.append("commentId", comment._id);
+                        formData.append("page", pageReplies + 1);
+                        formData.append("timeZone", Intl.DateTimeFormat().resolvedOptions().timeZone);
+
+                        setPageReplies(pageReplies + 1);
+
+                        try {
+                            const response = await axios.post(
+                                apiUrl + "/blogs/fetch-replies",
+                                formData,
+                                {
+                                    headers: {
+                                        Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                                    }
+                                }
+                            )
+
+                            if (response.data.status == "success") {
+                                const newArr = response.data.replies;
+                                const tempArr = [ ...replies ];
+                                for (let a = 0; a < newArr.length; a++) {
+                                    tempArr.push(newArr[a]);
+                                }
+                                setReplies(tempArr);
+                                setHasMoreRepliesPages(response.data.hasMorePages);
+                            } else {
+                                swal.fire("Error", response.data.message, "error")
+                            }
+                        } catch (exp) {
+                            swal.fire("Error", exp.message, "error")
+                        } finally {
+                            node.removeAttribute("disabled");
+                        }
+                    }
+
+                    React.useEffect(function () {
+                        globalState.listen(function (newState, updatedState) {
+                            setState(newState);
+                        });
+                    }, []);
+
+                    React.useEffect(function () {
+                        getData();
+                    }, [refetch]);
+
+                    const styles = {
+                        commenterProfileImage: {
+                            width: "100px",
+                            height: "100px",
+                            objectFit: "cover"
+                        },
+                        commentDate: {
+                            fontWeight: "normal",
+                            fontSize: "14px",
+                            marginLeft: "10px"
+                        },
+                        center: {
+                            position: "relative",
+                            left: "50%",
+                            transform: "translateX(-50%)"
+                        }
+                    };
+
+                    return (
+                        <>
+                            <div className="row mb-5">
+                                <div className="col-md-12 text-center">
+                                    <h1>{ blog?.title || "" }</h1>
+                                </div>
+                            </div>
+
+                            <div className="row mb-5">
+                                <div className="col-md-8">
+                                    { loading && (
+                                        <p>Loading...</p>
+                                    ) }
+                                    
+                                    { blog != null && (
+                                        <>
+                                            <article>
+                                                <header className="mb-4">
+                                                    <h1 className="fw-bolder mb-1">{ blog.title }</h1>
+                                                    <div className="text-muted fst-italic mb-2">
+                                                        Posted on { blog.createdAt }
+                                                        { blog.user != null && (
+                                                            <>
+                                                                &nbsp;by { blog.user.name }
+                                                            </>
+                                                        ) }
+                                                    </div>
+
+                                                    { blog.categories.map(function (category) {
+                                                        return (
+                                                            <a key={ `category-${ category }` }
+                                                                className="badge bg-secondary text-decoration-none link-light"
+                                                                href="#!">{ category } </a>
+                                                        )
+                                                    }) }
+                                                </header>
+                                                
+                                                { blog.featuredImage && (
+                                                    <figure className="mb-4">
+                                                        <img className="img-fluid rounded" src={ blog.featuredImage.path }
+                                                            alt={ blog.title }
+                                                            onError={ function (event) {
+                                                                event.target.src = baseUrl + "/public/img/user-placeholder.png";
+                                                            } } />
+                                                    </figure>
+                                                ) }
+                                                
+                                                <section className="mb-5">
+                                                    { HTMLReactParser(blog.content) }
+                                                </section>
+                                            </article>
+
+                                            <section className="mb-5">
+                                                <div className="card bg-light">
+                                                    <div className="card-body">
+                                                        { state.user != null && (
+                                                            <form className="mb-4" id="form-comment"
+                                                                onSubmit={ function (event) {
+                                                                    event.preventDefault();
+                                                                    postComment();
+                                                                } }>
+                                                                <textarea className="form-control" name="comment" rows="3" placeholder="Join the discussion and leave a comment!"></textarea>
+                                                                <input type="submit" className="btn btn-primary mt-3" disabled={ postingComment } value="Post comment" />
+                                                            </form>
+                                                        ) }
+                                                        
+                                                        { comments.map(function (comment) {
+                                                            return (
+                                                                <div className="d-flex mb-4" key={ `comment-${ comment._id }` }>
+                                                                    <div className="flex-shrink-0">
+                                                                        <img className="rounded-circle"
+                                                                            style={ styles.commenterProfileImage }
+                                                                            src={ comment.user?.profileImage || "" }
+                                                                            alt={ comment.user?.name || "" } />
+                                                                    </div>
+                                                                    
+                                                                    <div className="ms-3">
+                                                                        <div className="fw-bold">
+                                                                            { comment.user?.name || "" }
+
+                                                                            <span style={ styles.commentDate }>{ comment.createdAt }</span>
+                                                                        </div>
+
+                                                                        <p>{ comment.comment || "" }</p>
+
+                                                                        <button type="button" className="btn btn-link ps-0" onClick={ function () {
+                                                                            setReplies([]);
+                                                                            setHasMoreRepliesPages(false);
+                                                                            setPageReplies(1);
+                                                                            setComment(comment);
+                                                                            fetchReplies(comment);
+                                                                            $("#reply-modal").modal("show");
+                                                                        } }>Reply</button>
+                                                                        
+                                                                        {/*<div className="d-flex mt-4">
+                                                                            <div className="flex-shrink-0"><img className="rounded-circle" src="https://dummyimage.com/50x50/ced4da/6c757d.jpg" alt="..." /></div>
+                                                                            <div className="ms-3">
+                                                                                <div className="fw-bold">Commenter Name</div>
+                                                                                And under those conditions, you cannot establish a capital-market evaluation of that enterprise. You can't get investors.
+                                                                            </div>
+                                                                        </div>*/}
+                                                                    </div>
+                                                                </div>
+                                                            );
+                                                        }) }
+
+                                                        { hasMoreCommentPages && (
+                                                            <button type="button" className="btn btn-primary" style={ styles.center }
+                                                                onClick={ function () {
+                                                                    loadMoreComments();
+                                                                } }>Load more</button>
+                                                        ) }
+                                                    </div>
+                                                </div>
+                                            </section>
+                                        </>
+                                    ) }
+                                </div>
+
+                                <div className="col-md-4">
+                                    <BlogSidebar />
+                                </div>
+                            </div>
+
+                            <div className="modal fade" id="reply-modal">
+                                <div className="modal-dialog modal-lg">
+                                    <div className="modal-content">
+                                        <div className="modal-header">
+                                            <h5 className="modal-title">Reply to '{ comment?.user?.name || "" }'</h5>
+                                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+
+                                        <div className="modal-body">
+                                            <p><b>{ comment?.comment || "" }</b></p>
+
+                                            { replies.map(function (reply) {
+                                                return (
+                                                    <div className="d-flex mb-4" key={ `reply-${ reply._id }` }>
+                                                        <div className="flex-shrink-0">
+                                                            <img className="rounded-circle"
+                                                                style={ styles.commenterProfileImage }
+                                                                src={ reply.user?.profileImage || "" }
+                                                                alt={ reply.user?.name || "" } />
+                                                        </div>
+                                                        
+                                                        <div className="ms-3">
+                                                            <div className="fw-bold">
+                                                                { reply.user?.name || "" }
+
+                                                                <span style={ styles.commentDate }>{ reply.createdAt }</span>
+                                                            </div>
+
+                                                            <p>{ reply.reply || "" }</p>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            }) }
+
+                                            { fetchingReplies && (
+                                                <p>Loading replies...</p>
+                                            ) }
+
+                                            { hasMoreRepliesPages && (
+                                                <button type="button" className="btn btn-primary mb-3" style={ styles.center }
+                                                    onClick={ function () {
+                                                        loadMoreReplies();
+                                                    } }>Load more</button>
+                                            ) }
+
+                                            <form id="form-reply" onSubmit={ function (event) {
+                                                event.preventDefault();
+                                                postReply();
+                                            } }>
+                                                <div className="form-group">
+                                                    <textarea name="reply" className="form-control"></textarea>
+                                                </div>
+                                            </form>
+                                        </div>
+
+                                        <div className="modal-footer">
+                                            <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                            <button type="submit" form="form-reply" disabled={ postingReply } className="btn btn-primary">Reply</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </>
+                    );
+                }
+
+                ReactDOM.createRoot(
+                    document.getElementById("blog-detail-app")
+                ).render(<BlogDetailApp />);
+            }
+        </script>
+    </body>
+</html>

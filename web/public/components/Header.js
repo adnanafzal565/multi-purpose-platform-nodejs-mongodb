@@ -32,9 +32,9 @@ function Header() {
                         user: user
                     })
 
-                    if (newMessages > 0) {
-                        document.getElementById("message-notification-badge").innerHTML = newMessages
-                    }
+                    // if (newMessages > 0) {
+                    //     document.getElementById("message-notification-badge").innerHTML = newMessages
+                    // }
                 } else {
                     // swal.fire("Error", response.data.message, "error")
                 }
@@ -156,6 +156,10 @@ function Header() {
                                     </ul>
                                 </li>
                             </ul>
+                        </li>
+
+                        <li className="nav-item">
+                            <a className="nav-link" href={ `${ baseUrl }/blogs` }>Blogs</a>
                         </li>
                     </ul>
                 </div>

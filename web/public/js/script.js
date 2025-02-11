@@ -62,7 +62,8 @@ loadJS(baseUrl + "/public/js/premium.js");
 loadCSS(baseUrl + "/public/RichText/richtext.min.css");
 loadJS(baseUrl + "/public/RichText/jquery.richtext.min.js");
 loadJS(baseUrl + "/public/js/html-react-parser.min.js");
-loadJS(baseUrl + "/public/job-portal/SingleJob.js", "text/babel");
+// loadJS(baseUrl + "/public/job-portal/SingleJob.js", "text/babel");
+// loadJS(baseUrl + "/public/components/SingleBlog.js", "text/babel");
 
 let socketIO = null;
 
@@ -139,12 +140,12 @@ function openBase64File(base64String, fileType) {
     window.open(blobURL, '_blank');
 }
 
-fetch(baseUrl + "/buy-now.html")
-    .then(response => response.text())
-    .then(html => {
-        document.body.insertAdjacentHTML("afterbegin", html);
-    })
-    .catch(error => console.error("Error loading banner:", error));
+// fetch(baseUrl + "/buy-now.html")
+//     .then(response => response.text())
+//     .then(html => {
+//         document.body.insertAdjacentHTML("afterbegin", html);
+//     })
+//     .catch(error => console.error("Error loading banner:", error));
 
 /*const media = {
     data: [],

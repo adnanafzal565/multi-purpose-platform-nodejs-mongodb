@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Blogs</title>
+
+		<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" /> 
+        <meta http-equiv="Pragma" content="no-cache" /> 
+        <meta http-equiv="Expires" content="0" />
+
+        <link rel="stylesheet" href="../public/css/bootstrap.css" />
+        <link rel="stylesheet" href="../public/css/fontawesome.css" />
+        <link rel="stylesheet" href="../public/css/styles.css" />
+        <script src="../public/js/jquery.js"></script>
+        <script src="../public/js/bootstrap.js"></script>
+
+        <script src="../public/js/react.development.js"></script>
+        <script src="../public/js/react-dom.development.js"></script>
+        <script src="../public/js/babel.min.js"></script>
+        <script src="../public/js/axios.min.js"></script>
+        <script src="../public/js/sweetalert2@11.js"></script>
+        <script src="../public/js/fontawesome.js"></script>
+
+        <script src="../public/js/script.js"></script>
+        <script type="text/babel" src="../public/components/SingleBlog.js"></script>
+        <script type="text/babel" src="../public/components/BlogSidebar.js"></script>
+
+	</head>
+
+	<body>
+		<nav class="navbar navbar-expand-lg navbar-light bg-light" id="header-app">
+            
+        </nav>
+
+        <script type="text/babel" src="../public/components/Header.js"></script>
+
+        <main class="flex-shrink-0">
+            <div class="container mt-5 mb-5" id="blogs-app">
+                
+            </div>
+        </main>
+
+        <script>
+            const urlSearchParams = new URLSearchParams(window.location.search);
+            const p = urlSearchParams.get("page") || 1;
+            const q = urlSearchParams.get("q") || "";
+            const c = urlSearchParams.get("c") || "";
+        </script>
+
+        <script type="text/babel">
+
+            function initApp() {
+
+                function Blogs() {
+                    const [state, setState] = React.useState(globalState.state);
+                    const [page, setPage] = React.useState(p);
+                    const [pages, setPages] = React.useState(0);
+                    const [blogs, setBlogs] = React.useState([]);
+                    const [previousPage, setPreviousPage] = React.useState(0);
+                    const [nextPage, setNextPage] = React.useState(0);
+                    const [loading, setLoading] = React.useState(false);
+                    const [refetch, setRefetch] = React.useState(1);
+
+                    async function getData() {
+                        setLoading(true);
+
+                        const formData = new FormData();
+                        formData.append("q", q);
+                        formData.append("c", c);
+                        formData.append("page", page);
+                        formData.append("timeZone", Intl.DateTimeFormat().resolvedOptions().timeZone);
+
+                        try {
+                            const response = await axios.post(
+                                apiUrl + "/blogs/fetch",
+                                formData,
+                                {
+                                    headers: {
+                                        Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                                    }
+                                }
+                            )
+
+                            if (response.data.status == "success") {
+                                setBlogs(response.data.blogs);
+                                setPreviousPage(response.data.previousPage);
+                                setNextPage(response.data.nextPage);
+                                setPages(response.data.pages);
+                            } else {
+                                swal.fire("Error", response.data.message, "error")
+                            }
+                        } catch (exp) {
+                            swal.fire("Error", exp.message, "error")
+                        } finally {
+                            setLoading(false);
+                        }
+                    }
+
+                    function updateMetaTag(name, content) {
+                        // Remove existing meta tag if it exists
+                        let existingMeta = document.querySelector(`meta[name='${name}']`);
+                        if (existingMeta) {
+                            existingMeta.setAttribute("content", content); // Update instead of creating a new one
+                        } else {
+                            let meta = document.createElement("meta");
+                            meta.name = name;
+                            meta.content = content;
+                            document.head.appendChild(meta);
+                        }
+                    }
+
+                    React.useEffect(function () {
+                        globalState.listen(function (newState, updatedState) {
+                            setState(newState);
+                        });
+                    }, []);
+
+                    React.useEffect(function () {
+                        getData();
+                    }, [refetch]);
+
+                    React.useEffect(function () {
+                        if (previousPage > 0) {
+                            updateMetaTag("rel-prev", `${ baseUrl }/blogs?page=${ previousPage }`);
+                        }
+                    }, [previousPage]);
+
+                    React.useEffect(function () {
+                        if (nextPage > 0) {
+                            updateMetaTag("rel-next", `${ baseUrl }/blogs?page=${ nextPage }`);
+                        }
+                    }, [nextPage]);
+
+                    return (
+                        <>
+                            <div className="row mb-5">
+                                <div className="col-md-12 text-center">
+                                    <h1>Blogs</h1>
+
+                                    { (q != "" || c != "") && (
+                                        <h2>'{ c || q }'</h2>
+                                    ) }
+
+                                    { loading && (
+                                        <p>Loading...</p>
+                                    ) }
+                                </div>
+                            </div>
+
+                            <div className="row mb-5">
+                                <div className="col-md-8">
+                                    { (!loading && blogs.length <= 0) && (
+                                        <p className="text-center">No posts found.</p>
+                                    ) }
+
+                                    { blogs.map(function (blog) {
+                                        return (
+                                            <SingleBlog
+                                                key={ `blog-${ blog._id }` }
+                                                blog={ blog } />
+                                        );
+                                    }) }
+
+                                    <div className="row">
+                                        <div className="col-md-6">
+                                            { nextPage > 0 && (
+                                                <a href={ `${ baseUrl }/blogs?page=${ nextPage }` }
+                                                    className="btn btn-danger">Previous</a>
+                                            ) }
+                                        </div>
+
+                                        <div className="col-md-6">
+                                            { previousPage > 0 && (
+                                                <a href={ `${ baseUrl }/blogs?page=${ previousPage }` }
+                                                    className="btn btn-danger float-end">Next</a>
+                                            ) }
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="col-md-4">
+                                    <BlogSidebar />
+                                </div>
+                            </div>
+                        </>
+                    );
+                }
+
+                ReactDOM.createRoot(
+                    document.getElementById("blogs-app")
+                ).render(<Blogs />);
+            }
+        </script>
+    </body>
+</html>

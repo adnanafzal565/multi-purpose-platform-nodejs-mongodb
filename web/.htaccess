@@ -1,3 +1,11 @@
+Options -Indexes
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-l
+RewriteRule ^blogs$ blogs/index.html [L]
+RewriteRule ^blogs/([a-zA-Z0-9\-\s]+)$ blogs/detail.html?slug=$1 [QSA,L]
+
 <Files "public/js/script.js"> 
     Header set Cache-Control "no-cache, no-store, must-revalidate" 
     Header set Pragma "no-cache" 

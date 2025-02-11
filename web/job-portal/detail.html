@@ -320,15 +320,14 @@
                                                     <p>Job nature: { camelCaseSplit(job.nature).toUpperCase() }</p>
                                                     <p>{ job.nature == "freelance" ? "Amount" : "Salary" }: { job.currency.toUpperCase() } { job.amount }</p>
 
+                                                    { job.location != "" && (
+                                                        <p>Location: { job.location }</p>
+                                                    ) }
+
                                                     { job.nature == "freelance" ? (
-                                                        <>
-                                                            <p>Deadline: { job.deadline } days</p>
-                                                        </>
+                                                        <p>Deadline: { job.deadline } days</p>
                                                     ) : (
-                                                        <>
-                                                            <p>Location: { job.location }</p>
-                                                            <p>Vacancies: { job.vacancies }</p>
-                                                        </>
+                                                        <p>Vacancies: { job.vacancies }</p>
                                                     ) }
                                                 
                                                     { job.nature == "freelance" ? (
