@@ -54,13 +54,25 @@
                             <div class="col-lg-12">
                                 <div class="row" id="page-contents">
 
-                                    <div class="offset-lg-3 col-lg-6">
+                                    <div class="col-lg-3" id="sidebar-app">
+                                        
+                                    </div>
+
+                                    <script type="text/babel" src="../public/sn/components/Sidebar.js"></script>
+
+                                    <div class="col-lg-6">
                                         <div class="loadMore" id="newsfeed">
                                             <!--  -->
                                         </div>
 
                                         <p id="loading">Loading...</p>
                                     </div>
+
+                                    <div class="col-lg-3" id="right-sidebar-app">
+                                        
+                                    </div>
+
+                                    <script type="text/babel" src="../public/sn/components/RightSidebar.js"></script>
                                 </div>
                             </div>
                         </div>
@@ -76,7 +88,7 @@
             async function fetchPost() {
                 try {
                     const response = await axios.post(
-                        apiUrl + "/sn/posts/fetch/" + id,
+                        isDemo ? (baseUrl + "/demo-data/sn-posts-fetch-single.json") : (apiUrl + "/sn/posts/fetch/" + id),
                         null,
                         {
                             headers: {

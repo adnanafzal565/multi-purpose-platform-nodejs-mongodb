@@ -12,10 +12,10 @@ function Header() {
         // })
 
         const accessToken = localStorage.getItem(accessTokenKey)
-        if (accessToken) {
+        if (accessToken || isDemo) {
             try {
                 const response = await axios.post(
-                    apiUrl + "/me",
+			    isDemo ? (baseUrl + "/demo-data/user.json") : (apiUrl + "/me"),
                     null,
                     {
                         headers: {

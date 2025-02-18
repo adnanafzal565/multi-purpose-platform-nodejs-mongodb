@@ -101,6 +101,12 @@
                                             onclick="loadMore();"
                                             id="btn-load-more">Load More</button>
                                     </div>
+
+                                    <div class="col-lg-3" id="right-sidebar-app">
+                                        <!--  -->
+                                    </div>
+
+                                    <script type="text/babel" src="../../public/sn/components/RightSidebar.js"></script>
                                 </div>
                             </div>
                         </div>
@@ -134,7 +140,7 @@
 
                 try {
                     const response = await axios.post(
-                        apiUrl + "/sn/pages/fetch-posts",
+                        isDemo ? (baseUrl + "/demo-data/sn-pages-fetch-posts.json") : (apiUrl + "/sn/pages/fetch-posts"),
                         formData,
                         {
                             headers: {
@@ -169,43 +175,6 @@
                 }
             }
 
-            async function toggleFollow() {
-                const node = event.currentTarget;
-                node.setAttribute("disabled", "disabled");
-
-                const formData = new FormData();
-                formData.append("_id", id);
-
-                try {
-                    const response = await axios.post(
-                        apiUrl + "/sn/pages/toggle-follow",
-                        formData,
-                        {
-                            headers: {
-                                Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
-                            }
-                        }
-                    )
-
-                    if (response.data.status == "success") {
-                        if (pageObj != null) {
-                            if (pageObj.isFollowing) {
-                                document.querySelector("#btn-toggle-follow span").innerHTML = "Follow";
-                            } else {
-                                document.querySelector("#btn-toggle-follow span").innerHTML = "Unfollow";
-                            }
-                            pageObj.isFollowing = !pageObj.isFollowing;
-                        }
-                    } else {
-                        swal.fire(response.data.title, response.data.message, response.data.status);
-                    }
-                } catch (exp) {
-                    // swal.fire("Error", exp.message, "error")
-                } finally {
-                    node.removeAttribute("disabled");
-                }
-            }
-
             async function getData() {
                 document.getElementById("loading").style.display = "";
 
@@ -215,7 +184,7 @@
 
                 try {
                     const response = await axios.post(
-                        apiUrl + "/sn/pages/fetch-single",
+                        isDemo ? (baseUrl + "/demo-data/sn-pages-fetch-single.json") : (apiUrl + "/sn/pages/fetch-single"),
                         formData,
                         {
                             headers: {
@@ -311,7 +280,7 @@
 
                         try {
                             const response = await axios.post(
-                                apiUrl + "/sn/pages/delete",
+                                isDemo ? (baseUrl + "/demo-data/sn-pages-delete.json") : (apiUrl + "/sn/pages/delete"),
                                 formData,
                                 {
                                     headers: {

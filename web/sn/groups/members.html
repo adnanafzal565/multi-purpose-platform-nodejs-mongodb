@@ -107,7 +107,7 @@
 
                                 try {
                                     const response = await axios.post(
-                                        apiUrl + "/sn/groups/remove-member",
+                                        isDemo ? (baseUrl + "/demo-data/sn-groups-remove-member.json") : (apiUrl + "/sn/groups/remove-member"),
                                         formData,
                                         {
                                             headers: {
@@ -146,7 +146,7 @@
 
                         try {
                             const response = await axios.post(
-                                apiUrl + "/sn/groups/fetch-single",
+                                isDemo ? (baseUrl + "/demo-data/sn-groups-fetch-single.json") : (apiUrl + "/sn/groups/fetch-single"),
                                 formData,
                                 {
                                     headers: {
@@ -184,7 +184,7 @@
 
                         try {
                             const response = await axios.post(
-                                apiUrl + "/sn/groups/members",
+                                isDemo ? (baseUrl + "/demo-data/sn-groups-members.json") : (apiUrl + "/sn/groups/members"),
                                 formData,
                                 {
                                     headers: {
@@ -229,7 +229,7 @@
                                             <figure><img src={ group.image } /></figure>
 
                                             <div className="add-btn">
-                                                <span className="counter">{ group.membersCount } members</span>
+                                                <span className="counter">{ group.membersCount } member(s)</span>
                                                 <button type="button" className="mtr-btn" onClick={ function () {
                                                     toggleJoin();
                                                 } }
@@ -249,8 +249,17 @@
                                                                 <li>
                                                                     <a className="" href={ `${ baseUrl }/sn/groups/detail.html?id=${ group._id }` }>Group</a>
                                                                     <a className="active" href={ `${ baseUrl }/sn/groups/members.html?id=${ group._id }` }>Members ({ group.membersCount })</a>
+                                                                    
                                                                     { group.isAdmin && (
-                                                                        <a className="" href={ `${ baseUrl }/sn/groups/pending-posts.html?id=${ group._id }` }>Pending Posts ({ group.pendingPostsCount })</a>
+                                                                        <>
+                                                                            <a className="" href={ `${ baseUrl }/sn/groups/pending-posts.html?id=${ group._id }` }>Pending Posts ({ group.pendingPostsCount })</a>
+
+                                                                            <a className="btn btn-link" href={ `${ baseUrl }/sn/groups/edit.html?id=${ group._id }` }>Edit</a>
+                                                                            <button type="button" className="btn btn-danger"
+                                                                                onClick={ function () {
+                                                                                    deleteGroup();
+                                                                                } }>Delete</button>
+                                                                        </>
                                                                     ) }
                                                                 </li>
                                                             </ul>

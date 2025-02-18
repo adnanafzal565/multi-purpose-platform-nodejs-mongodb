@@ -3,8 +3,15 @@ function ChangePassword() {
     const [isSaving, setIsSaving] = React.useState(false)
 
     async function changePassword() {
-        try {
-            event.preventDefault()
+        event.preventDefault()
+
+	if (isDemo) {
+		swal.fire("Change password", "Password has been changed", "success");
+		return;
+	}
+
+	try {
+            
             setIsSaving(true)
 
             const formData = new FormData(event.target)

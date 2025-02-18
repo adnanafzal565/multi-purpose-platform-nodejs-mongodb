@@ -1,0 +1,13 @@
+{
+    "status": "success",
+    "message": "Data has been fetched.",
+    "members": [
+        {
+            "_id": "67afa70af3b629ea9e187ba0",
+            "userId": "67981e4c6d827ab147a35811",
+            "name": "Adnan Afzal",
+            "profileImage": "https://adnan-tech.com/wp-content/uploads/2025/02/channels4_profile.jpg",
+            "createdAt": "2/15/2025, 1:26:50 AM"
+        }
+    ]
+}

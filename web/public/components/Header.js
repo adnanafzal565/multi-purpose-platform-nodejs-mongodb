@@ -11,37 +11,37 @@ function Header() {
         //     user: window.userObject
         // })
 
-        const accessToken = localStorage.getItem(accessTokenKey)
-        if (accessToken) {
-            try {
-                const response = await axios.post(
-                    apiUrl + "/me",
-                    null,
-                    {
-                        headers: {
-                            Authorization: "Bearer " + accessToken
-                        }
+	const accessToken = localStorage.getItem(accessTokenKey)
+	if (accessToken || isDemo) {
+	    try {
+            const response = await axios.post(
+                isDemo ? (baseUrl + "/demo-data/user.json") : (apiUrl + "/me"),
+                null,
+                {
+                    headers: {
+                        Authorization: "Bearer " + accessToken
                     }
-                )
-
-                if (response.data.status == "success") {
-                    const user = response.data.user
-                    const newMessages = response.data.new_messages
-
-                    globalState.setState({
-                        user: user
-                    })
-
-                    // if (newMessages > 0) {
-                    //     document.getElementById("message-notification-badge").innerHTML = newMessages
-                    // }
-                } else {
-                    // swal.fire("Error", response.data.message, "error")
                 }
-            } catch (exp) {
-                // swal.fire("Error", exp.message, "error")
+            )
+
+            if (response.data.status == "success") {
+                const user = response.data.user
+                const newMessages = response.data.new_messages
+
+                globalState.setState({
+                    user: user
+                })
+
+                // if (newMessages > 0) {
+                //     document.getElementById("message-notification-badge").innerHTML = newMessages
+                // }
+            } else {
+                // swal.fire("Error", response.data.message, "error")
             }
-        }
+	    } catch (exp) {
+		// swal.fire("Error", exp.message, "error")
+	    }
+	}
 
         if (typeof initApp !== "undefined") {
             initApp();

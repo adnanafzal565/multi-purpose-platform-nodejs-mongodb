@@ -1,0 +1,21 @@
+{
+    "status": "success",
+    "message": "Message has been sent.",
+    "messageObj": {
+        "_id": "67b3f99e793860502f8d5901",
+        "sender": {
+            "_id": "67981e4c6d827ab147a35811",
+            "name": "Adnan Afzal",
+            "profileImage": "https://adnan-tech.com/wp-content/uploads/2025/02/channels4_profile.jpg"
+        },
+        "receiver": {
+            "_id": "679d6e7cc52fcb4663fc7bee",
+            "name": "Adnan Afzal",
+            "profileImage": "https://adnan-tech.com/wp-content/uploads/2025/02/channels4_profile.jpg"
+        },
+        "message": "Hi",
+        "files": [],
+        "isRead": false,
+        "createdAt": "2/18/2025, 8:08:14 AM"
+    }
+}

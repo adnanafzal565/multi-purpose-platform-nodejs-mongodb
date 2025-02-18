@@ -87,7 +87,7 @@
 
                         try {
                             const response = await axios.post(
-                                apiUrl + "/sn/friends/fetch",
+                                isDemo ? (baseUrl + "/demo-data/sn-friends-fetch.json") : (apiUrl + "/sn/friends/fetch"),
                                 formData,
                                 {
                                     headers: {
@@ -124,7 +124,7 @@
 
                         try {
                             const response = await axios.post(
-                                apiUrl + "/sn/friends/requests/fetch",
+                                isDemo ? (baseUrl + "/demo-data/sn-friends-requests-fetch.json") : (apiUrl + "/sn/friends/requests/fetch"),
                                 formData,
                                 {
                                     headers: {
@@ -162,7 +162,7 @@
 
                         try {
                             const response = await axios.post(
-                                apiUrl + "/sn/friends/requests/accept",
+                                isDemo ? (baseUrl + "/demo-data/sn-friends-requests-accept.json") : (apiUrl + "/sn/friends/requests/accept"),
                                 formData,
                                 {
                                     headers: {
@@ -200,7 +200,7 @@
 
                         try {
                             const response = await axios.post(
-                                apiUrl + "/sn/friends/requests/reject",
+                                isDemo ? (baseUrl + "/demo-data/sn-friends-requests-reject.json") : (apiUrl + "/sn/friends/requests/reject"),
                                 formData,
                                 {
                                     headers: {
@@ -258,7 +258,7 @@
 
                                 try {
                                     const response = await axios.post(
-                                        apiUrl + "/sn/friends/delete",
+                                        isDemo ? (baseUrl + "/demo-data/sn-friends-delete.json") : (apiUrl + "/sn/friends/delete"),
                                         formData,
                                         {
                                             headers: {
@@ -298,6 +298,17 @@
                         fetchRequests();
 
                         fetch(baseUrl + "/public/sn/components/Sidebar.js")
+                            .then(function (response) {
+                                response.text().then(function (text) {
+                                    const transpiledCode = Babel.transform(text, {
+                                        presets: ["env", "react"]
+                                    }).code;
+
+                                    eval(transpiledCode);
+                                })
+                            });
+
+                        fetch(baseUrl + "/public/sn/components/RightSidebar.js")
                             .then(function (response) {
                                 response.text().then(function (text) {
                                     const transpiledCode = Babel.transform(text, {
@@ -441,6 +452,10 @@
                                                                 </div>
                                                             </div>
                                                         </div>
+                                                    </div>
+
+                                                    <div className="col-lg-3" id="right-sidebar-app">
+                                                        
                                                     </div>
 
                                                     {/*<div className="col-lg-3">

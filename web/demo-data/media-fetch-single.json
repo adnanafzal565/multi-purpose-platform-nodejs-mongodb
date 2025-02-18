@@ -1,0 +1,22 @@
+{
+    "status": "success",
+    "message": "Data has been fetched.",
+    "media":
+        {
+            "_id": "67af8d37f3b629ea9e187b8e",
+            "title": "Test",
+            "alt": "test",
+            "caption": "test",
+            "type": "public",
+            "status": "",
+            "file": {
+                "name": "channels4_profile.jpg",
+                "path": "https://adnan-tech.com/wp-content/uploads/2025/02/channels4_profile.jpg",
+                "size": 89787,
+                "type": "image/jpeg"
+            },
+            "createdAt": "2/14/2025, 11:36:39 PM",
+            "updatedAt": "2/14/2025, 11:36:39 PM"
+        }
+}
+

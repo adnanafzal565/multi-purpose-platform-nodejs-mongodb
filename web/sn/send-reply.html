@@ -122,7 +122,7 @@
 
                 try {
                     const response = await axios.post(
-                        apiUrl + "/sn/posts/replies/fetch",
+                        isDemo ? (baseUrl + "/demo-data/sn-posts-replies-fetch.json") : (apiUrl + "/sn/posts/replies/fetch"),
                         formData,
                         {
                             headers: {
@@ -163,7 +163,7 @@
 
                 try {
                     const response = await axios.post(
-                        apiUrl + "/sn/posts/comments/fetch-single",
+                        isDemo ? (baseUrl + "/demo-data/sn-posts-comments-fetch-single.json") : (apiUrl + "/sn/posts/comments/fetch-single"),
                         formData,
                         {
                             headers: {

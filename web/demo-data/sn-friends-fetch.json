@@ -1,0 +1,25 @@
+{
+    "status": "success",
+    "message": "Data has been fetched.",
+    "friends": [
+        {
+            "_id": "67b3f625793860502f8d58fe",
+            "user1": {
+                "_id": "67981e4c6d827ab147a35811",
+                "name": "Adnan Afzal",
+                "profileImage": "https://adnan-tech.com/wp-content/uploads/2025/02/channels4_profile.jpg",
+                "unreadMessages": 0,
+                "publicKey": ""
+            },
+            "user2": {
+                "_id": "679d6e7cc52fcb4663fc7bee",
+                "name": "Adnan Afzal",
+                "profileImage": "https://adnan-tech.com/wp-content/uploads/2025/02/channels4_profile.jpg",
+                "unreadMessages": 0
+            },
+            "createdAt": "2025-02-18T02:53:25.000Z"
+        }
+    ],
+    "friendsCount": 1,
+    "selectedFriend": null
+}

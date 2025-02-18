@@ -88,7 +88,7 @@
                     formData.append("_id", id);
 
                     const response = await axios.post(
-                        apiUrl + "/media/update",
+                	isDemo ? (baseUrl + "/demo-data/media-update.json") : (apiUrl + "/media/update"),
                         formData,
                         {
                             headers: {
@@ -116,7 +116,7 @@
                         formData.append("_id", id);
 
                         const response = await axios.post(
-                            apiUrl + "/media/fetch-single",
+                            isDemo ? (baseUrl + "/demo-data/media-fetch-single.json") : (apiUrl + "/media/fetch-single"),
                             formData,
                             {
                                 headers: {

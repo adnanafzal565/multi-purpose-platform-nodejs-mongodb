@@ -46,6 +46,8 @@
             </div>
 
             <script type="text/babel" src="../../public/sn/components/Header.js"></script>
+
+            <section id="page-detail-container"></section>
                 
             <section>
                 <div class="gap gray-bg">
@@ -125,7 +127,7 @@
 
                 try {
                     const response = await axios.post(
-                        apiUrl + "/sn/pages/update",
+                        isDemo ? (baseUrl + "/demo-data/sn-pages-update.json") : (apiUrl + "/sn/pages/update"),
                         formData,
                         {
                             headers: {
@@ -138,7 +140,7 @@
                         swal.fire("Update Page", response.data.message, "success");
 
                         const page = response.data.page;
-                        if (page.image != null) {
+                        if (page && page.image != null) {
                             document.getElementById("cover-photo").setAttribute("src", page.image.path);
                         }
                     } else {
@@ -159,7 +161,7 @@
 
                 try {
                     const response = await axios.post(
-                        apiUrl + "/sn/pages/fetch-single",
+                        isDemo ? (baseUrl + "/demo-data/sn-pages-fetch-single.json") : (apiUrl + "/sn/pages/fetch-single"),
                         formData,
                         {
                             headers: {
@@ -170,6 +172,46 @@
 
                     if (response.data.status == "success") {
                         const pageObj = response.data.page;
+
+                        let html = "";
+                        html += `<div class="feature-photo">
+                            <figure><img src="` + pageObj.image + `" /></figure>
+
+                            <div class="add-btn">
+                                <span class="counter">` + pageObj.followersCount + ` followers</span>
+                                <button type="button" class="mtr-btn" onclick="toggleFollow();"
+                                    id="btn-toggle-follow">
+                                    <span>` + (pageObj.isFollowing ? 'Unfollow' : 'Follow') + `</span>
+                                </button>
+                            </div>
+
+                            <div class="container-fluid">
+                                <div class="row merged">
+                                    <div class="col-lg-10 col-sm-9">
+                                        <div class="timeline-info">
+                                            <ul>
+                                                <li class="admin-name">
+                                                  <h5>` + pageObj.name + `</h5>
+                                                  <span>` + pageObj.user.name + `</span>
+                                                </li>
+                                                <li>
+                                                    <a class="active" href="` + baseUrl + `/sn/pages/detail.html?id=` + pageObj._id + `">Page</a>
+                                                    <a class="" href="` + baseUrl + `/sn/pages/followers.html?id=` + pageObj._id + `">Followers</a>`
+
+                                                    if (globalState.state.user != null && globalState.state.user._id == pageObj.user._id) {
+                                                        html += `<a class="btn btn-link" href="` + baseUrl + `/sn/pages/edit.html?id=` + pageObj._id + `">Edit</a>
+                                                            <button type="button" class="btn btn-danger"
+                                                                onclick="deletePage();">Delete</button>`
+                                                    }
+
+                                                html += `</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`;
+                        document.getElementById("page-detail-container").innerHTML = html;
 
                         const form = document.getElementById("form-edit-page");
                         form.name.value = pageObj.name;

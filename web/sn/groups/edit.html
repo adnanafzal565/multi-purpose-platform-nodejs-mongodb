@@ -101,7 +101,7 @@
 
                     try {
                         const response = await axios.post(
-                            apiUrl + "/sn/groups/update",
+                            isDemo ? (baseUrl + "/demo-data/sn-groups-update.json") : (apiUrl + "/sn/groups/update"),
                             formData,
                             {
                                 headers: {
@@ -135,7 +135,7 @@
 
                     try {
                         const response = await axios.post(
-                            apiUrl + "/sn/groups/fetch-single",
+                            isDemo ? (baseUrl + "/demo-data/sn-groups-fetch-single.json") : (apiUrl + "/sn/groups/fetch-single"),
                             formData,
                             {
                                 headers: {

@@ -1,0 +1,31 @@
+{
+    "status": "success",
+    "message": "Post has been created",
+    "post": {
+        "userId": "67981e4c6d827ab147a35811",
+        "caption": "Check this post with attachment.",
+        "type": "post",
+        "files": [
+            {
+                "name": "padZero.png",
+                "size": 121196,
+                "type": "image/png",
+                "path": "https://adnan-tech.com/wp-content/uploads/2025/02/looking-for-a-developer.png" 
+            }
+        ],
+        "views": 0,
+        "likes": 0,
+        "comments": 0,
+        "shares": 0,
+        "createdAt": "2/14/2025, 11:54:26 PM",
+        "updatedAt": "2/14/2025, 11:54:26 PM",
+        "status": "published",
+        "_id": "67af9162f3b629ea9e187b8f",
+        "user": {
+            "_id": "67981e4c6d827ab147a35811",
+            "name": "Adnan Afzal",
+            "email": "adnan@gmail.com",
+            "profileImage": "https://adnan-tech.com/wp-content/uploads/2025/02/channels4_profile.jpg"
+        }
+    }
+}

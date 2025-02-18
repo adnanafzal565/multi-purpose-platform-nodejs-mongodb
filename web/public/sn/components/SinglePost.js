@@ -27,7 +27,7 @@ function SinglePost({ post }) {
 
         try {
             const response = await axios.post(
-                apiUrl + "/sn/posts/toggle-like",
+                isDemo ? (baseUrl + "/demo-data/sn-posts-toggle-like.json") : (apiUrl + "/sn/posts/toggle-like"),
                 formData,
                 {
                     headers: {
@@ -93,14 +93,14 @@ function SinglePost({ post }) {
                             </figure>
                         </div>
 
-                        <div className="col-md-6">
+                        <div className="col-md-4">
                             <div className="friend-name">
                                 <ins><a href={ href }>{ name }</a></ins>
                                 <span>published: { post.createdAt }</span>
                             </div>
                         </div>
 
-                        <div className="col-md-4">
+                        <div className="col-md-6">
 
                             { (isMyPost() || isMeGroupAdmin()) && (
                                 <>
@@ -120,6 +120,8 @@ function SinglePost({ post }) {
 
                             { (isMeGroupAdmin() && post.status == "pending") && (
                                 <>
+                                    &nbsp;
+
                                     <button type="button" className="btn btn-success btn-sm" onClick={ function () {
                                         acceptPost(post._id);
                                     } }>Accept</button>

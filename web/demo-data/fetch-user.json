@@ -1,0 +1,85 @@
+{
+    "status": "success",
+    "message": "Data has been fetched.",
+    "user": {
+        "_id": "67981e4c6d827ab147a35811",
+        "name": "Adnan Afzal",
+        "email": "adnan@gmail.com",
+        "profileImage": "https://adnan-tech.com/wp-content/uploads/2025/02/channels4_profile.jpg",
+        "unreadNotifications": [],
+        "unreadNotificationsCount": 0
+    },
+    "posts": [{
+        "_id": "67af9162f3b629ea9e187b8f",
+        "user": {
+            "_id": "67981e4c6d827ab147a35811",
+            "name": "Adnan Afzal",
+            "email": "adnan@gmail.com",
+            "profileImage": "https://adnan-tech.com/wp-content/uploads/2025/02/channels4_profile.jpg"
+        },
+        "caption": "Check this post with attachment.",
+        "type": "post",
+        "status": "published",
+        "sharedPost": null,
+        "files": [
+            {
+                "name": "padZero.png",
+                "size": 121196,
+                "type": "image/png",
+                "path": "https://adnan-tech.com/wp-content/uploads/2025/02/looking-for-a-developer.png"
+            }
+        ],
+        "views": 0,
+        "likes": 1,
+        "comments": 1,
+        "shares": 1,
+        "hasLiked": true,
+        "createdAt": "2/14/2025, 11:54:26 PM"
+    },
+    {
+        "_id": "67a547ffc7aa4dd67ae95f11",
+        "user": {
+            "_id": "67981e4c6d827ab147a35811",
+            "name": "Adnan Afzal",
+            "email": "adnan@gmail.com",
+            "profileImage": "https://adnan-tech.com/wp-content/uploads/2025/02/channels4_profile.jpg"
+        },
+        "caption": "hi",
+        "type": "post",
+        "status": "published",
+        "sharedPost": null,
+        "files": [],
+        "views": 0,
+        "likes": 0,
+        "comments": 0,
+        "shares": 0,
+        "hasLiked": false,
+        "createdAt": "2/7/2025, 4:38:39 AM"
+    },
+    {
+        "_id": "67afa47bf3b629ea9e187b9b",
+        "user": {
+            "_id": "67981e4c6d827ab147a35811",
+            "name": "Adnan Afzal",
+            "email": "adnan@gmail.com",
+            "profileImage": "https://adnan-tech.com/wp-content/uploads/2025/02/channels4_profile.jpg"
+        },
+        "caption": "Post in \"The Walking Dead\" page. ",
+        "type": "page",
+        "status": "published",
+        "sharedPost": null,
+        "files": [],
+        "views": 0,
+        "likes": 0,
+        "comments": 0,
+        "shares": 0,
+        "hasLiked": false,
+        "createdAt": "2/15/2025, 1:15:55 AM",
+        "page": {
+            "_id": "67afa42cf3b629ea9e187b9a",
+            "name": "The Walking Dead",
+            "followers": 0,
+            "image": "https://adnan-tech.com/wp-content/uploads/2025/02/MV5BYWQwMGRhNGEtZTNhMy00MzVjLWJhMjItYjcwMDljMTkyNTg2XkEyXkFqcGc@._V1_-scaled.jpg"
+        }
+    }]
+}

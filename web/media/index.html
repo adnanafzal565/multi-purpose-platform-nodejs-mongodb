@@ -108,7 +108,7 @@
                     const formData = new FormData(form);
 
                     const response = await axios.post(
-                        apiUrl + "/media/upload",
+                        isDemo ? (baseUrl + "/demo-data/media-upload.json") : (apiUrl + "/media/upload"),
                         formData,
                         {
                             headers: {
@@ -163,7 +163,7 @@
                             formData.append("_id", id);
 
                             const response = await axios.post(
-                                apiUrl + "/media/delete",
+                                isDemo ? (baseUrl + "/demo-data/media-delete.json") : (apiUrl + "/media/delete"),
                                 formData,
                                 {
                                     headers: {
@@ -191,7 +191,7 @@
                         formData.append("page", page);
 
                         const response = await axios.post(
-                            apiUrl + "/media/fetch",
+                            isDemo ? (baseUrl + "/demo-data/media-fetch.json") : (apiUrl + "/media/fetch"),
                             formData,
                             {
                                 headers: {

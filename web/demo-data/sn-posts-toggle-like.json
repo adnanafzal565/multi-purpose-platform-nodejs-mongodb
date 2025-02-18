@@ -1,0 +1,5 @@
+{
+    "status": "success",
+    "message": "Post has been liked.",
+    "type": "liked"
+}

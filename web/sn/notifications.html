@@ -77,7 +77,7 @@
 
                         try {
                             const response = await axios.post(
-                                apiUrl + "/notifications/fetch",
+                                isDemo ? (baseUrl + "/demo-data/notifications-fetch.json") : (apiUrl + "/notifications/fetch"),
                                 formData,
                                 {
                                     headers: {
@@ -108,6 +108,14 @@
                     function getHref(notification) {
                         if (["friendRequest", "friendRequestRejected", "friendRequestAccepted"].includes(notification.type)) {
                             return baseUrl + "/sn/friends.html";
+                        } else if (["postLiked", "newComment", "newReply"].includes(notification.type)) {
+                            if (notification.post != null) {
+                                return baseUrl + "/sn/post.html?id=" + notification.post._id;
+                            }
+                        } else if (["postShared"].includes(notification.type)) {
+                            if (notification.sharedPost != null) {
+                                return baseUrl + "/sn/post.html?id=" + notification.sharedPost._id;
+                            }
                         }
                         return "";
                     }
@@ -120,6 +128,17 @@
                         getData();
 
                         fetch(baseUrl + "/public/sn/components/Sidebar.js")
+                            .then(function (response) {
+                                response.text().then(function (text) {
+                                    const transpiledCode = Babel.transform(text, {
+                                        presets: ["env", "react"]
+                                    }).code;
+
+                                    eval(transpiledCode);
+                                })
+                            });
+
+                        fetch(baseUrl + "/public/sn/components/RightSidebar.js")
                             .then(function (response) {
                                 response.text().then(function (text) {
                                     const transpiledCode = Babel.transform(text, {
@@ -196,6 +215,8 @@
                                                             </ul>
                                                         </div>
                                                     </div>
+
+                                                    <div class="col-lg-3" id="right-sidebar-app"></div>
                                                 </div>	
                                             </div>
                                         </div>

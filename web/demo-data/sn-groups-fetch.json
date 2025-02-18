@@ -1,0 +1,33 @@
+{
+    "status": "success",
+    "message": "Data has been fetched.",
+    "groups": [
+        {
+            "_id": "67afa6eaf3b629ea9e187b9f",
+            "name": "The Lazy Chef Club",
+            "description": "Love good food but hate complicated recipes? This group is for you! Share quick and easy meal hacks, 5-minute recipes, and microwave magic. Because great food doesn’t have to be a 5-star production. 🍕🔥",
+            "members": 1,
+            "isJoined": false,
+            "image": "https://adnan-tech.com/wp-content/uploads/2025/02/4d66d85cd5df12b4a0ae27de3fe240af5355a45d39ef3f68d188dd6efc9f866b.jpg",
+            "createdAt": "2/15/2025, 1:26:18 AM"
+        },
+        {
+            "_id": "67afa6d6f3b629ea9e187b9e",
+            "name": "Tech Tinkerers & Code Crafters",
+            "description": "A community for developers, hackers, and tech enthusiasts who love building cool things! Share your latest projects, ask coding questions, discuss frameworks, and geek out over tech trends. No gatekeeping, just learning and fun! 💻⚡",
+            "members": 0,
+            "isJoined": false,
+            "image": "https://adnan-tech.com/wp-content/uploads/2025/02/IMG_0115.jpeg",
+            "createdAt": "2/15/2025, 1:25:58 AM"
+        },
+        {
+            "_id": "67afa6a9f3b629ea9e187b9d",
+            "name": "The Midnight Brainstorm",
+            "description": "A creative hub for night owls, thinkers, and dreamers! Whether you're a writer, artist, coder, or just someone with random 2 AM thoughts, this is the place to share ideas, get feedback, and connect with like-minded insomniacs.",
+            "members": 0,
+            "isJoined": false,
+            "image": "https://adnan-tech.com/wp-content/uploads/2025/02/3050926341_fca0936edf_b.jpg",
+            "createdAt": "2/15/2025, 1:25:13 AM"
+        }
+    ]
+}

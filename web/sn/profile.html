@@ -71,6 +71,10 @@
                                             onclick="loadMore();"
                                             id="btn-load-more">Load More</button>
                                     </div>
+
+                                    <div class="col-lg-3" id="right-sidebar-app"></div>
+
+                                    <script type="text/babel" src="../public/sn/components/RightSidebar.js"></script>
                                 </div>
                             </div>
                         </div>
@@ -98,7 +102,7 @@
 
                 try {
                     const response = await axios.post(
-                        apiUrl + "/sn/posts/fetch",
+                        isDemo ? (baseUrl + "/demo-data/sn-posts-fetch.json") : (apiUrl + "/sn/posts/fetch"),
                         formData,
                         {
                             headers: {
@@ -149,7 +153,7 @@
 
                 try {
                     const response = await axios.post(
-                        apiUrl + "/fetch-user",
+                        isDemo ? (baseUrl + "/demo-data/fetch-user.json") : (apiUrl + "/fetch-user"),
                         formData,
                         {
                             headers: {

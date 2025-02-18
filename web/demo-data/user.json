@@ -1,0 +1,94 @@
+{
+    "status": "success",
+    "message": "Data has been fetched.",
+    "user": {
+        "_id": "67981e4c6d827ab147a35811",
+        "name": "Adnan Afzal",
+        "email": "adnan@gmail.com",
+        "profileImage": "https://adnan-tech.com/wp-content/uploads/2025/02/channels4_profile.jpg",
+        "unreadNotifications": [{
+            "_id": "67af93b2f3b629ea9e187b98",
+            "type": "postShared",
+            "content": "'Adnan Afzal' has shared your post 'Check this post.'",
+            "isRead": false,
+            "message": null,
+            "post": {
+                "_id": "67af9162f3b629ea9e187b8f",
+                "caption": "Check this post."
+            },
+            "sharedPost": {
+                "_id": "67af9162f3b629ea9e187b8f",
+                "caption": "Check this post I shared."
+            },
+            "comment": null,
+            "reply": null,
+            "sentBy": {
+                "_id": "67981e4c6d827ab147a35811",
+                "name": "Adnan Afzal",
+                "profileImage": "https://adnan-tech.com/wp-content/uploads/2025/02/channels4_profile.jpg"
+            },
+            "createdAt": "2/15/2025, 12:04:18 AM"
+        }, {
+            "_id": "67af93a3f3b629ea9e187b95",
+            "type": "newReply",
+            "content": "'Adnan Afzal' has replied to your comment 'Nice post.'",
+            "isRead": false,
+            "message": null,
+            "post": {
+                "_id": "67af9162f3b629ea9e187b8f",
+                "caption": "Check this post."
+            },
+            "sharedPost": null,
+            "comment": null,
+            "reply": null,
+            "sentBy": {
+                "_id": "67981e4c6d827ab147a35811",
+                "name": "Adnan Afzal",
+                "profileImage": "https://adnan-tech.com/wp-content/uploads/2025/02/channels4_profile.jpg"
+            },
+            "createdAt": "2/15/2025, 12:04:03 AM"
+        }, {
+            "_id": "67af939cf3b629ea9e187b93",
+            "type": "newComment",
+            "content": "'Adnan Afzal' commented on your post 'Check this post with attachment.'",
+            "isRead": false,
+            "message": null,
+            "post": {
+                "_id": "67af9162f3b629ea9e187b8f",
+                "caption": "Check this post."
+            },
+            "sharedPost": null,
+            "comment": {
+                "_id": "67af939cf3b629ea9e187b92",
+                "comment": "Nice post."
+            },
+            "reply": null,
+            "sentBy": {
+                "_id": "67981e4c6d827ab147a35811",
+                "name": "Adnan Afzal",
+                "profileImage": "https://adnan-tech.com/wp-content/uploads/2025/02/channels4_profile.jpg"
+            },
+            "createdAt": "2/15/2025, 12:03:56 AM"
+        }, {
+            "_id": "67af9396f3b629ea9e187b91",
+            "type": "postLiked",
+            "content": "'Adnan Afzal' liked your post 'Check this post with attachment.'",
+            "isRead": false,
+            "message": null,
+            "post": {
+                "_id": "67af9162f3b629ea9e187b8f",
+                "caption": "Check this post."
+            },
+            "sharedPost": null,
+            "comment": null,
+            "reply": null,
+            "sentBy": {
+                "_id": "67981e4c6d827ab147a35811",
+                "name": "Adnan Afzal",
+                "profileImage": "https://adnan-tech.com/wp-content/uploads/2025/02/channels4_profile.jpg"
+            },
+            "createdAt": "2/15/2025, 12:03:50 AM"
+        }],
+        "unreadNotificationsCount": 4
+    }
+}

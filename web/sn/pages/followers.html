@@ -119,7 +119,7 @@
 
                 try {
                     const response = await axios.post(
-                        apiUrl + "/sn/pages/fetch-followers",
+                        isDemo ? (baseUrl + "/demo-data/sn-pages-fetch-followers.json") : (apiUrl + "/sn/pages/fetch-followers"),
                         formData,
                         {
                             headers: {
@@ -159,7 +159,7 @@
 
                 try {
                     const response = await axios.post(
-                        apiUrl + "/sn/pages/fetch-single",
+                        isDemo ? (baseUrl + "/demo-data/sn-pages-fetch-single.json") : (apiUrl + "/sn/pages/fetch-single"),
                         formData,
                         {
                             headers: {
@@ -194,8 +194,15 @@
                                                 </li>
                                                 <li>
                                                     <a class="" href="` + baseUrl + `/sn/pages/detail.html?id=` + pageObj._id + `">Page</a>
-                                                    <a class="active" href="` + baseUrl + `/sn/pages/followers.html?id=` + pageObj._id + `">Followers</a>
-                                                </li>
+                                                    <a class="active" href="` + baseUrl + `/sn/pages/followers.html?id=` + pageObj._id + `">Followers</a>`
+
+                                                    if (globalState.state.user != null && globalState.state.user._id == pageObj.user._id) {
+                                                        html += `<a class="btn btn-link" href="` + baseUrl + `/sn/pages/edit.html?id=` + pageObj._id + `">Edit</a>
+                                                            <button type="button" class="btn btn-danger"
+                                                                onclick="deletePage();">Delete</button>`
+                                                    }
+                                                    
+                                                html += `</li>
                                             </ul>
                                         </div>
                                     </div>

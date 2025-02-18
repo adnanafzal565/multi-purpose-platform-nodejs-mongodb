@@ -30,7 +30,7 @@ function Sidebar() {
                         <li>
                             <i className="fa fa-bell"></i>&nbsp;
                             <a href={ `${ baseUrl }/sn/notifications.html` }>
-                                Notifications
+                                Notifications&nbsp;
                                 { (state.user?.unreadNotificationsCount || 0) > 0 && (
                                     <>
                                         ({ state.user?.unreadNotificationsCount || 0 })

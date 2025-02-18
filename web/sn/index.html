@@ -134,7 +134,7 @@
 
                     try {
                         const response = await axios.post(
-                            apiUrl + "/sn/posts/fetch",
+                            isDemo ? (baseUrl + "/demo-data/sn-posts-fetch.json") : (apiUrl + "/sn/posts/fetch"),
                             formData,
                             {
                                 headers: {
@@ -197,7 +197,7 @@
 
                     try {
                         const response = await axios.post(
-                            apiUrl + "/sn/posts/create",
+                            isDemo ? (baseUrl + "/demo-data/sn-posts-create.json") : (apiUrl + "/sn/posts/create"),
                             formData,
                             {
                                 headers: {

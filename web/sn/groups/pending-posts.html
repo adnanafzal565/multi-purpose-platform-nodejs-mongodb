@@ -98,7 +98,7 @@
 
                         try {
                             const response = await axios.post(
-                                apiUrl + "/sn/groups/fetch-single",
+                                isDemo ? (baseUrl + "/demo-data/sn-groups-fetch-single.json") : (apiUrl + "/sn/groups/fetch-single"),
                                 formData,
                                 {
                                     headers: {
@@ -136,7 +136,7 @@
 
                         try {
                             const response = await axios.post(
-                                apiUrl + "/sn/groups/fetch-pending-posts",
+                                isDemo ? (baseUrl + "/demo-data/sn-groups-fetch-pending-posts.json") : (apiUrl + "/sn/groups/fetch-pending-posts"),
                                 formData,
                                 {
                                     headers: {
@@ -171,7 +171,7 @@
                                         <figure><img src={ group.image } /></figure>
 
                                         <div className="add-btn">
-                                            <span className="counter">{ group.membersCount } members</span>
+                                            <span className="counter">{ group.membersCount } member(s)</span>
                                         </div>
 
                                         <div className="container-fluid">
@@ -187,7 +187,15 @@
                                                                 <a className="" href={ `${ baseUrl }/sn/groups/members.html?id=${ group._id }` }>Members ({ group.membersCount })</a>
 
                                                                 { group.isAdmin && (
-                                                                    <a className="active" href={ `${ baseUrl }/sn/groups/pending-posts.html?id=${ group._id }` }>Pending Posts ({ group.pendingPostsCount })</a>
+                                                                    <>
+                                                                        <a className="" href={ `${ baseUrl }/sn/groups/pending-posts.html?id=${ group._id }` }>Pending Posts ({ group.pendingPostsCount })</a>
+
+                                                                        <a className="btn btn-link" href={ `${ baseUrl }/sn/groups/edit.html?id=${ group._id }` }>Edit</a>
+                                                                        <button type="button" className="btn btn-danger"
+                                                                            onClick={ function () {
+                                                                                deleteGroup();
+                                                                            } }>Delete</button>
+                                                                    </>
                                                                 ) }
                                                             </li>
                                                         </ul>

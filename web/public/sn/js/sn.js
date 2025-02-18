@@ -1,3 +1,48 @@
+function deleteGroup() {
+    const node = event.target;
+
+    swal.fire({
+        title: "Delete Group",
+        text: "All the posts of this group will be deleted as well.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes, delete it",
+    }).then(async function (result) {
+        /* Read more about isConfirmed, isDenied below */
+        if (result.isConfirmed) {
+            node.setAttribute("disabled", "disabled");
+
+            const formData = new FormData();
+            formData.append("_id", id);
+
+            try {
+                const response = await axios.post(
+                    isDemo ? (baseUrl + "/demo-data/sn-groups-delete.json") : (apiUrl + "/sn/groups/delete"),
+                    formData,
+                    {
+                        headers: {
+                            Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                        }
+                    }
+                )
+
+                if (response.data.status == "success") {
+                    swal.fire("Delete Group", response.data.message, "success")
+                        .then(function () {
+                            window.location.href = baseUrl + "/sn/groups/index.html";
+                        });
+                } else {
+                    swal.fire(response.data.title, response.data.message, response.data.status);
+                }
+            } catch (exp) {
+                // swal.fire("Error", exp.message, "error")
+            } finally {
+                node.removeAttribute("disabled");
+            }
+        }
+    });
+}
+
 async function declinePost(id) {
     const node = event.target;
     node.setAttribute("disabled", "disabled");
@@ -7,7 +52,7 @@ async function declinePost(id) {
 
     try {
         const response = await axios.post(
-            apiUrl + "/sn/posts/decline",
+            isDemo ? (baseUrl + "/demo-data/sn-posts-decline.json") : (apiUrl + "/sn/posts/decline"),
             formData,
             {
                 headers: {
@@ -39,7 +84,7 @@ async function acceptPost(id) {
 
     try {
         const response = await axios.post(
-            apiUrl + "/sn/posts/accept",
+            isDemo ? (baseUrl + "/demo-data/sn-posts-accept.json") : (apiUrl + "/sn/posts/accept"),
             formData,
             {
                 headers: {
@@ -71,7 +116,7 @@ async function toggleJoin(id, callBack = null) {
 
     try {
         const response = await axios.post(
-            apiUrl + "/sn/groups/toggle-join",
+            isDemo ? (baseUrl + "/demo-data/sn-groups-toggle-join.json") : (apiUrl + "/sn/groups/toggle-join"),
             formData,
             {
                 headers: {
@@ -120,12 +165,54 @@ function renderSingleFollower(follower) {
     return html;
 }
 
+async function toggleFollow() {
+    const node = event.currentTarget;
+    node.setAttribute("disabled", "disabled");
+
+    const formData = new FormData();
+    formData.append("_id", id);
+
+    try {
+        const response = await axios.post(
+            isDemo ? (baseUrl + "/demo-data/sn-pages-toggle-follow.json") : (apiUrl + "/sn/pages/toggle-follow"),
+            formData,
+            {
+                headers: {
+                    Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                }
+            }
+        )
+
+        if (response.data.status == "success") {
+            if (pageObj != null) {
+                if (pageObj.isFollowing) {
+                    document.querySelector("#btn-toggle-follow span").innerHTML = "Follow";
+                } else {
+                    document.querySelector("#btn-toggle-follow span").innerHTML = "Unfollow";
+                }
+                pageObj.isFollowing = !pageObj.isFollowing;
+            }
+        } else {
+            swal.fire(response.data.title, response.data.message, response.data.status);
+        }
+    } catch (exp) {
+        // swal.fire("Error", exp.message, "error")
+    } finally {
+        node.removeAttribute("disabled");
+    }
+}
+
 function renderSinglePage(page) {
     let html = "";
-    html += `<li style="margin-right: 10px;">
+    html += `<li style="margin-right: 5px;">
         <div class="f-page">
             <figure>
-                <a href="` + baseUrl + `/sn/pages/detail.html?id=` + page._id + `" title=""><img src="` + page.image + `" alt=""></a>
+                <a href="` + baseUrl + `/sn/pages/detail.html?id=` + page._id + `" title="">
+                    <img src="` + page.image + `" alt=""
+                        style="height: 120px;
+                            object-fit: cover;" />
+                </a>
+                
                 <div class="dropdown pgs">`
                     if (page.isFollowed) {
                         html += `<button class="btn dropdown-toggle" type="button" id="dropdownMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -152,7 +239,7 @@ async function toggleLike(id, hasLiked) {
     const node = event.currentTarget;
     let counter = parseInt(node.nextElementSibling.innerHTML);
 
-    if (hasLiked) {
+    if (hasLiked && counter > 0) {
         counter--;
     } else {
         counter++;
@@ -165,7 +252,7 @@ async function toggleLike(id, hasLiked) {
 
     try {
         const response = await axios.post(
-            apiUrl + "/sn/posts/toggle-like",
+            isDemo ? (baseUrl + "/demo-data/sn-posts-toggle-like.json") : (apiUrl + "/sn/posts/toggle-like"),
             formData,
             {
                 headers: {
@@ -194,6 +281,7 @@ async function showPostSharers(id, page = 1) {
     postSharersPage = page;
 
     $("#post-sharers-modal").modal("show");
+    $(".modal-backdrop").remove();
     $("#post-sharers-modal .modal-body .loading").show();
 
     const formData = new FormData();
@@ -202,7 +290,7 @@ async function showPostSharers(id, page = 1) {
 
     try {
         const response = await axios.post(
-            apiUrl + "/sn/posts/fetch-sharers",
+            isDemo ? (baseUrl + "/demo-data/sn-posts-fetch-sharers.json") : (apiUrl + "/sn/posts/fetch-sharers"),
             formData,
             {
                 headers: {
@@ -247,6 +335,7 @@ async function showPostLikers(id, page = 1) {
     postLikersPage = page;
     
     $("#post-likers-modal").modal("show");
+    $(".modal-backdrop").remove();
     $("#post-likers-modal .modal-body").html("Loading...");
 
     const formData = new FormData();
@@ -255,7 +344,7 @@ async function showPostLikers(id, page = 1) {
 
     try {
         const response = await axios.post(
-            apiUrl + "/sn/posts/fetch-likers",
+            isDemo ? (baseUrl + "/demo-data/sn-posts-fetch-likers.json") : (apiUrl + "/sn/posts/fetch-likers"),
             formData,
             {
                 headers: {
@@ -300,7 +389,7 @@ async function postComment() {
 
     try {
         const response = await axios.post(
-            apiUrl + "/sn/posts/comments/send",
+            isDemo ? (baseUrl + "/demo-data/sn-posts-comments-send.json") : (apiUrl + "/sn/posts/comments/send"),
             formData,
             {
                 headers: {
@@ -340,7 +429,7 @@ async function postComments(_id, page = 1) {
 
     try {
         const response = await axios.post(
-            apiUrl + "/sn/posts/comments/fetch",
+            isDemo ? (baseUrl + "/demo-data/sn-posts-comments-fetch.json") : (apiUrl + "/sn/posts/comments/fetch"),
             formData,
             {
                 headers: {
@@ -399,7 +488,7 @@ function deleteReply(id) {
 
             try {
                 const response = await axios.post(
-                    apiUrl + "/sn/posts/replies/delete",
+                    isDemo ? (baseUrl + "/demo-data/sn-posts-replies-delete.json") : (apiUrl + "/sn/posts/replies/delete"),
                     formData,
                     {
                         headers: {
@@ -435,7 +524,7 @@ function deleteComment(id) {
 
             try {
                 const response = await axios.post(
-                    apiUrl + "/sn/posts/comments/delete",
+                    isDemo ? (baseUrl + "/demo-data/sn-posts-comments-delete.json") : (apiUrl + "/sn/posts/comments/delete"),
                     formData,
                     {
                         headers: {
@@ -541,7 +630,7 @@ function deletePost(id) {
 
             try {
                 const response = await axios.post(
-                    apiUrl + "/sn/posts/delete",
+                    isDemo ? (baseUrl + "/demo-data/sn-posts-delete.json") : (apiUrl + "/sn/posts/delete"),
                     formData,
                     {
                         headers: {
@@ -587,7 +676,7 @@ function deletePostFile(id, path) {
 
             try {
                 const response = await axios.post(
-                    apiUrl + "/sn/posts/remove-file",
+                    isDemo ? (baseUrl + "/demo-data/sn-posts-remove-file.json") : (apiUrl + "/sn/posts/remove-file"),
                     formData,
                     {
                         headers: {
@@ -598,12 +687,13 @@ function deletePostFile(id, path) {
 
                 if (response.data.status == "success") {
                     node.previousElementSibling.remove();
+                    node.remove();
                 } else {
                     swal.fire("Error", response.data.message, "error")
+                    node.removeAttribute("disabled");
                 }
             } catch (exp) {
                 // swal.fire("Error", exp.message, "error")
-            } finally {
                 node.removeAttribute("disabled");
             }
         }
@@ -631,7 +721,7 @@ function sharePost(id) {
 
             try {
                 const response = await axios.post(
-                    apiUrl + "/sn/posts/share",
+                    isDemo ? (baseUrl + "/demo-data/sn-posts-share.json") : (apiUrl + "/sn/posts/share"),
                     formData,
                     {
                         headers: {

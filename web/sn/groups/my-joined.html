@@ -88,7 +88,7 @@
 
                     try {
                         const response = await axios.post(
-                            apiUrl + "/sn/groups/fetch-my-joined",
+                            isDemo ? (baseUrl + "/demo-data/sn-groups-fetch.json") : (apiUrl + "/sn/groups/fetch-my-joined"),
                             formData,
                             {
                                 headers: {

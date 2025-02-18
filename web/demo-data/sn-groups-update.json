@@ -1,0 +1,13 @@
+{
+    "status": "success",
+    "message": "Group has been updated.",
+    "group": {
+        "_id": "67afa6eaf3b629ea9e187b9f",
+        "name": "The Lazy Chef Club",
+        "description": "Love good food but hate complicated recipes? This group is for you! Share quick and easy meal hacks, 5-minute recipes, and microwave magic. Because great food doesn’t have to be a 5-star production. 🍕🔥",
+        "members": 1,
+        "isJoined": false,
+        "image": "https://adnan-tech.com/wp-content/uploads/2025/02/4d66d85cd5df12b4a0ae27de3fe240af5355a45d39ef3f68d188dd6efc9f866b.jpg",
+        "createdAt": "2/15/2025, 1:26:18 AM"
+    }
+}

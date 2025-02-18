@@ -4,6 +4,7 @@ const publicKeyKey = "multi_purpose_platform_public_key";
 const baseUrl = "http://localhost:8888/multi-purpose-platform-nodejs-mongodb/web";
 const apiUrl = "http://localhost:3000";
 const appName = "Multi-purpose platform";
+const isDemo = true;
 
 const globalState = {
     state: {
@@ -100,7 +101,7 @@ window.addEventListener("load", function () {
     //     href[a].setAttribute("href", href[a].getAttribute("data-href"));
     // }
 
-    if (typeof io !== "undefined") {
+    if (typeof io !== "undefined" && !isDemo) {
         socketIO = io(apiUrl);
     
         socketIO.on("newMessage", function (data) {

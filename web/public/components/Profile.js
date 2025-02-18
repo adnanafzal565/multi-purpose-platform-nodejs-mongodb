@@ -6,7 +6,7 @@ function Profile() {
     const [profileImage, setProfileImage] = React.useState("")
     const [isSaving, setIsSaving] = React.useState(false)
 
-    React.useEffect(function () {
+   // React.useEffect(function () {
         globalState.listen(function (newState) {
             setState(newState)
 
@@ -22,12 +22,18 @@ function Profile() {
             setEmail(window.userObject.email)
             setProfileImage(window.userObject.profile_image)
         }*/
-    }, [])
+   // }, [])
 
     async function saveProfile() {
+	event.preventDefault()
+
+	if (isDemo) {
+		swal.fire("Profile", "Profile has been updated.", "success");
+		return;
+	}
+
         try {
-            event.preventDefault()
-            setIsSaving(true)
+		setIsSaving(true)
 
             const formData = new FormData(event.target)
             const response = await axios.post(

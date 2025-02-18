@@ -1,0 +1,34 @@
+{
+    "status": "success",
+    "message": "Data has been fetched.",
+    "users": [
+        {
+            "_id": "679d6e7cc52fcb4663fc7bee",
+            "name": "Adnan",
+            "profileImage": "https://adnan-tech.com/wp-content/uploads/2025/02/channels4_profile.jpg",
+            "isFriend": false,
+            "memberSince": "2/1/2025, 5:44:44 AM"
+        },
+        {
+            "_id": "679d6e7cc52fcb4663fc7bee",
+            "name": "Afzal",
+            "profileImage": "https://adnan-tech.com/wp-content/uploads/2025/02/channels4_profile.jpg",
+            "isFriend": false,
+            "memberSince": "2/1/2025, 5:44:44 AM"
+        },
+        {
+            "_id": "679d6e7cc52fcb4663fc7bee",
+            "name": "Khalid",
+            "profileImage": "https://adnan-tech.com/wp-content/uploads/2025/02/channels4_profile.jpg",
+            "isFriend": false,
+            "memberSince": "2/1/2025, 5:44:44 AM"
+        },
+        {
+            "_id": "679d6e7cc52fcb4663fc7bee",
+            "name": "Tariq",
+            "profileImage": "https://adnan-tech.com/wp-content/uploads/2025/02/channels4_profile.jpg",
+            "isFriend": false,
+            "memberSince": "2/1/2025, 5:44:44 AM"
+        }
+    ]
+}

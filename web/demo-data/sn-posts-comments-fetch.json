@@ -1,0 +1,29 @@
+{
+    "status": "success",
+    "message": "Comments has been fetched.",
+    "comments": [
+        {
+            "_id": "67af939cf3b629ea9e187b92",
+            "user": {
+                "_id": "67981e4c6d827ab147a35811",
+                "name": "Adnan Afzal",
+                "profileImage": "https://adnan-tech.com/wp-content/uploads/2025/02/channels4_profile.jpg"
+            },
+            "comment": "Nice post.",
+            "replies": 1,
+            "repliesArr": [
+                {
+                    "_id": "67af93a3f3b629ea9e187b94",
+                    "user": {
+                        "_id": "67981e4c6d827ab147a35811",
+                        "name": "Adnan Afzal",
+                        "profileImage": "https://adnan-tech.com/wp-content/uploads/2025/02/channels4_profile.jpg"
+                    },
+                    "reply": "Thanks.",
+                    "createdAt": "2/15/2025, 12:04:03 AM"
+                }
+            ],
+            "createdAt": "2/15/2025, 12:03:56 AM"
+        }
+    ]
+}

@@ -34,7 +34,6 @@
         <script src="../public/sn/js/script.js"></script>
         <script src="../public/sn/js/main.min.js"></script>
         <script src="../public/sn/js/sn.js"></script>
-
     </head>
 
     <body>
@@ -78,7 +77,7 @@
 
                         try {
                             const response = await axios.post(
-                                apiUrl + "/users/search",
+                                isDemo ? (baseUrl + "/demo-data/users-search.json") : (apiUrl + "/users/search"),
                                 formData,
                                 {
                                     headers: {
@@ -115,7 +114,7 @@
 
                         try {
                             const response = await axios.post(
-                                apiUrl + "/sn/friends/requests/send",
+                                isDemo ? (baseUrl + "/demo-data/sn-friends-requests-send.json") : (apiUrl + "/sn/friends/requests/send"),
                                 formData,
                                 {
                                     headers: {
@@ -144,6 +143,17 @@
                         getData();
 
                         fetch(baseUrl + "/public/sn/components/Sidebar.js")
+                            .then(function (response) {
+                                response.text().then(function (text) {
+                                    const transpiledCode = Babel.transform(text, {
+                                        presets: ["env", "react"]
+                                    }).code;
+
+                                    eval(transpiledCode);
+                                })
+                            });
+
+                        fetch(baseUrl + "/public/sn/components/RightSidebar.js")
                             .then(function (response) {
                                 response.text().then(function (text) {
                                     const transpiledCode = Babel.transform(text, {
@@ -192,9 +202,9 @@
 
                                                             <ul className="nearby-contct">
 
-                                                                { users.map(function (u) {
+                                                                { users.map(function (u, index) {
                                                                     return (
-                                                                        <li key={ `user-${ u._id }` }>
+                                                                        <li key={ `user-${ index }-${ u._id }` }>
                                                                             <div className="nearly-pepls">
                                                                                 <figure>
                                                                                     <a href={ `${ baseUrl }/sn/profile.html?id=${ u._id }` }>
@@ -234,88 +244,9 @@
                                                         </div>
                                                     </div>
 
-                                                    {/*<div className="col-lg-3">
-                                                        <aside className="sidebar static">
-                                                            <div className="widget friend-list stick-widget">
-                                                                <h4 className="widget-title">Friends</h4>
-                                                                <div id="searchDir"></div>
-                                                                <ul id="people-list" className="friendz-list">
-                                                                    <li>
-                                                                        <figure>
-                                                                            <img src="images/resources/friend-avatar.jpg" alt="">
-                                                                            <span className="status f-online"></span>
-                                                                        </figure>
-                                                                        <div className="friendz-meta">
-                                                                            <a href="time-line.html">bucky barnes</a>
-                                                                            <i><a href="https://wpkixx.com/cdn-cgi/l/email-protection" className="__cf_email__" data-cfemail="addac4c3d9c8dfdec2c1c9c8dfedcac0ccc4c183cec2c0">[email&#160;protected]</a></i>
-                                                                        </div>
-                                                                    </li>
-                                                                </ul>
-                                                                <div className="chat-box">
-                                                                    <div className="chat-head">
-                                                                        <span className="status f-online"></span>
-                                                                        <h6>Bucky Barnes</h6>
-                                                                        <div className="more">
-                                                                            <span><i className="ti-more-alt"></i></span>
-                                                                            <span className="close-mesage"><i className="ti-close"></i></span>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div className="chat-list">
-                                                                        <ul>
-                                                                            <li className="me">
-                                                                                <div className="chat-thumb"><img src="images/resources/chatlist1.jpg" alt=""></div>
-                                                                                <div className="notification-event">
-                                                                                    <span className="chat-message-item">
-                                                                                        Hi James! Please remember to buy the food for tomorrow! I’m gonna be handling the gifts and Jake’s gonna get the drinks
-                                                                                    </span>
-                                                                                    <span className="notification-date"><time datetime="2004-07-24T18:18" className="entry-date updated">Yesterday at 8:10pm</time></span>
-                                                                                </div>
-                                                                            </li>
-                                                                            <li className="you">
-                                                                                <div className="chat-thumb"><img src="images/resources/chatlist2.jpg" alt=""></div>
-                                                                                <div className="notification-event">
-                                                                                    <span className="chat-message-item">
-                                                                                        Hi James! Please remember to buy the food for tomorrow! I’m gonna be handling the gifts and Jake’s gonna get the drinks
-                                                                                    </span>
-                                                                                    <span className="notification-date"><time datetime="2004-07-24T18:18" className="entry-date updated">Yesterday at 8:10pm</time></span>
-                                                                                </div>
-                                                                            </li>
-                                                                            <li className="me">
-                                                                                <div className="chat-thumb"><img src="images/resources/chatlist1.jpg" alt=""></div>
-                                                                                <div className="notification-event">
-                                                                                    <span className="chat-message-item">
-                                                                                        Hi James! Please remember to buy the food for tomorrow! I’m gonna be handling the gifts and Jake’s gonna get the drinks
-                                                                                    </span>
-                                                                                    <span className="notification-date"><time datetime="2004-07-24T18:18" className="entry-date updated">Yesterday at 8:10pm</time></span>
-                                                                                </div>
-                                                                            </li>
-                                                                        </ul>
-                                                                        <form className="text-box">
-                                                                            <textarea placeholder="Post enter to post..."></textarea>
-                                                                            <div className="add-smiles">
-                                                                                <span title="add icon" className="em em-expressionless"></span>
-                                                                            </div>
-                                                                            <div className="smiles-bunch">
-                                                                                <i className="em em---1"></i>
-                                                                                <i className="em em-smiley"></i>
-                                                                                <i className="em em-anguished"></i>
-                                                                                <i className="em em-laughing"></i>
-                                                                                <i className="em em-angry"></i>
-                                                                                <i className="em em-astonished"></i>
-                                                                                <i className="em em-blush"></i>
-                                                                                <i className="em em-disappointed"></i>
-                                                                                <i className="em em-worried"></i>
-                                                                                <i className="em em-kissing_heart"></i>
-                                                                                <i className="em em-rage"></i>
-                                                                                <i className="em em-stuck_out_tongue"></i>
-                                                                            </div>
-                                                                            <button type="submit"></button>
-                                                                        </form>
-                                                                    </div>
-                                                                </div>
-                                                            </div>							
-                                                        </aside>
-                                                    </div>*/}
+                                                    <div className="col-lg-3" id="right-sidebar-app">
+                                                        
+                                                    </div>
                                                 </div>	
                                             </div>
                                         </div>

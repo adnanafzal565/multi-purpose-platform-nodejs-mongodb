@@ -107,7 +107,7 @@
 
                 try {
                     const response = await axios.post(
-                        apiUrl + "/sn/pages/fetch",
+                        isDemo ? (baseUrl + "/demo-data/sn-pages-fetch.json") : (apiUrl + "/sn/pages/fetch"),
                         formData,
                         {
                             headers: {

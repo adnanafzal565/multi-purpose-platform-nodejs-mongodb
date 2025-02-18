@@ -115,7 +115,7 @@
 
                 try {
                     const response = await axios.post(
-                        apiUrl + "/sn/groups/create",
+                        isDemo ? (baseUrl + "/demo-data/sn-groups-create.json") : (apiUrl + "/sn/groups/create"),
                         formData,
                         {
                             headers: {

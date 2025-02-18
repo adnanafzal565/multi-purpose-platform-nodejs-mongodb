@@ -84,7 +84,7 @@
 
                         try {
                             const response = await axios.post(
-                                apiUrl + "/sn/friends/fetch",
+                                isDemo ? (baseUrl + "/demo-data/sn-friends-fetch.json") : (apiUrl + "/sn/friends/fetch"),
                                 formData,
                                 {
                                     headers: {
@@ -154,7 +154,7 @@
 
                         try {
                             const response = await axios.post(
-                                apiUrl + "/chats/fetch",
+                                isDemo ? (baseUrl + "/demo-data/chats-fetch.json") : (apiUrl + "/chats/fetch"),
                                 formData,
                                 {
                                     headers: {
@@ -171,7 +171,9 @@
                                 const tempArr = [...messages];
                                 for (let a = 0; a < messagesArr.length; a++) {
                                     if (typeof premium !== "undefined") {
-                                        messagesArr[a].message = await premium.decryptMessage(messagesArr[a].message);
+                                        if (!isDemo) {
+                                            messagesArr[a].message = await premium.decryptMessage(messagesArr[a].message);
+                                        }
                                     }
                                     tempArr.unshift(messagesArr[a]);
                                 }
@@ -217,16 +219,18 @@
 
                         const message = form.message.value;
                         if (typeof premium !== "undefined") {
-                            const messageForReceiver = await premium.encryptMessage(selectedUser.publicKey || "", message);
-                            const messageForSender = await premium.encryptMessage(localStorage.getItem(publicKeyKey) || "", message);
+                            if (!isDemo) {
+                                const messageForReceiver = await premium.encryptMessage(selectedUser.publicKey || "", message);
+                                const messageForSender = await premium.encryptMessage(localStorage.getItem(publicKeyKey) || "", message);
 
-                            formData.append("messageForReceiver", messageForReceiver);
-                            formData.append("messageForSender", messageForSender);
+                                formData.append("messageForReceiver", messageForReceiver);
+                                formData.append("messageForSender", messageForSender);
+                            }
                         }
 
                         try {
                             const response = await axios.post(
-                                apiUrl + "/chats/send",
+                                isDemo ? (baseUrl + "/demo-data/chats-send.json") : (apiUrl + "/chats/send"),
                                 formData,
                                 {
                                     headers: {
@@ -240,12 +244,18 @@
                                 if (messageObj != null) {
                                     const tempArr = [...messages];
                                     if (typeof premium !== "undefined") {
-                                        premium.decryptMessage(messageObj.message)
-                                            .then(function (decrypted) {
-                                                messageObj.message = decrypted;
-                                                tempArr.push(messageObj);
-                                                setMessages(tempArr);
-                                            });
+                                        if (isDemo) {
+                                            messageObj.message = form.message.value || "";
+                                            tempArr.push(messageObj);
+                                            setMessages(tempArr);
+                                        } else {
+                                            premium.decryptMessage(messageObj.message)
+                                                .then(function (decrypted) {
+                                                    messageObj.message = decrypted;
+                                                    tempArr.push(messageObj);
+                                                    setMessages(tempArr);
+                                                });
+                                        }
                                     } else {
                                         tempArr.push(messageObj);
                                         setMessages(tempArr);
@@ -311,10 +321,6 @@
                     React.useEffect(function () {
                         globalState.listen(async function (newState, updatedState) {
                             setState(newState);
-
-                            if (typeof updatedState.user !== "undefined") {
-                                getData();
-                            }
                         });
 
                         fetch(baseUrl + "/public/sn/components/Sidebar.js")
@@ -327,6 +333,19 @@
                                     eval(transpiledCode);
                                 })
                             });
+
+                        fetch(baseUrl + "/public/sn/components/RightSidebar.js")
+                            .then(function (response) {
+                                response.text().then(function (text) {
+                                    const transpiledCode = Babel.transform(text, {
+                                        presets: ["env", "react"]
+                                    }).code;
+
+                                    eval(transpiledCode);
+                                })
+                            });
+
+                        getData();
                     }, []);
 
                     return (
@@ -454,6 +473,10 @@
                                                                 </div>
                                                             </div>
                                                         </div>
+                                                    </div>
+
+                                                    <div className="col-lg-3" id="right-sidebar-app">
+                                                        
                                                     </div>
                                                 </div>	
                                             </div>

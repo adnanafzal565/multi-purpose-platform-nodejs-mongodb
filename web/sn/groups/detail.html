@@ -97,7 +97,7 @@
 
                         try {
                             const response = await axios.post(
-                                apiUrl + "/sn/groups/toggle-join",
+                                isDemo ? (baseUrl + "/demo-data/sn-groups-toggle-join.json") : (apiUrl + "/sn/groups/toggle-join"),
                                 formData,
                                 {
                                     headers: {
@@ -132,51 +132,6 @@
                         }
                     }
 
-                    function deleteGroup() {
-                        const node = event.target;
-
-                        swal.fire({
-                            title: "Delete Group",
-                            text: "All the posts of this group will be deleted as well.",
-                            icon: "warning",
-                            showCancelButton: true,
-                            confirmButtonText: "Yes, delete it",
-                        }).then(async function (result) {
-                            /* Read more about isConfirmed, isDenied below */
-                            if (result.isConfirmed) {
-                                node.setAttribute("disabled", "disabled");
-
-                                const formData = new FormData();
-                                formData.append("_id", id);
-
-                                try {
-                                    const response = await axios.post(
-                                        apiUrl + "/sn/groups/delete",
-                                        formData,
-                                        {
-                                            headers: {
-                                                Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
-                                            }
-                                        }
-                                    )
-
-                                    if (response.data.status == "success") {
-                                        swal.fire("Delete Group", response.data.message, "success")
-                                            .then(function () {
-                                                window.location.href = baseUrl + "/sn/groups/index.html";
-                                            });
-                                    } else {
-                                        swal.fire(response.data.title, response.data.message, response.data.status);
-                                    }
-                                } catch (exp) {
-                                    // swal.fire("Error", exp.message, "error")
-                                } finally {
-                                    node.removeAttribute("disabled");
-                                }
-                            }
-                        });
-                    }
-
                     async function getData() {
                         setLoading(true)
 
@@ -186,7 +141,7 @@
 
                         try {
                             const response = await axios.post(
-                                apiUrl + "/sn/groups/fetch-single",
+                                isDemo ? (baseUrl + "/demo-data/sn-groups-fetch-single.json") : (apiUrl + "/sn/groups/fetch-single"),
                                 formData,
                                 {
                                     headers: {
@@ -228,7 +183,7 @@
 
                         try {
                             const response = await axios.post(
-                                apiUrl + "/sn/groups/fetch-posts",
+                                isDemo ? (baseUrl + "/demo-data/sn-posts-fetch.json") : (apiUrl + "/sn/groups/fetch-posts"),
                                 formData,
                                 {
                                     headers: {
@@ -279,7 +234,7 @@
 
                         try {
                             const response = await axios.post(
-                                apiUrl + "/sn/posts/create",
+                                isDemo ? (baseUrl + "/demo-data/sn-posts-create.json") : (apiUrl + "/sn/posts/create"),
                                 formData,
                                 {
                                     headers: {
@@ -321,7 +276,7 @@
                                         <figure><img src={ group.image } /></figure>
 
                                         <div className="add-btn">
-                                            <span className="counter">{ group.membersCount } members</span>
+                                            <span className="counter">{ group.membersCount } member(s)</span>
                                             <button type="button" className="mtr-btn" onClick={ function () {
                                                 toggleJoin();
                                             } }
