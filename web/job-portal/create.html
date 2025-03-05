@@ -131,18 +131,10 @@
                                         onChange={ function () {
                                             setNature(event.target.value);
                                         } }>
-                                        {/*<option value="freelance">Freelance</option>*/}
                                         <option value="fullTime">Full-time</option>
                                         <option value="partTime">Part-time</option>
                                     </select>
                                 </div>
-
-                                { nature == 'freelance' && (
-                                    <div className="form-group mb-3">
-                                        <label className="form-label">Deadline (in days)</label>
-                                        <input type="number" min="1" name="deadline" className="form-control" />
-                                    </div>
-                                ) }
 
                                 <div className="row">
                                     <div className="col-md-6">
@@ -154,7 +146,7 @@
 
                                     <div className="col-md-6">
                                         <div className="form-group">
-                                            <label className="form-label">{ nature == 'freelance' ? 'Price' : 'Salary' }</label>
+                                            <label className="form-label">Salary</label>
                                             <input type="number" min="0" name="amount" className="form-control" />
                                         </div>
                                     </div>
@@ -165,12 +157,10 @@
                                     <textarea name="description" className="form-control"></textarea>
                                 </div>
 
-                                { nature != 'freelance' && (
-                                    <div className="form-group">
-                                        <label className="form-label">Vacancies</label>
-                                        <input type="number" min="1" name="vacancies" className="form-control" defaultValue="1" />
-                                    </div>
-                                ) }
+                                <div className="form-group">
+                                    <label className="form-label">Vacancies</label>
+                                    <input type="number" min="1" name="vacancies" className="form-control" defaultValue="1" />
+                                </div>
 
                                 <div className="form-group mt-3 mb-3">
                                     <label className="form-label">Status</label>

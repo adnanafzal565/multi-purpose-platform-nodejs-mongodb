@@ -4,7 +4,7 @@ const publicKeyKey = "multi_purpose_platform_public_key";
 const baseUrl = "http://localhost:8888/multi-purpose-platform-nodejs-mongodb/web";
 const apiUrl = "http://localhost:3000";
 const appName = "Multi-purpose platform";
-const isDemo = true;
+const isDemo = false;
 
 const globalState = {
     state: {
@@ -63,6 +63,7 @@ loadJS(baseUrl + "/public/js/premium.js");
 loadCSS(baseUrl + "/public/RichText/richtext.min.css");
 loadJS(baseUrl + "/public/RichText/jquery.richtext.min.js");
 loadJS(baseUrl + "/public/js/html-react-parser.min.js");
+// loadJS(baseUrl + "/public/components/DynamicTag.js", "text/babel");
 // loadJS(baseUrl + "/public/job-portal/SingleJob.js", "text/babel");
 // loadJS(baseUrl + "/public/components/SingleBlog.js", "text/babel");
 

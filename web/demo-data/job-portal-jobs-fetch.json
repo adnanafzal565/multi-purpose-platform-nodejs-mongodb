@@ -1,0 +1,26 @@
+{
+    "status": "success",
+    "message": "Data has been fetched.",
+    "jobs": [
+        {
+            "_id": "67b7aa9162e53098dca5443e",
+            "title": "Test",
+            "type": "remote",
+            "location": "",
+            "nature": "fullTime",
+            "deadline": 1,
+            "currency": "USD",
+            "amount": 1800,
+            "description": "<div>Test</div>",
+            "vacancies": 1,
+            "applications": 1,
+            "bids": 0,
+            "user": {
+                "_id": "67981e4c6d827ab147a35811",
+                "name": "Adnan Afzal",
+                "profileImage": "https://adnan-tech.com/wp-content/uploads/2025/02/channels4_profile.jpg"
+            },
+            "createdAt": "2/21/2025, 3:20:01 AM"
+        }
+    ]
+}

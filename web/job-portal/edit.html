@@ -168,19 +168,10 @@
                                                     tempObj.nature = event.target.value;
                                                     setJob(tempObj);
                                                 } }>
-                                                {/*<option value="freelance">Freelance</option>*/}
                                                 <option value="fullTime">Full-time</option>
                                                 <option value="partTime">Part-time</option>
                                             </select>
                                         </div>
-
-                                        { job.nature == 'freelance' && (
-                                            <div className="form-group mb-3">
-                                                <label className="form-label">Deadline (in days)</label>
-                                                <input type="number" min="1" name="deadline" className="form-control"
-                                                    defaultValue={ job.deadline } />
-                                            </div>
-                                        ) }
 
                                         <div className="row">
                                             <div className="col-md-6">
@@ -193,7 +184,7 @@
 
                                             <div className="col-md-6">
                                                 <div className="form-group">
-                                                    <label className="form-label">{ job.nature == 'freelance' ? 'Price' : 'Salary' }</label>
+                                                    <label className="form-label">Salary</label>
                                                     <input type="number" min="0" name="amount" className="form-control"
                                                         defaultValue={ job.amount } />
                                                 </div>
@@ -205,12 +196,10 @@
                                             <textarea name="description" className="form-control" defaultValue={ job.description }></textarea>
                                         </div>
 
-                                        { job.nature != 'freelance' && (
-                                            <div className="form-group">
-                                                <label className="form-label">Vacancies</label>
-                                                <input type="number" min="1" name="vacancies" className="form-control" defaultValue={ job.vacancies } />
-                                            </div>
-                                        ) }
+                                        <div className="form-group">
+                                            <label className="form-label">Vacancies</label>
+                                            <input type="number" min="1" name="vacancies" className="form-control" defaultValue={ job.vacancies } />
+                                        </div>
 
                                         <div className="form-group mt-3 mb-3">
                                             <label className="form-label">Status</label>

@@ -1,0 +1,188 @@
+{
+    "status": "success",
+    "message": "Data has been fetched.",
+    "blogs": [
+        {
+            "_id": "67b698638c68819c0a3c3ae8",
+            "title": "Test 3",
+            "slug": "test-3",
+            "featuredImage": {
+                "path": "https://adnan-tech.com/wp-content/uploads/2020/06/Realtime-Web-based-Chat-in-Firebase-Javascript.jpg",
+                "name": "de8cbda4-3f77-4394-8f79-60a5b2aa1f2c.JPG",
+                "size": 141665,
+                "type": "image/jpeg"
+            },
+            "excerpt": "test 3",
+            "content": "Test 3",
+            "status": "active",
+            "categories": [
+                "Game of thrones"
+            ],
+            "tags": [
+                ""
+            ],
+            "views": 0,
+            "comments": 0,
+            "user": {
+                "_id": "67a18d108508631a07c57c54",
+                "name": "Adnan Afzal",
+                "profileImage": "https://adnan-tech.com/wp-content/uploads/2025/02/channels4_profile.jpg"
+            },
+            "createdAt": "02/20/2025"
+        },
+        {
+            "_id": "67b697a78c68819c0a3c3ae7",
+            "title": "Test 2",
+            "slug": "test-2",
+            "featuredImage": {
+                "path": "https://adnan-tech.com/wp-content/uploads/2024/08/property-1.jpg",
+                "name": "78c93766-8483-446e-af66-959530e69d01.JPG",
+                "size": 128803,
+                "type": "image/jpeg"
+            },
+            "excerpt": "test 2",
+            "content": "Test 2",
+            "status": "active",
+            "categories": [
+                "Guest"
+            ],
+            "tags": [
+                "test2"
+            ],
+            "views": 0,
+            "comments": 0,
+            "user": {
+                "_id": "67a18d108508631a07c57c54",
+                "name": "Adnan Afzal",
+                "profileImage": "https://adnan-tech.com/wp-content/uploads/2025/02/channels4_profile.jpg"
+            },
+            "createdAt": "02/20/2025"
+        },
+        {
+            "_id": "67aa95930d73412a7c9e0477",
+            "title": "Test",
+            "slug": "test",
+            "featuredImage": {
+                "path": "https://adnan-tech.com/wp-content/uploads/2024/06/compress-image-php.png",
+                "name": "adnan-tech.com 2.png",
+                "size": 93243,
+                "type": "image/png"
+            },
+            "excerpt": "test",
+            "content": "test <b>bold text</b>",
+            "status": "active",
+            "categories": [
+                "Guest"
+            ],
+            "tags": [
+                "test",
+                "got"
+            ],
+            "views": 0,
+            "comments": 1,
+            "user": {
+                "_id": "67a18d108508631a07c57c54",
+                "name": "Adnan Afzal",
+                "profileImage": "https://adnan-tech.com/wp-content/uploads/2025/02/channels4_profile.jpg"
+            },
+            "createdAt": "02/11/2025"
+        }
+    ],
+    "snPosts": [
+        {
+            "_id": "67afa47bf3b629ea9e187b9b",
+            "user": {
+                "_id": "679d6e7cc52fcb4663fc7bee",
+                "name": "Adnan Afzal",
+                "email": "support@adnan-tech.com",
+                "profileImage": "https://adnan-tech.com/wp-content/uploads/2025/02/channels4_profile.jpg"
+            },
+            "caption": "Post in \"The Walking Dead\" page. ",
+            "type": "page",
+            "status": "published",
+            "sharedPost": null,
+            "files": [],
+            "views": 0,
+            "likes": 0,
+            "comments": 0,
+            "shares": 0,
+            "hasLiked": false,
+            "createdAt": "02/15/2025",
+            "page": {
+                "_id": "67afa42cf3b629ea9e187b9a",
+                "name": "The Walking Dead",
+                "followers": 1,
+                "image": "https://adnan-tech.com/wp-content/uploads/2025/02/MV5BYWQwMGRhNGEtZTNhMy00MzVjLWJhMjItYjcwMDljMTkyNTg2XkEyXkFqcGc@._V1_-scaled.jpg"
+            }
+        },
+        {
+            "_id": "67af9162f3b629ea9e187b8f",
+            "user": {
+                "_id": "67981e4c6d827ab147a35811",
+                "name": "Adnan Afzal",
+                "email": "adnan@gmail.com",
+                "profileImage": "https://adnan-tech.com/wp-content/uploads/2025/02/channels4_profile.jpg"
+            },
+            "caption": "Check this post with attachment.",
+            "type": "post",
+            "status": "published",
+            "sharedPost": null,
+            "files": [
+                {
+                    "name": "padZero.png",
+                    "size": 121196,
+                    "type": "image/png",
+                    "path": "http://127.0.0.1:3000/uploads/public/posts/67af9162f3b629ea9e187b8f/1739559266720.png"
+                }
+            ],
+            "views": 0,
+            "likes": 1,
+            "comments": 1,
+            "shares": 1,
+            "hasLiked": false,
+            "createdAt": "02/14/2025"
+        },
+        {
+            "_id": "67a547ffc7aa4dd67ae95f11",
+            "user": {
+                "_id": "67981e4c6d827ab147a35811",
+                "name": "Adnan Afzal",
+                "email": "adnan@gmail.com",
+                "profileImage": "https://adnan-tech.com/wp-content/uploads/2025/02/channels4_profile.jpg"
+            },
+            "caption": "hi",
+            "type": "post",
+            "status": "published",
+            "sharedPost": null,
+            "files": [],
+            "views": 0,
+            "likes": 0,
+            "comments": 0,
+            "shares": 0,
+            "hasLiked": false,
+            "createdAt": "02/07/2025"
+        }
+    ],
+    "jobs": [
+        {
+            "_id": "67b7aa9162e53098dca5443e",
+            "title": "Test",
+            "type": "remote",
+            "location": "",
+            "nature": "fullTime",
+            "deadline": 1,
+            "currency": "USD",
+            "amount": 1800,
+            "description": "<div>Test</div>",
+            "vacancies": 1,
+            "applications": 0,
+            "bids": 0,
+            "user": {
+                "_id": "67981e4c6d827ab147a35811",
+                "name": "Adnan Afzal",
+                "profileImage": "https://adnan-tech.com/wp-content/uploads/2025/02/channels4_profile.jpg"
+            },
+            "createdAt": "02/21/2025, 03:20:01"
+        }
+    ]
+}

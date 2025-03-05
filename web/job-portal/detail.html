@@ -53,17 +53,46 @@
                     const [cvs, setCvs] = React.useState([]);
                     const [applications, setApplications] = React.useState([]);
                     const [currentApplicationsCount, setCurrentApplicationsCount] = React.useState(0);
+                    const [filterApplicationsValue, setFilterApplicationsValue] = React.useState("");
 
-                    async function loadMoreApplications() {
-                        page++;
-
+                    async function fetchApplications() {
                         const formData = new FormData();
                         formData.append("_id", id);
                         formData.append("page", page);
+                        formData.append("status", filterApplicationsValue);
 
                         try {
                             const response = await axios.post(
-                                apiUrl + "/job-portal/jobs/fetch-applications",
+                                isDemo ? (baseUrl + "/demo-data/user.json") : (apiUrl + "/job-portal/jobs/fetch-applications"),
+                                formData,
+                                {
+                                    headers: {
+                                        Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                                    }
+                                }
+                            )
+
+                            if (response.data.status == "success") {
+                                const newApplications = response.data.applications;
+                                setCurrentApplicationsCount(newApplications.length);
+                                setApplications(newApplications);
+                            } else {
+                                swal.fire("Error", response.data.message, "error")
+                            }
+                        } catch (exp) {
+                            swal.fire("Error", exp.message, "error")
+                        }
+                    }
+
+                    async function loadMoreApplications() {
+                        const formData = new FormData();
+                        formData.append("_id", id);
+                        formData.append("page", page);
+                        formData.append("status", filterApplicationsValue);
+
+                        try {
+                            const response = await axios.post(
+                                isDemo ? (baseUrl + "/demo-data/user.json") : (apiUrl + "/job-portal/jobs/fetch-applications"),
                                 formData,
                                 {
                                     headers: {
@@ -96,7 +125,7 @@
 
                         try {
                             const response = await axios.post(
-                                apiUrl + "/job-portal/jobs/fetch-single",
+                                isDemo ? (baseUrl + "/demo-data/job-portal-jobs-fetch-single.json") : (apiUrl + "/job-portal/jobs/fetch-single"),
                                 formData,
                                 {
                                     headers: {
@@ -137,7 +166,7 @@
 
                         try {
                             const response = await axios.post(
-                                apiUrl + "/job-portal/jobs/apply",
+                                isDemo ? (baseUrl + "/demo-data/job-portal-jobs-apply.json") : (apiUrl + "/job-portal/jobs/apply"),
                                 formData,
                                 {
                                     headers: {
@@ -185,7 +214,7 @@
                                         // const url = `
                                         //   https://api.github.com/users/${value}
                                         // `;
-                                        const url = apiUrl + "/job-portal/jobs/reject-application";
+                                        const url = isDemo ? (baseUrl + "/demo-data/job-portal-jobs-reject-application.json") : (apiUrl + "/job-portal/jobs/reject-application");
                                         const response = await fetch(url, {
                                             method: 'POST', // Specify POST method
                                             headers: {
@@ -256,7 +285,7 @@
 
                             try {
                                 const response = await axios.post(
-                                    apiUrl + "/job-portal/jobs/change-application-status",
+                                    isDemo ? (baseUrl + "/demo-data/job-portal-jobs-change-application-status.json") : (apiUrl + "/job-portal/jobs/change-application-status"),
                                     formData,
                                     {
                                         headers: {
@@ -291,6 +320,10 @@
                         getData();
                     }, []);
 
+                    React.useEffect(function () {
+                        fetchApplications();
+                    }, [filterApplicationsValue]);
+
                     return (
                         <>
                             { job != null && (
@@ -318,27 +351,17 @@
                                                     <p>Posted on: { job.createdAt.split(", ")[0] }</p>
                                                     <p>Type: { camelCaseSplit(job.type).toUpperCase() }</p>
                                                     <p>Job nature: { camelCaseSplit(job.nature).toUpperCase() }</p>
-                                                    <p>{ job.nature == "freelance" ? "Amount" : "Salary" }: { job.currency.toUpperCase() } { job.amount }</p>
+                                                    <p>Salary: { job.currency.toUpperCase() } { job.amount }</p>
 
                                                     { job.location != "" && (
                                                         <p>Location: { job.location }</p>
                                                     ) }
 
-                                                    { job.nature == "freelance" ? (
-                                                        <p>Deadline: { job.deadline } days</p>
-                                                    ) : (
-                                                        <p>Vacancies: { job.vacancies }</p>
-                                                    ) }
+                                                    <p>Vacancies: { job.vacancies }</p>
                                                 
-                                                    { job.nature == "freelance" ? (
-                                                        <button type="button" className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#bid-modal">
-                                                            Bid ({ job.bids })
-                                                        </button>
-                                                    ) : (
-                                                        <button type="button" className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#apply-modal">
-                                                            Apply Now ({ job.applications })
-                                                        </button>
-                                                    ) }
+                                                    <button type="button" className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#apply-modal">
+                                                        Apply Now ({ job.applications })
+                                                    </button>
                                                 </div>
                                             </div>
                                         </div>
@@ -346,65 +369,71 @@
 
                                     { (state.user != null && state.user._id == job.user._id) && (
                                         <>
-                                            { job.type == "freelance" ? (
-                                                <div className="row">
-                                                    <div className="col-md-12">
-                                                        <h2>Bids</h2>
-
-                                                        <table className="table table-bordered table-responsive">
-                                                            <thead>
-                                                                <tr>
-                                                                    <th></th>
-                                                                </tr>
-                                                            </thead>
-                                                        </table>
-                                                    </div>
+                                            <div className="row">
+                                                <div className="col-md-8">
+                                                    <h2>Applications</h2>
                                                 </div>
-                                            ) : (
-                                                <div className="row">
-                                                    <div className="col-md-12">
-                                                        <h2>Applications</h2>
 
-                                                        <table className="table table-bordered table-responsive mt-3">
-                                                            <thead>
-                                                                <tr>
-                                                                    <th>Applicant</th>
-                                                                    <th>CV</th>
-                                                                    <th>Status</th>
-                                                                    <th>Actions</th>
-                                                                </tr>
-                                                            </thead>
+                                                <div className="col-md-4">
 
-                                                            <tbody>
-                                                                { applications.map(function (application) {
-                                                                    return (
-                                                                        <tr key={ `application-${ application._id }` }>
-                                                                            <td>
-                                                                                <img src={ application.user.profileImage }
-                                                                                    onError={ function () {
-                                                                                        event.target.src = baseUrl + "/public/img/user-placeholder.png";
-                                                                                    } }
-                                                                                    className="user-img" />&nbsp;
+                                                    <select className="form-control" defaultValue=""
+                                                        onChange={ function (event) {
+                                                            page = 1;
+                                                            setFilterApplicationsValue(event.target.value);
+                                                        } }>
+                                                        <option value="">Filter Applications</option>
+                                                        <option value="submitted">Submitted</option>
+                                                        <option value="shortlisted">Shortlisted</option>
+                                                        <option value="interviewing">Interviewing</option>
+                                                        <option value="rejected">Rejected</option>
+                                                        <option value="selected">Selected</option>
+                                                    </select>
 
-                                                                                { application.user.name }
-                                                                            </td>
+                                                </div>
+                                            </div>
 
-                                                                            <td>
-                                                                                <a href={ application.cv.path }
-                                                                                    target="_blank">
-                                                                                    { application.cv.name }
-                                                                                </a>
-                                                                            </td>
+                                            <div className="row">
+                                                <div className="col-md-12">
+                                                    <table className="table table-bordered table-responsive mt-3">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Applicant</th>
+                                                                <th>CV</th>
+                                                                <th>Status</th>
+                                                                <th>Actions</th>
+                                                            </tr>
+                                                        </thead>
 
-                                                                            <td>
-                                                                                { application.status.toUpperCase() }
+                                                        <tbody>
+                                                            { applications.map(function (application) {
+                                                                return (
+                                                                    <tr key={ `application-${ application._id }` }>
+                                                                        <td>
+                                                                            <img src={ application.user.profileImage }
+                                                                                onError={ function () {
+                                                                                    event.target.src = baseUrl + "/public/img/user-placeholder.png";
+                                                                                } }
+                                                                                className="user-img" />&nbsp;
 
-                                                                                { application.status == "rejected" && (
-                                                                                    <p className="text-danger mt-3">
-                                                                                        { application.rejectReason }
-                                                                                    </p>
-                                                                                ) }
-                                                                            </td>
+                                                                            { application.user.name }
+                                                                        </td>
+
+                                                                        <td>
+                                                                            <a href={ application.cv.path }
+                                                                                target="_blank">
+                                                                                { application.cv.name }
+                                                                            </a>
+                                                                        </td>
+
+                                                                        <td>
+                                                                            { application.status.toUpperCase() }
+
+                                                                            { application.status == "rejected" && (
+                                                                                <p className="text-danger mt-3">
+                                                                                    { application.rejectReason }
+                                                                                </p>
+                                                                            ) }
+                                                                        </td>
 
                                                                             <td>
                                                                                 <div className="form-group">
@@ -425,20 +454,20 @@
                                                                     );
                                                                 }) }
                                                             </tbody>
-                                                        </table>
+                                                    </table>
 
-                                                        { currentApplicationsCount > 0 && (
-                                                            <div className="row">
-                                                                <div className="col-md-12 text-center">
-                                                                    <button className="btn btn-primary" onClick={ function () {
-                                                                        loadMoreApplications();
-                                                                    } }>Load more</button>
-                                                                </div>
+                                                    { currentApplicationsCount > 0 && (
+                                                        <div className="row">
+                                                            <div className="col-md-12 text-center">
+                                                                <button className="btn btn-primary" onClick={ function () {
+                                                                    page++;
+                                                                    loadMoreApplications();
+                                                                } }>Load more</button>
                                                             </div>
-                                                        ) }
-                                                    </div>
+                                                        </div>
+                                                    ) }
                                                 </div>
-                                            ) }
+                                            </div>
                                         </>
                                     ) }
 

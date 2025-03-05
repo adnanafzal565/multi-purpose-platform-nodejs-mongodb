@@ -24,6 +24,7 @@
 
         <script src="../public/js/script.js"></script>
         <script type="text/babel" src="../public/components/BlogSidebar.js"></script>
+        <script type="text/babel" src="../public/components/DynamicTag.js"></script>
 	</head>
 
 	<body>
@@ -66,6 +67,33 @@
                     const [pageReplies, setPageReplies] = React.useState(1);
                     const [replies, setReplies] = React.useState([]);
                     const [hasMoreRepliesPages, setHasMoreRepliesPages] = React.useState(false);
+
+                    async function fetchBlogContent(slug) {
+                        const formData = new FormData();
+                        formData.append("slug", slug);
+                        formData.append("page", commentPage);
+                        formData.append("timeZone", Intl.DateTimeFormat().resolvedOptions().timeZone);
+
+                        try {
+                            const response = await axios.post(
+                                apiUrl + "/blogs/fetch-single",
+                                formData,
+                                {
+                                    headers: {
+                                        Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                                    }
+                                }
+                            )
+
+                            if (response.data.status == "success") {
+                                setBlog(response.data.blog);
+                            } else {
+                                swal.fire("Error", response.data.message, "error")
+                            }
+                        } catch (exp) {
+                            swal.fire("Error", exp.message, "error")
+                        }
+                    }
 
                     async function getData() {
                         setLoading(true);
@@ -301,6 +329,10 @@
                         globalState.listen(function (newState, updatedState) {
                             setState(newState);
                         });
+
+                        socketIO.on("blogUpdated", function (data) {
+                            fetchBlogContent(data.slug);
+                        });
                     }, []);
 
                     React.useEffect(function () {
@@ -373,7 +405,29 @@
                                                 ) }
                                                 
                                                 <section className="mb-5">
-                                                    { HTMLReactParser(blog.content) }
+                                                    {/*
+                                                        { HTMLReactParser(blog.content) }
+                                                    */}
+
+                                                    <div id="content">
+                                                        { Array.isArray(blog.content) && (
+                                                            <>
+                                                                { blog.content.map(function (block, index) {
+                                                                    return (
+                                                                        <DynamicTag key={ `block-${ block.name }-${ block.index }` }
+                                                                            name={ block.name || "" }
+                                                                            content={ block.value || "" }
+                                                                            file={ block.file || null }
+                                                                            id={ block.id || undefined }
+                                                                            classes={ block.classes || undefined }
+                                                                            alt={ block.alt || undefined }
+                                                                            caption={ block.caption || undefined }
+                                                                            styles={ block.styles || "" } />
+                                                                    );
+                                                                }) }
+                                                            </>
+                                                        ) }
+                                                    </div>
                                                 </section>
                                             </article>
 

@@ -1,0 +1,5 @@
+{
+    "status": "success",
+    "message": "Data has been fetched.",
+    "locations": ["Lahore, Pakistan", "New York, USA", "London, England"]
+}

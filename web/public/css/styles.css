@@ -1,3 +1,7 @@
+/*#content img,
+#content video {
+    width: 100%;
+}*/
 .job-meta-data li:first-child {
     margin-left: 0px;
 }

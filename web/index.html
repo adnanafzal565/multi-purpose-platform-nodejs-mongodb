@@ -22,6 +22,8 @@
         <script src="public/js/sweetalert2@11.js"></script>
         <script src="public/js/fontawesome.js"></script>
 
+        <script src="public/components/SingleBlog.js" type="text/babel"></script>
+        <script src="public/job-portal/SingleJob.js" type="text/babel"></script>
         <script src="public/js/script.js"></script>
     </head>
 
@@ -36,7 +38,10 @@
             <div class="container mt-5 mb-5">
                 <div class="row">
 
-                    <div class="offset-md-3 col-md-6">
+                    <div class="col-md-12">
+
+                        <div id="home-app"></div>
+
                         <!--<table class="table table-bordered" id="pricing-table">
                             <thead>
                                 <tr>
@@ -131,31 +136,6 @@
                             </tfoot>
                         </table>-->
                     </div>
-            
-                    <style>
-                        #pricing-table .fa-check {
-                            background-color: #00e900;
-                            padding: 3px 4px;
-                            color: white;
-                            border-radius: 50%;
-                            float: right;
-                        }
-                        #pricing-table .fa-xmark {
-                            background-color: red;
-                            padding: 3px 5px;
-                            color: white;
-                            border-radius: 50%;
-                            float: right;
-                        }
-                        #pricing-table thead th,
-                        #pricing-table th[colspan="2"] {
-                            font-size: 24px;
-                        }
-                        #pricing-table tfoot p {
-                            font-size: 16px;
-                            font-weight: normal;
-                        }
-                    </style>
 
                     <!--<div class="col-md-3">
                         <div class="card">
@@ -199,5 +179,238 @@
         <!--<div id="chat-app"></div>
         <script type="text/babel" src="public/components/Chat.js"></script>
         <link rel="stylesheet" href="public/css/chat.css" />-->
+
+        <script type="text/babel">
+            function Home() {
+
+                const [loading, setLoading] = React.useState(false);
+                const [blogs, setBlogs] = React.useState([]);
+                const [snPosts, setSnPosts] = React.useState([]);
+                const [jobs, setJobs] = React.useState([]);
+
+                async function getData() {
+                    setLoading(true);
+
+                    const formData = new FormData();
+                    formData.append("timeZone", Intl.DateTimeFormat().resolvedOptions().timeZone);
+
+                    try {
+                        const response = await axios.post(
+                            isDemo ? (baseUrl + "/demo-data/fetch-home-data.json") : (apiUrl + "/fetch-home-data"),
+                            formData,
+                            {
+                                headers: {
+                                    Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                                }
+                            }
+                        )
+
+                        if (response.data.status == "success") {
+                            setBlogs(response.data.blogs);
+                            setSnPosts(response.data.snPosts);
+                            setJobs(response.data.jobs);
+                        } else {
+                            swal.fire("Error", response.data.message, "error")
+                        }
+                    } catch (exp) {
+                        swal.fire("Error", exp.message, "error")
+                    } finally {
+                        setLoading(false);
+                    }
+                }
+
+                React.useEffect(function () {
+                    getData();
+                }, []);
+
+                const styles = {
+                    userImg: {
+                        width: "75px",
+                        height: "75px",
+                        objectFit: "cover"
+                    },
+                    published: {
+                        fontSize: "14px",
+                        color: "gray"
+                    },
+                    postImg: {
+                        width: "100px",
+                        height: "100px",
+                        objectFit: "cover"
+                    }
+                };
+
+                return (
+                    <>
+                        <div className="row mb-5">
+                            <div className="col-md-12 text-center">
+                                { loading && (
+                                    <p>Loading...</p>
+                                ) }
+                            </div>
+                        </div>
+
+                        { blogs.length > 0 && (
+                            <>
+                                <div className="row mb-5">
+                                    <div className="col-md-12 text-center">
+                                        <h1>Blogs</h1>
+                                    </div>
+                                </div>
+
+                                <div className="row mb-5">
+                                    { blogs.map(function (blog) {
+                                        return (
+                                            <div className="col-md-4" key={ `blog-${ blog._id }` }>
+                                                <SingleBlog blog={ blog } />
+                                            </div>
+                                        );
+                                    }) }
+                                </div>
+                            </>
+                        ) }
+
+                        { snPosts.length > 0 && (
+                            <>
+                                <div className="row mb-5">
+                                    <div className="col-md-12 text-center">
+                                        <h1>Social Network Posts</h1>
+                                    </div>
+                                </div>
+
+                                <div className="row mb-5">
+                                    { snPosts.map(function (post) {
+
+                                        let image = post.user.profileImage;
+                                        let name = post.user.name;
+                                        let href = baseUrl + "/sn/profile.html?id=" + post.user._id;
+
+                                        if (typeof post.page !== "undefined") {
+                                            image = post.page.image;
+                                            name = post.page.name;
+                                            href = baseUrl + "/sn/pages/detail.html?id=" + post.page._id;
+                                        } else if (typeof post.group !== "undefined") {
+                                            image = post.group.image;
+                                            name = post.group.name;
+                                            href = baseUrl + "/sn/groups/detail.html?id=" + post.group._id;
+                                        }
+
+                                        return (
+                                            <div className="col-md-4" key={ `sn-post-${ post._id }` }>
+                                                <div className="card card-body">
+                                                    <div className="row">
+                                                        <div className="col-md-3">
+                                                            <img src={ image }
+                                                                onError={ function () {
+                                                                    event.target.src = baseUrl + "/public/img/user-placeholder.png";
+                                                                } }
+                                                                style={ styles.userImg }
+                                                                alt={ name } />
+                                                        </div>
+
+                                                        <div className="col-md-7">
+                                                            <p className="mb-0"><a href={ href }>{ name }</a></p>
+                                                            <span style={ styles.published }>Published: { post.createdAt }</span>
+                                                        </div>
+
+                                                        <div className="col-md-2">
+                                                            <a href={ `${ baseUrl }/sn/post.html?id=${ post._id }` } className="pull-right">
+                                                                <i className="fa fa-eye"></i>
+                                                            </a>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="row mt-3">
+                                                        <div className="col-md-12">
+                                                            <p>{ (post.caption || "") }</p>
+
+                                                            { (post.files || []).map(function (file, index) {
+                                                                return (
+                                                                    <React.Fragment key={ `${ post._id }-file-${ index }` }>
+                                                                        { file.type.includes("image") ? (
+                                                                            <img src={ file.path }
+                                                                                alt={ file.name }
+                                                                                style={ styles.postImg } />
+                                                                        ) : file.type.includes("video") && (
+                                                                            <video src={ file.path }
+                                                                                alt={ file.name }
+                                                                                style={ styles.postImg }
+                                                                                controls></video>
+                                                                        ) }
+                                                                    </React.Fragment>
+                                                                );
+                                                            }) }
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    }) }
+                                </div>
+                            </>
+                        ) }
+
+                        { jobs.length > 0 && (
+                            <>
+                                <div className="row mb-5">
+                                    <div className="col-md-12 text-center">
+                                        <h1>Jobs</h1>
+                                    </div>
+                                </div>
+
+                                <div className="row mb-5">
+                                    { jobs.map(function (job) {
+                                        return (
+                                            <SingleJob
+                                                key={ `job-${ job._id }` }
+                                                job={ job }
+                                                onDelete={ function (id) {
+                                                    const tempArr = [ ...jobs ];
+                                                    for (let a = 0; a < tempArr.length; a++) {
+                                                        if (tempArr[a]._id == id) {
+                                                            tempArr.splice(a, 1);
+                                                            break;
+                                                        }
+                                                    }
+                                                    setJobs(tempArr);
+                                                } } />
+                                        );
+                                    }) }
+                                </div>
+                            </>
+                        ) }
+                    </>
+                );
+            }
+
+            ReactDOM.createRoot(
+                document.getElementById("home-app")
+            ).render(<Home />);
+        </script>
+
+        <style>
+            #pricing-table .fa-check {
+                background-color: #00e900;
+                padding: 3px 4px;
+                color: white;
+                border-radius: 50%;
+                float: right;
+            }
+            #pricing-table .fa-xmark {
+                background-color: red;
+                padding: 3px 5px;
+                color: white;
+                border-radius: 50%;
+                float: right;
+            }
+            #pricing-table thead th,
+            #pricing-table th[colspan="2"] {
+                font-size: 24px;
+            }
+            #pricing-table tfoot p {
+                font-size: 16px;
+                font-weight: normal;
+            }
+        </style>
     </body>
 </html>

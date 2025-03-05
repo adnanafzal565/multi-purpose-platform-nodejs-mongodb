@@ -22,6 +22,7 @@
         <script src="../public/js/sweetalert2@11.js"></script>
         <script src="../public/js/fontawesome.js"></script>
 
+        <script src="../public/job-portal/SingleJob.js" type="text/babel"></script>
         <script src="../public/js/script.js"></script>
 	</head>
 
@@ -61,7 +62,7 @@
 
                         try {
                             const response = await axios.post(
-                                apiUrl + "/job-portal/jobs/fetch-filters",
+                                isDemo ? (baseUrl + "/demo-data/job-portal-jobs-fetch-filters.json") : (apiUrl + "/job-portal/jobs/fetch-filters"),
                                 null,
                                 {
                                     headers: {
@@ -92,7 +93,7 @@
 
                         try {
                             const response = await axios.post(
-                                apiUrl + "/job-portal/jobs/fetch",
+                                isDemo ? (baseUrl + "/demo-data/job-portal-jobs-fetch.json") : (apiUrl + "/job-portal/jobs/fetch"),
                                 formData,
                                 {
                                     headers: {
@@ -190,7 +191,6 @@
                                         <div className="form-group">
                                             <label className="form-label">Nature</label>
                                             <select name="nature" className="form-control">
-                                                {/*<option value="freelance">Freelance</option>*/}
                                                 <option value="fullTime">Full-time</option>
                                                 <option value="partTime">Part-time</option>
                                             </select>
