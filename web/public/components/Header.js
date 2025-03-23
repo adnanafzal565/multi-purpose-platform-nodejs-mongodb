@@ -161,6 +161,43 @@ function Header() {
                         <li className="nav-item">
                             <a className="nav-link" href={ `${ baseUrl }/blogs` }>Blogs</a>
                         </li>
+
+                        <li className="nav-item">
+                            <a className="nav-link" href={ `${ baseUrl }/balance.html` }>Balance</a>
+                        </li>
+
+                        <li className="nav-item dropdown">
+                            <a className="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Freelance
+
+                                { state.user?.freelanceNotifications > 0 && (
+                                    <span className="badge badge-primary text-success">({ state.user.freelanceNotifications })</span>
+                                ) }
+                            </a>
+
+                            <ul className="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <li><a className="dropdown-item" href={ `${ baseUrl }/freelance/buyer.html` }>Buyer</a></li>
+                                <li>
+                                    <a className="dropdown-item" href={ `${ baseUrl }/freelance/seller.html` }>
+                                        Seller
+
+                                        { state.user?.bidAccepted > 0 && (
+                                            <span className="badge badge-primary text-success">({ state.user.bidAccepted })</span>
+                                        ) }
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a className="dropdown-item" href={ `${ baseUrl }/freelance/orders.html` }>
+                                        Orders
+
+                                        { state.user?.freelanceOrderNewMessage > 0 && (
+                                            <span className="badge badge-primary text-success">({ state.user.freelanceOrderNewMessage })</span>
+                                        ) }
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
                     </ul>
                 </div>
             </div>

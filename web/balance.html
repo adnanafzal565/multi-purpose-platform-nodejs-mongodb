@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Balance</title>
+
+        <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" /> 
+        <meta http-equiv="Pragma" content="no-cache" /> 
+        <meta http-equiv="Expires" content="0" />
+
+        <link rel="stylesheet" href="public/css/bootstrap.css" />
+        <link rel="stylesheet" href="public/css/fontawesome.css" />
+        <link rel="stylesheet" href="public/css/styles.css" />
+        <script src="public/js/jquery.js"></script>
+        <script src="public/js/bootstrap.js"></script>
+
+        <script src="public/js/react.development.js"></script>
+        <script src="public/js/react-dom.development.js"></script>
+        <script src="public/js/babel.min.js"></script>
+        <script src="public/js/axios.min.js"></script>
+        <script src="public/js/sweetalert2@11.js"></script>
+        <script src="public/js/fontawesome.js"></script>
+        <script src="public/js/socket.io.js"></script>
+
+        <link rel="stylesheet" href="public/datetimepicker/jquery.datetimepicker.min.css" />
+        <script src="public/datetimepicker/jquery.datetimepicker.full.js"></script>
+
+        <link rel="stylesheet" href="public/RichText/richtext.min.css" />
+        <script src="public/RichText/jquery.richtext.js"></script>
+
+        <script src="public/js/script.js"></script>
+        <script type="text/babel" src="public/components/BlogSidebar.js"></script>
+        <script type="text/babel" src="public/components/DynamicTag.js"></script>
+
+        <script src="public/js/socket.io.js"></script>
+        <script src="https://js.stripe.com/v3/"></script>
+    </head>
+
+    <body>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light" id="header-app">
+            
+        </nav>
+
+        <script type="text/babel" src="public/components/Header.js"></script>
+
+        <div class="container mt-5" id="balance-app">
+            
+            <script type="text/babel">
+
+                function Balance() {
+
+                    const [state, setState] = React.useState(globalState.state);
+                    const [adding, setAdding] = React.useState(false);
+                    const [paymentMethod, setPaymentMethod] = React.useState("");
+                    const [stripe, setStripe] = React.useState(null);
+                    const [cardElement, setCardElement] = React.useState(null);
+
+                    async function addBalance() {
+                        if (paymentMethod == "") {
+                            return;
+                        }
+
+                        const form = document.getElementById("form-add-balance");
+
+                        if (paymentMethod == "stripe") {
+                            try {
+                                setAdding(true);
+
+                                const formData = new FormData();
+                                formData.append("amount", form.amount.value || 0);
+
+                                const response = await axios.post(
+                                    apiUrl + "/fetch-stripe-client-secret",
+                                    formData,
+                                    {
+                                        headers: {
+                                            Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                                        }
+                                    }
+                                );
+
+                                if (response.data.status == "success") {
+                                    const clientSecret = response.data.clientSecret;
+
+                                    stripe
+                                        .confirmCardPayment(clientSecret, {
+                                            payment_method: {
+                                                card: cardElement,
+                                                billing_details: {
+                                                    email: state.user?.email || "",
+                                                    name: state.user?.name || "",
+                                                    phone: 0
+                                                },
+                                            },
+                                        })
+                                        .then(async function(result) {
+
+                                            if (result.error) {
+                                                console.log(result.error);
+                                            } else {
+                                                console.log("The card has been verified successfully...", result.paymentIntent.id);
+
+                                                try {
+                                                    const formData2 = new FormData();
+                                                    formData2.append("paymentId", result.paymentIntent.id);
+
+                                                    const response2 = await axios.post(
+                                                        apiUrl + "/credit-via-stripe",
+                                                        formData2,
+                                                        {
+                                                            headers: {
+                                                                Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                                                            }
+                                                        }
+                                                    );
+
+                                                    if (response2.data.status == "success") {
+                                                        swal.fire("Account Credited", response2.data.message, "success");
+                                                    } else {
+                                                        swal.fire("Error", response2.data.message, "error");
+                                                    }
+                                                } catch (exp) {
+                                                    console.log(exp.message);
+                                                } finally {
+                                                    setAdding(false);
+                                                }
+                                            }
+                                        });
+                                } else {
+                                    swal.fire("Error", response.data.message, "error");
+                                }
+                            } catch (exp) {
+                                console.log(exp.message);
+                            } finally {
+                                setAdding(false);
+                            }
+                        }
+                    }
+
+                    React.useEffect(function () {
+                        globalState.listen(function (newState, updatedState) {
+                            setState(newState);
+                        });
+                    }, []);
+
+                    React.useEffect(function () {
+                        if (paymentMethod == "stripe" && stripe == null) {
+                            const temp = Stripe("pk_test_51H5TzhCWZOEqAHRfJufW6MCuM4SiV11LQSBJ25yyfWhOi0o8WMEDTGcZmjnkSNgS6qlw0HKoPHRpLuGB9sKMDCPT00xV8FLW8Q");
+                            const elements = temp.elements();
+                            const temp2 = elements.create("card");
+                            temp2.mount("#stripe-card-element");
+
+                            setCardElement(temp2);
+                            setStripe(temp);
+                        }
+                    }, [paymentMethod, stripe]);
+
+                    return (
+                        <>
+                            <p>Your balance is <b>{ state.user?.balance || 0 } USD</b></p>
+
+                            <p>
+                                <a href={ `${ baseUrl }/withdraw.html` }>Withdraw</a>
+                            </p>
+
+                            <form onSubmit={ function (event) {
+                                event.preventDefault();
+                                addBalance();
+                            } } id="form-add-balance">
+                                <div className="form-group">
+                                    <label className="form-label">Amount USD</label>
+                                    <input type="number" min="1" name="amount" className="form-control" required />
+                                </div>
+
+                                <div className="form-group mt-3 mb-3">
+                                    <label className="form-label">Payment Method</label>
+                                    <select name="paymentMethod" className="form-control" required
+                                        value={ paymentMethod }
+                                        onChange={ function (event) {
+                                            setPaymentMethod(event.target.value);
+                                        } }>
+                                        <option value="">Select Payment Method</option>
+                                        <option value="stripe">Stripe</option>
+                                        <option value="paypal">PayPal</option>
+                                    </select>
+                                </div>
+
+                                { paymentMethod == "stripe" && (
+                                    <>
+                                        <div id="stripe-card-element"
+                                            className="mb-5"></div>
+                                    </>
+                                ) }
+
+                                { paymentMethod != "" && (
+                                    <input type="submit" className="btn btn-success" value="Add Balance"
+                                        disabled={ adding } />
+                                ) }
+                            </form>
+                        </>
+                    );
+
+                }
+
+                ReactDOM.createRoot(
+                    document.getElementById("balance-app")
+                ).render(<Balance />);
+
+            </script>
+        </div>
+    </body>
+</html>

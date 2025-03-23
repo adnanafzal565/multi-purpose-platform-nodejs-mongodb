@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Withdraw</title>
+
+        <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" /> 
+        <meta http-equiv="Pragma" content="no-cache" /> 
+        <meta http-equiv="Expires" content="0" />
+
+        <link rel="stylesheet" href="public/css/bootstrap.css" />
+        <link rel="stylesheet" href="public/css/fontawesome.css" />
+        <link rel="stylesheet" href="public/css/styles.css" />
+        <script src="public/js/jquery.js"></script>
+        <script src="public/js/bootstrap.js"></script>
+
+        <script src="public/js/react.development.js"></script>
+        <script src="public/js/react-dom.development.js"></script>
+        <script src="public/js/babel.min.js"></script>
+        <script src="public/js/axios.min.js"></script>
+        <script src="public/js/sweetalert2@11.js"></script>
+        <script src="public/js/fontawesome.js"></script>
+        <script src="public/js/socket.io.js"></script>
+
+        <link rel="stylesheet" href="public/datetimepicker/jquery.datetimepicker.min.css" />
+        <script src="public/datetimepicker/jquery.datetimepicker.full.js"></script>
+
+        <link rel="stylesheet" href="public/RichText/richtext.min.css" />
+        <script src="public/RichText/jquery.richtext.js"></script>
+
+        <script src="public/js/script.js"></script>
+        <script type="text/babel" src="public/components/BlogSidebar.js"></script>
+        <script type="text/babel" src="public/components/DynamicTag.js"></script>
+
+        <script src="public/js/socket.io.js"></script>
+    </head>
+
+    <body>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light" id="header-app">
+            
+        </nav>
+
+        <script type="text/babel" src="public/components/Header.js"></script>
+
+        <div class="container mt-5" id="withdraw-app">
+            
+            <script type="text/babel">
+
+                function Withdraw() {
+
+                    const [banks, setBanks] = React.useState([]);
+                    const [state, setState] = React.useState(globalState.state);
+                    const [fetchingBanks, setFetchingBanks] = React.useState(false);
+
+                    async function fetchBanks() {
+                        setFetchingBanks(true);
+
+                        try {
+                            const formData = new FormData();
+                            formData.append("timeZone", Intl.DateTimeFormat().resolvedOptions().timeZone || "");
+
+                            const response = await axios.post(
+                                apiUrl + "/banks/my",
+                                formData,
+                                {
+                                    headers: {
+                                        Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                                    }
+                                }
+                            );
+
+                            if (response.data.status == "success") {
+                                setBanks(response.data.banks);
+                            } else {
+                                swal.fire("Error", response.data.message, "error");
+                            }
+                        } catch (exp) {
+                            console.log(exp.message);
+                        } finally {
+                            setFetchingBanks(false);
+                        }
+                    }
+
+                    async function addBank() {
+                        const form = document.getElementById("form-add-bank");
+                        form.submit.setAttribute("disabled", "disabled");
+
+                        try {
+                            const formData = new FormData(form);
+
+                            const response = await axios.post(
+                                apiUrl + "/banks/add",
+                                formData,
+                                {
+                                    headers: {
+                                        Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                                    }
+                                }
+                            );
+
+                            if (response.data.status == "success") {
+                                swal.fire("Add Bank", response.data.message, "success");
+
+                                const bank = response.data.bank;
+                                const temp = [ ...banks ];
+                                temp.unshift(bank);
+                                setBanks(temp);
+                            } else {
+                                swal.fire("Error", response.data.message, "error");
+                            }
+                        } catch (exp) {
+                            console.log(exp.message);
+                        } finally {
+                            form.submit.removeAttribute("disabled");
+                        }
+                    }
+
+                    async function withdraw() {
+                        const form = document.getElementById("form-withdraw");
+                        form.submit.setAttribute("disabled", "disabled");
+
+                        try {
+                            const formData = new FormData(form);
+
+                            const response = await axios.post(
+                                apiUrl + "/banks/withdraw",
+                                formData,
+                                {
+                                    headers: {
+                                        Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                                    }
+                                }
+                            );
+
+                            if (response.data.status == "success") {
+                                swal.fire("Withdraw", response.data.message, "success");
+                            } else {
+                                swal.fire("Error", response.data.message, "error");
+                            }
+                        } catch (exp) {
+                            console.log(exp.message);
+                        } finally {
+                            form.submit.removeAttribute("disabled");
+                        }
+                    }
+
+                    React.useEffect(function () {
+                        globalState.listen(function (newState, updatedState) {
+                            setState(newState);
+                        });
+
+                        fetchBanks();
+                    }, []);
+
+                    return (
+                        <>
+
+                            <h1 className="mb-5">Withdraw</h1>
+
+                            <h2>Your balance: { state.user?.balance || 0 } USD</h2>
+
+                            { state.user?.balance >= 100 && (
+                                <>
+                                    <form onSubmit={ function (event) {
+                                        event.preventDefault();
+                                        withdraw();
+                                    } } id="form-withdraw">
+                                        <div className="form-group mt-3 mb-3">
+                                            <label className="form-label">Bank to Withdraw</label>
+                                            <select name="bankId" className="form-control" required>
+                                                { banks.map(function (bank) {
+                                                    return (
+                                                        <option value={ bank._id }
+                                                            key={ `bank-${ bank._id }` }>{ bank.bankName } | { bank.accountTitle } | { bank.accountNumber }</option>
+                                                    )
+                                                }) }
+                                            </select>
+                                        </div>
+
+                                        <button type="submit" name="submit" className="btn btn-success mb-5">Withdraw</button>
+                                    </form>
+                                </>
+                            ) }
+
+                            <form onSubmit={ function (event) {
+                                event.preventDefault();
+                                addBank();
+                            } } id="form-add-bank">
+                                <div className="form-group">
+                                    <label className="form-label">Bank Name</label>
+                                    <input type="text" name="bankName" className="form-control" required />
+                                </div>
+
+                                <div className="form-group mt-3 mb-3">
+                                    <label className="form-label">Account Number</label>
+                                    <input type="text" name="accountNumber" className="form-control" required />
+                                </div>
+
+                                <div className="form-group">
+                                    <label className="form-label">Account Title</label>
+                                    <input type="text" name="accountTitle" className="form-control" required />
+                                </div>
+
+                                <div className="form-group mt-3 mb-3">
+                                    <label className="form-label">Swift Code</label>
+                                    <input type="text" name="swiftCode" className="form-control" />
+                                </div>
+
+                                <div className="form-group">
+                                    <label className="form-label">Branch Name</label>
+                                    <input type="text" name="branchName" className="form-control" />
+                                </div>
+
+                                <div className="form-group mt-3 mb-3">
+                                    <label className="form-label">Branch Address</label>
+                                    <input type="text" name="branchAddress" className="form-control" />
+                                </div>
+
+                                <input type="submit" name="submit" className="btn btn-primary mb-5" value="Add Bank" />
+                            </form>
+
+                            <h2 className="mt-5 mb-5">Banks</h2>
+
+                            { fetchingBanks && (
+                                <p>Fetching Banks...</p>
+                            ) }
+
+                            <table className="table table-bordered table-responsive mb-5">
+                                <thead>
+                                    <tr>
+                                        <th>Bank Name</th>
+                                        <th>Account Number</th>
+                                        <th>Account Title</th>
+                                        <th>Swift Code</th>
+                                        <th>Branch Name</th>
+                                        <th>Branch Address</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    { banks.map(function (bank) {
+                                        return (
+                                            <tr key={ `bank-${ bank._id }` }>
+                                                <td>{ bank.bankName }</td>
+                                                <td>{ bank.accountNumber }</td>
+                                                <td>{ bank.accountTitle }</td>
+                                                <td>{ bank.swiftCode }</td>
+                                                <td>{ bank.branchName }</td>
+                                                <td>{ bank.branchAddress }</td>
+                                            </tr>
+                                        );
+                                    }) }
+                                </tbody>
+                            </table>
+
+                        </>
+                    );
+
+                }
+
+                ReactDOM.createRoot(
+                    document.getElementById("withdraw-app")
+                ).render(<Withdraw />);
+            </script>
+        </div>
+    </body>
+</html>

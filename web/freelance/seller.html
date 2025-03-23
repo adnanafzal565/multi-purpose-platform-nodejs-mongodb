@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Freelance | Seller</title>
+
+        <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" /> 
+        <meta http-equiv="Pragma" content="no-cache" /> 
+        <meta http-equiv="Expires" content="0" />
+
+        <link rel="stylesheet" href="../public/css/bootstrap.css" />
+        <link rel="stylesheet" href="../public/css/fontawesome.css" />
+        <link rel="stylesheet" href="../public/css/styles.css" />
+        <script src="../public/js/jquery.js"></script>
+        <script src="../public/js/bootstrap.js"></script>
+
+        <script src="../public/js/react.development.js"></script>
+        <script src="../public/js/react-dom.development.js"></script>
+        <script src="../public/js/babel.min.js"></script>
+        <script src="../public/js/axios.min.js"></script>
+        <script src="../public/js/sweetalert2@11.js"></script>
+        <script src="../public/js/fontawesome.js"></script>
+
+        <link rel="stylesheet" href="../public/datetimepicker/jquery.datetimepicker.min.css" />
+        <script src="../public/datetimepicker/jquery.datetimepicker.full.js"></script>
+
+        <link rel="stylesheet" href="../public/RichText/richtext.min.css" />
+        <script src="../public/RichText/jquery.richtext.js"></script>
+
+        <script src="../public/js/script.js"></script>
+        <script type="text/babel" src="../public/components/BlogSidebar.js"></script>
+        <script type="text/babel" src="../public/components/DynamicTag.js"></script>
+    </head>
+
+    <body>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light" id="header-app">
+            
+        </nav>
+
+        <script type="text/babel" src="../public/components/Header.js"></script>
+
+        <div class="container mt-5" id="seller-app">
+            
+            <script type="text/babel">
+                const urlSearchParams = new URLSearchParams(window.location.search);
+                const page = urlSearchParams.get("page") || 1;
+                
+                function Seller() {
+                    const [state, setState] = React.useState(globalState.state);
+                    const [q, setQ] = React.useState("");
+                    const [fetchingTasks, setFetchingTasks] = React.useState(false);
+                    const [refetch, setRefetch] = React.useState(0);
+
+                    const [tasks, setTasks] = React.useState([]);
+                    const [pages, setPages] = React.useState(0);
+
+                    async function fetchTasks() {
+                        setFetchingTasks(true);
+
+                        try {
+                            const formData = new FormData();
+                            formData.append("page", page);
+                            formData.append("q", q);
+                            formData.append("timeZone", Intl.DateTimeFormat().resolvedOptions().timeZone);
+
+                            const response = await axios.post(
+                                apiUrl + "/freelance/fetch-tasks",
+                                formData
+                            );
+
+                            if (response.data.status == "success") {
+                                setTasks(response.data.tasks);
+                                setPages(response.data.pages);
+                            } else {
+                                swal.fire("Error", response.data.message, "error");
+                            }
+                        } catch (exp) {
+                            console.log(exp.message);
+                        } finally {
+                            setFetchingTasks(false);
+                        }
+                    }
+
+                    React.useEffect(function () {
+                        fetchTasks();
+                    }, [refetch]);
+
+                    React.useEffect(function() {
+                        globalState.listen(function (newState, updatedState) {
+                            setState(newState);
+                        });
+                    }, []);
+
+                    const styles = {
+                        profileImage: {
+                            width: "100px",
+                            height: "100px",
+                            objectFit: "cover",
+                            borderRadius: "50%"
+                        }
+                    };
+
+                    return (
+                        <>
+                            <div className="row">
+                                <div className="col-md-4">
+                                    <img src={ state.user?.profileImage || "" } style={ styles.profileImage } />
+
+                                    <p>{ state.user?.name || "" }</p>
+
+                                    <ul className="list-group">
+                                        <li className="list-group-item">
+                                            <a href={ `${ baseUrl }/freelance/orders.html` }>
+                                                My Orders
+
+                                                { state.user?.bidAccepted > 0 && (
+                                                    <span className="badge badge-primary">{ state.user.bidAccepted }</span>
+                                                ) }
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+
+                                <div className="col-md-8">
+                                    <div className="form-group">
+                                        <label className="form-label">Search</label>
+                                        <input type="text" className="form-control"
+                                            defaultValue={ q }
+                                            onChange={ function (event) {
+                                                setQ(event.target.value || "");
+                                        } } />
+                                    </div>
+
+                                    { fetchingTasks && (
+                                        <p className="mt-3">Loading Tasks...</p>
+                                    ) }
+
+                                    { tasks.map(function (task) {
+                                        return (
+                                            <div className="row mt-5" key={ `task-${ task._id }` }>
+                                                <div className="col-md-12">
+                                                    <div className="card card-body">
+                                                        <div className="row">
+                                                            <div className="col-md-4">
+                                                                <img src={ task.user?.profileImage || "" }
+                                                                    style={ styles.profileImage } />
+
+                                                                <p>{ task.user?.name || "" }</p>
+                                                            </div>
+
+                                                            <div className="col-md-8">
+                                                                <h3>
+                                                                    <a href={ `${ baseUrl }/freelance/task-detail.html?id=${ task._id }` }>
+                                                                        { task.title }
+                                                                    </a>
+                                                                </h3>
+
+                                                                <p>
+                                                                    Budget: USD { task.budget }<br />
+                                                                    Deadline: { task.deadline } days<br />
+                                                                    Bids: { task.bids }<br />
+                                                                    Status: { task.status }<br />
+                                                                    Posted at: { task.createdAt }
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    }) }
+
+                                    { pages > 1 && (
+                                        <nav>
+                                            <ul class="pagination">
+                                                { Array.from({ length: pages }, function (_, index) { return index + 1 } )
+                                                    .map(function (p) {
+                                                        return (
+                                                        <li key={ `pagination-${ p }` }
+                                                            className={ `page-item ${ p == page ? "active" : "" }` }>
+                                                            
+                                                            <a class="page-link" href="#"
+                                                                onClick={ function (event) {
+                                                                    event.preventDefault();
+                                                                    setPage(p);
+                                                                    setRefetch(refetch + 1);
+                                                                } }>{ p }</a>
+                                                        </li>
+                                                    );
+                                                }) }
+                                            </ul>
+                                        </nav>
+                                    ) }
+
+                                </div>
+                            </div>
+
+                        </>
+                    );
+
+                }
+
+                ReactDOM.createRoot(
+                    document.getElementById("seller-app")
+                ).render(<Seller />);
+            </script>
+        </div>
+    </body>
+</html>

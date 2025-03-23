@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Freelance | Order Detail</title>
+
+        <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" /> 
+        <meta http-equiv="Pragma" content="no-cache" /> 
+        <meta http-equiv="Expires" content="0" />
+
+        <link rel="stylesheet" href="../public/css/bootstrap.css" />
+        <link rel="stylesheet" href="../public/css/fontawesome.css" />
+        <link rel="stylesheet" href="../public/css/styles.css" />
+        <script src="../public/js/jquery.js"></script>
+        <script src="../public/js/bootstrap.js"></script>
+
+        <script src="../public/js/react.development.js"></script>
+        <script src="../public/js/react-dom.development.js"></script>
+        <script src="../public/js/babel.min.js"></script>
+        <script src="../public/js/axios.min.js"></script>
+        <script src="../public/js/sweetalert2@11.js"></script>
+        <script src="../public/js/fontawesome.js"></script>
+        <script src="../public/js/socket.io.js"></script>
+
+        <link rel="stylesheet" href="../public/datetimepicker/jquery.datetimepicker.min.css" />
+        <script src="../public/datetimepicker/jquery.datetimepicker.full.js"></script>
+
+        <link rel="stylesheet" href="../public/RichText/richtext.min.css" />
+        <script src="../public/RichText/jquery.richtext.js"></script>
+
+        <script src="../public/js/script.js"></script>
+        <script type="text/babel" src="../public/components/BlogSidebar.js"></script>
+        <script type="text/babel" src="../public/components/DynamicTag.js"></script>
+
+        <script src="../public/js/socket.io.js"></script>
+    </head>
+
+    <body>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light" id="header-app">
+            
+        </nav>
+
+        <script type="text/babel" src="../public/components/Header.js"></script>
+
+        <div class="container mt-5" id="order-detail-app">
+            
+            <script type="text/babel">
+
+                const urlSearchParams = new URLSearchParams(window.location.search);
+                const id = urlSearchParams.get("id") || "";
+
+                function OrderDetail() {
+
+                    const [state, setState] = React.useState(globalState.state);
+                    const [order, setOrder] = React.useState(null);
+                    const [fetching, setFetching] = React.useState(false);
+                    const [messages, setMessages] = React.useState([]);
+
+                    const [page, setPage] = React.useState(1);
+                    const [hasMorePages, setHasMorePages] = React.useState(false);
+                    const [fetchingMessages, setFetchingMessages] = React.useState(false);
+
+                    const [cancelling, setCancelling] = React.useState(false);
+                    const [completing, setCompleting] = React.useState(false);
+
+                    async function completeOrder() {
+                        setCompleting(true);
+
+                        try {
+                            const form = document.getElementById("form-complete-order");
+                            const formData = new FormData(form);
+                            formData.append("_id", id);
+
+                            const response = await axios.post(
+                                apiUrl + "/freelance/complete-order",
+                                formData,
+                                {
+                                    headers: {
+                                        Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                                    }
+                                }
+                            );
+
+                            if (response.data.status == "success") {
+                                swal.fire("Order Completed", response.data.message, "success");
+                            } else {
+                                swal.fire("Error", response.data.message, "error");
+                            }
+                        } catch (exp) {
+                            console.log(exp.message);
+                        } finally {
+                            setCompleting(false);
+                        }
+                    }
+
+                    async function cancelOrder() {
+                        setCancelling(true);
+
+                        try {
+                            const form = document.getElementById("form-cancel-order");
+                            const formData = new FormData(form);
+                            formData.append("_id", id);
+
+                            const response = await axios.post(
+                                apiUrl + "/freelance/cancel-order",
+                                formData,
+                                {
+                                    headers: {
+                                        Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                                    }
+                                }
+                            );
+
+                            if (response.data.status == "success") {
+                                swal.fire("Order Cancelled", response.data.message, "info");
+                            } else {
+                                swal.fire("Error", response.data.message, "error");
+                            }
+                        } catch (exp) {
+                            console.log(exp.message);
+                        } finally {
+                            setCancelling(false);
+                        }
+                    }
+
+                    async function fetchOrder() {
+                        setFetching(true);
+
+                        try {
+                            const formData = new FormData();
+                            formData.append("_id", id);
+                            formData.append("timeZone", Intl.DateTimeFormat().resolvedOptions().timeZone);
+
+                            const response = await axios.post(
+                                apiUrl + "/freelance/fetch-order",
+                                formData,
+                                {
+                                    headers: {
+                                        Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                                    }
+                                }
+                            );
+
+                            if (response.data.status == "success") {
+                                setOrder(response.data.order);
+                                document.title = "Order #" + (response.data.order._id || "");
+                            } else {
+                                swal.fire("Error", response.data.message, "error");
+                            }
+                        } catch (exp) {
+                            console.log(exp.message);
+                        } finally {
+                            setFetching(false);
+                        }
+                    }
+
+                    async function sendMessage(event) {
+                        const form = event.target;
+
+                        try {
+                            const formData = new FormData(form);
+                            formData.append("_id", id);
+                            formData.append("timeZone", Intl.DateTimeFormat().resolvedOptions().timeZone);
+
+                            form.submit.setAttribute("disabled", "disabled");
+
+                            const response = await axios.post(
+                                apiUrl + "/freelance/send-message",
+                                formData,
+                                {
+                                    headers: {
+                                        Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                                    }
+                                }
+                            );
+
+                            if (response.data.status == "success") {
+                                const message = response.data.messageObj;
+                                const arr = JSON.parse(JSON.stringify(messages));
+                                arr.push(message);
+                                setMessages(arr);
+
+                                form.message.value = "";
+                                form.querySelector("input[name='files[]']").value = null;
+                            } else {
+                                swal.fire("Error", response.data.message, "error");
+                            }
+                        } catch (exp) {
+                            console.log(exp.message);
+                        } finally {
+                            form.submit.removeAttribute("disabled");
+                        }
+                    }
+
+                    async function fetchMessages() {
+                        setFetchingMessages(true);
+
+                        try {
+                            const formData = new FormData();
+                            formData.append("_id", id);
+                            formData.append("page", page);
+                            formData.append("timeZone", Intl.DateTimeFormat().resolvedOptions().timeZone);
+
+                            const response = await axios.post(
+                                apiUrl + "/freelance/fetch-messages",
+                                formData,
+                                {
+                                    headers: {
+                                        Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                                    }
+                                }
+                            );
+
+                            if (response.data.status == "success") {
+                                const newArr = response.data.messages;
+                                const temp = JSON.parse(JSON.stringify(messages));
+
+                                for (let a = 0; a < newArr.length; a++) {
+                                    temp.unshift(newArr[a]);
+                                }
+
+                                setMessages(temp);
+
+                                // setMessages([...newArr, ...messages]);
+                                setHasMorePages(response.data.hasMorePages);
+                            } else {
+                                swal.fire("Error", response.data.message, "error");
+                            }
+                        } catch (exp) {
+                            console.log(exp.message);
+                        } finally {
+                            setFetchingMessages(false);
+                        }
+                    }
+
+                    React.useEffect(function () {
+                        fetchMessages();
+                    }, [page]);
+
+                    React.useEffect(function () {
+                        fetchOrder();
+
+                        globalState.listen(function (newState, updatedState) {
+                            setState(newState);
+                        });
+
+                        socketIO.on("freelanceOrderMessage-" + id, function (message) {
+                            if (message.message.sender._id != globalState.state.user?._id) {
+                                // const arr = JSON.parse(JSON.stringify(messages));
+                                // arr.push(message.message);
+                                setMessages(function (prevMessages) {
+                                    return prevMessages.push(message.message);
+                                });
+                            }
+                        });
+
+                        setTimeout(function () {
+                            $("textarea[name='message']").richText();
+                            $("textarea[name='review']").richText();
+                            $("textarea[name='reviewComplete']").richText();
+                        }, 1000);
+                    }, []);
+
+                    const styles = {
+                        profileImage: {
+                            width: "100px",
+                            height: "100px",
+                            borderRadius: "50%",
+                            objectFit: "cover"
+                        }
+                    };
+
+                    return (
+                        <>
+                            <h1>Order #{ order?._id }</h1>
+
+                            { order != null && (
+                                <>
+                                    <p>Buyer: { order.buyer.name }</p>
+                                    <p>Seller: { order.seller.name }</p>
+                                    <p>Offer: { order.offer } USD</p>
+                                    <p>Deadline: { order.deadline } days</p>
+                                    <p>Status: { order.status }</p>
+                                    <p>Created At: { order.createdAt }</p>
+
+                                    { order?.buyer?._id == state.user?._id && (
+                                        <button type="button" className="btn btn-success"
+                                            onClick={ function () {
+                                                $("#modal-complete-order").modal("show");
+                                            } }>Complete</button>
+                                    ) }
+
+                                    &nbsp;
+
+                                    <button type="button" className="btn btn-danger"
+                                        onClick={ function () {
+                                            $("#modal-cancel-order").modal("show");
+                                        } }>Cancel</button>
+
+                                    <h3 className="mt-5">Messages</h3>
+
+                                    <form encType="multipart/form-data"
+                                        onSubmit={ function (event) {
+                                            event.preventDefault();
+                                            sendMessage(event);
+                                        } }>
+                                        <div className="form-group mt-5">
+                                            <label className="form-label">Message</label>
+                                            <textarea name="message" className="form-control" required></textarea>
+                                        </div>
+
+                                        <div className="form-group mt-3 mb-3">
+                                            <label className="form-label">Files</label>
+                                            <input type="file" name="files[]" multiple className="form-control" />
+                                        </div>
+
+                                        <input type="submit" name="submit" className="btn btn-primary mb-5" value="Send" />
+                                    </form>
+
+                                    { hasMorePages && (
+                                        <button type="button"
+                                            onClick={ function () {
+                                            setPage(page + 1);
+                                        } } className="btn btn-primary mb-3">Load more</button>
+                                    ) }
+
+                                    { messages.map(function (message) {
+                                        return (
+                                            <div className="row mb-3 card card-body" key={ `message-${ message._id }` }>
+                                                <div className="col-md-4">
+                                                    <img src={ message.sender?.profileImage }
+                                                        style={ styles.profileImage }
+                                                        onError={ function (event) {
+                                                            event.target.src = baseUrl + "/public/img/user-placeholder.png";
+                                                        } } />
+                                                    </div>
+
+                                                    <div className="col-md-8">
+                                                        <p style={ styles.senderName }>{ message.sender?.name }</p>
+
+                                                        <div>{ HTMLReactParser(message.message) }</div>
+
+                                                        <p style={ styles.messageTime }>{ message.createdAt }</p>
+
+                                                        <ul>
+                                                            { message.files.map(function (file, fileIndex) {
+                                                                return (
+                                                                    <li key={ `file-${ message._id }-${ fileIndex }` }>
+                                                                        <a href={ file.path } target="_blank">
+                                                                            { file.name }
+                                                                        </a>
+                                                                    </li>
+                                                                );
+                                                            }) }
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            );
+                                        }) }
+                                </>
+                            ) }
+
+                            <div className="modal fade" id="modal-complete-order">
+                                <div className="modal-dialog modal-lg">
+                                    <div className="modal-content">
+                                        <div className="modal-header">
+                                            <h5 className="modal-title">Complete Order</h5>
+                                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+
+                                        <div className="modal-body">
+
+                                            <form id="form-complete-order" onSubmit={ function (event) {
+                                                event.preventDefault();
+                                                completeOrder();
+                                            } }>
+                                                <div className="form-group mt-3 mb-3">
+                                                    <label>Ratings</label>
+                                                    <select name="ratings" className="form-control" required>
+                                                        <option value="1">1</option>
+                                                        <option value="2">2</option>
+                                                        <option value="3">3</option>
+                                                        <option value="4">4</option>
+                                                        <option value="5">5</option>
+                                                    </select>
+                                                </div>
+
+                                                <div className="form-group">
+                                                    <label>Review</label>
+                                                    <textarea name="reviewComplete" className="form-control"></textarea>
+                                                </div>
+                                            </form>
+                                        </div>
+
+                                        <div className="modal-footer">
+                                            <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                            <button type="submit" className="btn btn-success"
+                                                form="form-complete-order"
+                                                disabled={ completing }>Complete</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="modal fade" id="modal-cancel-order">
+                                <div className="modal-dialog modal-lg">
+                                    <div className="modal-content">
+                                        <div className="modal-header">
+                                            <h5 className="modal-title">Cancel Order</h5>
+                                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+
+                                        <div className="modal-body">
+
+                                            <form id="form-cancel-order" onSubmit={ function (event) {
+                                                event.preventDefault();
+                                                cancelOrder();
+                                            } }>
+                                                <div className="form-group">
+                                                    <label>Reason to cancel</label>
+                                                    <input type="text" name="reason" className="form-control" required />
+                                                </div>
+
+                                                <div className="form-group mt-3 mb-3">
+                                                    <label>Ratings</label>
+                                                    <select name="ratings" className="form-control" required>
+                                                        <option value="1">1</option>
+                                                        <option value="2">2</option>
+                                                        <option value="3">3</option>
+                                                        <option value="4">4</option>
+                                                        <option value="5">5</option>
+                                                    </select>
+                                                </div>
+
+                                                <div className="form-group">
+                                                    <label>Review</label>
+                                                    <textarea name="review" className="form-control"></textarea>
+                                                </div>
+                                            </form>
+                                        </div>
+
+                                        <div className="modal-footer">
+                                            <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                            <button type="submit" className="btn btn-danger"
+                                                form="form-cancel-order"
+                                                disabled={ cancelling }>Cancel</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </>
+                    );
+                }
+
+                ReactDOM.createRoot(
+                    document.getElementById("order-detail-app")
+                ).render(<OrderDetail />);
+
+            </script>
+        </div>
+    </body>
+</html>

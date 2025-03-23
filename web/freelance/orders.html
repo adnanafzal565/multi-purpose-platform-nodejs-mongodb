@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Freelance | Orders</title>
+
+        <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" /> 
+        <meta http-equiv="Pragma" content="no-cache" /> 
+        <meta http-equiv="Expires" content="0" />
+
+        <link rel="stylesheet" href="../public/css/bootstrap.css" />
+        <link rel="stylesheet" href="../public/css/fontawesome.css" />
+        <link rel="stylesheet" href="../public/css/styles.css" />
+        <script src="../public/js/jquery.js"></script>
+        <script src="../public/js/bootstrap.js"></script>
+
+        <script src="../public/js/react.development.js"></script>
+        <script src="../public/js/react-dom.development.js"></script>
+        <script src="../public/js/babel.min.js"></script>
+        <script src="../public/js/axios.min.js"></script>
+        <script src="../public/js/sweetalert2@11.js"></script>
+        <script src="../public/js/fontawesome.js"></script>
+
+        <link rel="stylesheet" href="../public/datetimepicker/jquery.datetimepicker.min.css" />
+        <script src="../public/datetimepicker/jquery.datetimepicker.full.js"></script>
+
+        <link rel="stylesheet" href="../public/RichText/richtext.min.css" />
+        <script src="../public/RichText/jquery.richtext.js"></script>
+
+        <script src="../public/js/script.js"></script>
+        <script type="text/babel" src="../public/components/BlogSidebar.js"></script>
+        <script type="text/babel" src="../public/components/DynamicTag.js"></script>
+    </head>
+
+    <body>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light" id="header-app">
+            
+        </nav>
+
+        <script type="text/babel" src="../public/components/Header.js"></script>
+
+        <div class="container mt-5" id="orders-app">
+            
+            <script type="text/babel">
+
+                const urlSearchParams = new URLSearchParams(window.location.search);
+                let page = urlSearchParams.get("page") || 1;
+
+                function Orders() {
+
+                    const [fetching, setFetching] = React.useState(false);
+                    const [orders, setOrders] = React.useState([]);
+                    const [refetch, setRefetch] = React.useState(0);
+                    const [pages, setPages] = React.useState(0);
+
+                    async function fetchOrders() {
+                        setFetching(true);
+
+                        try {
+                            const formData = new FormData();
+                            formData.append("page", page);
+                            formData.append("timeZone", Intl.DateTimeFormat().resolvedOptions().timeZone);
+
+                            const response = await axios.post(
+                                apiUrl + "/freelance/fetch-orders",
+                                formData,
+                                {
+                                    headers: {
+                                        Authorization: "Bearer " + localStorage.getItem(accessTokenKey)
+                                    }
+                                }
+                            );
+
+                            if (response.data.status == "success") {
+                                setOrders(response.data.orders);
+                                setPages(response.data.pages);
+                            } else {
+                                swal.fire("Error", response.data.message, "error");
+                            }
+                        } catch (exp) {
+                            console.log(exp.message);
+                        } finally {
+                            setFetching(false);
+                        }
+                    }
+
+                    React.useEffect(function () {
+                        fetchOrders();
+                    }, [refetch]);
+
+                    return (
+                        <>
+                            <h2>Orders</h2>
+
+                            { fetching && (
+                                <p>Fetching orders...</p>
+                            ) }
+
+                            <table className="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Task</th>
+                                        <th>Amount (USD)</th>
+                                        <th>Deadline (days)</th>
+                                        <th>Created At</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    { orders.map(function (order) {
+                                        return (
+                                            <tr key={ `order-${ order._id }` }>
+                                                <td>
+                                                    <a href={ `${ baseUrl }/freelance/task-detail.html?id=${ order.task?._id }` }>
+                                                        { order.task?.title || "" }
+                                                    </a>
+                                                </td>
+
+                                                <td>{ order.offer }</td>
+                                                <td>{ order.deadline }</td>
+                                                <td>{ order.createdAt }</td>
+
+                                                <td>
+                                                    <a className="btn btn-info"
+                                                        href={ `${ baseUrl }/freelance/order-detail.html?id=${ order._id }` }>Details</a>
+                                                </td>
+                                            </tr>
+                                        );
+                                    }) }
+                                </tbody>
+                            </table>
+
+                            { pages > 1 && (
+                                <nav className="mt-5 mb-5">
+                                    <ul className="pagination">
+                                    { Array.from({ length: pages }, function (_, index) { return index + 1 } )
+                                        .map(function (p) {
+                                            return (
+                                                <li key={ `pagination-${ p }` }
+                                                    className={ `page-item ${ p == page ? "active" : "" }` }>
+                                                    <a className="page-link" href="#"
+                                                        onClick={ function (event) {
+                                                        event.preventDefault();
+                                                        page = p;
+                                                        setRefetch(refetch + 1);
+                                                    } }>{ p }</a>
+                                                </li>
+                                            );
+                                        }) }
+                                    </ul>
+                                </nav>
+                            ) }
+                        </>
+                    );
+                }
+
+                ReactDOM.createRoot(
+                    document.getElementById("orders-app")
+                ).render(<Orders />);
+            </script>
+        </div>
+    </body>
+</html>
